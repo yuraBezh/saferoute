@@ -13,10 +13,46 @@ datasource db {
 }
 
 model Child {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   firstName String
   lastName  String
-  birthDate DateTime @db.Date
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  birthDate DateTime        @db.Date
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  guardians ChildGuardian[]
+}
+
+model User {
+  id              String          @id @default(cuid())
+  email           String          @unique
+  emailVerifiedAt DateTime?
+  passwordHash    String?
+  phone           String?
+  fullName        String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  guardedChildren ChildGuardian[]
+}
+
+enum GuardianRelationship {
+  MOTHER
+  FATHER
+  GUARDIAN
+  OTHER
+}
+
+model ChildGuardian {
+  id                String               @id @default(cuid())
+  child             Child                @relation(fields: [childId], references: [id], onDelete: Cascade)
+  childId           String
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId            String
+  relationship      GuardianRelationship
+  isPrimary         Boolean              @default(false)
+  canBook           Boolean              @default(true)
+  canApproveHandoff Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+
+  @@unique([childId, userId])
+  @@index([userId])
 }
