@@ -1,7 +1,21 @@
+import type { GuardianRelationship } from '@/app/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
 
+const relationshipLabels: Record<GuardianRelationship, string> = {
+  MOTHER: 'mother',
+  FATHER: 'father',
+  GUARDIAN: 'guardian',
+  OTHER: 'other',
+};
+
 export default async function Home() {
-  const children = await prisma.child.findMany();
+  const children = await prisma.child.findMany({
+    include: {
+      guardians: { include: {
+        user: true }
+      }
+    }
+  });
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-10">
@@ -9,31 +23,27 @@ export default async function Home() {
         Children
       </h1>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-gray-100 text-xs uppercase text-gray-600">
-          <tr>
-            <th className="px-6 py-4 font-semibold">First name</th>
-            <th className="px-6 py-4 font-semibold">Last name</th>
-            <th className="px-6 py-4 font-semibold">Date of Birth</th>
-          </tr>
-          </thead>
+      <div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+        {children.map((child) => (
+          <section key={child.id} className="px-6 py-5">
+            <p className="font-semibold text-gray-900">
+              {child.firstName} {child.lastName}
+              <span className="font-normal text-gray-500">
+                {' · '}{child.birthDate.toLocaleDateString('en-GB')}
+              </span>
+            </p>
 
-          <tbody className="divide-y divide-gray-200">
-          {children.map((child) => (
-            <tr
-              key={child.id}
-              className="text-gray-700 transition-colors hover:bg-gray-50"
-            >
-              <td className="px-6 py-4">{child.firstName}</td>
-              <td className="px-6 py-4">{child.lastName}</td>
-              <td className="px-6 py-4">
-                {child.birthDate.toLocaleDateString()}
-              </td>
-            </tr>
-          ))}
-          </tbody>
-        </table>
+            <div className="mt-2 space-y-1 pl-5 text-sm text-gray-600">
+              {child.guardians.map((guardian) => (
+                <p key={guardian.id}>
+                  {guardian.user.fullName}
+                  {' — '}{relationshipLabels[guardian.relationship]}
+                  {' · '}{guardian.canBook ? 'can book' : 'view only'}
+                </p>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </main>
   );
