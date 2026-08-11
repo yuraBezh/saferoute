@@ -1,5 +1,6 @@
 import type { GuardianRelationship } from '@/app/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
 
 const relationshipLabels: Record<GuardianRelationship, string> = {
   MOTHER: 'mother',
@@ -19,9 +20,17 @@ export default async function Home() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-10">
-      <h1 className="mb-6 text-3xl font-bold text-gray-900">
-        Children
-      </h1>
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Children
+        </h1>
+        <Link
+          href="/children/new"
+          className="inline-flex shrink-0 items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        >
+          Add child
+        </Link>
+      </div>
 
       <div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 shadow-sm">
         {children.map((child) => (
