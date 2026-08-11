@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dateFromToday } from '@/test/date';
 import { childFormText } from '@/lib/children/child-form-text';
 
-const { saveError, fields: { birthDate: birthDateText } } = childFormText;
+const {
+	saveError,
+	fields: { birthDate: birthDateText },
+} = childFormText;
 
 const mocks = vi.hoisted(() => ({
 	createChild: vi.fn(),
@@ -46,11 +49,14 @@ describe('childFormAction', () => {
 	});
 
 	it('returns field errors and does not write invalid data', async () => {
-		const result = await childFormAction(initialState, createFormData({
-			firstName: 'Miles',
-			lastName: 'Davis',
-			birthDate: '',
-		}));
+		const result = await childFormAction(
+			initialState,
+			createFormData({
+				firstName: 'Miles',
+				lastName: 'Davis',
+				birthDate: '',
+			}),
+		);
 
 		expect(result.errors?.birthDate?.[0]).toBe(birthDateText.required);
 		expect(mocks.createChild).not.toHaveBeenCalled();
@@ -61,11 +67,14 @@ describe('childFormAction', () => {
 		mocks.createChild.mockResolvedValue({});
 		const birthDate = dateFromToday({ years: -6 });
 
-		await childFormAction(initialState, createFormData({
-			firstName: '  Miles  ',
-			lastName: '  Davis  ',
-			birthDate,
-		}));
+		await childFormAction(
+			initialState,
+			createFormData({
+				firstName: '  Miles  ',
+				lastName: '  Davis  ',
+				birthDate,
+			}),
+		);
 
 		expect(mocks.createChild).toHaveBeenCalledWith({
 			data: {
@@ -79,15 +88,20 @@ describe('childFormAction', () => {
 	});
 
 	it('returns a general message when saving fails', async () => {
-		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		const consoleError = vi
+			.spyOn(console, 'error')
+			.mockImplementation(() => undefined);
 		mocks.createChild.mockRejectedValue(new Error('Database unavailable'));
 		const birthDate = dateFromToday({ years: -6 });
 
-		const result = await childFormAction(initialState, createFormData({
-			firstName: 'Miles',
-			lastName: 'Davis',
-			birthDate,
-		}));
+		const result = await childFormAction(
+			initialState,
+			createFormData({
+				firstName: 'Miles',
+				lastName: 'Davis',
+				birthDate,
+			}),
+		);
 
 		expect(result).toEqual({
 			message: saveError,

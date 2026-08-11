@@ -9,10 +9,11 @@ SafeRoute stores children, the adults (responsible for them), bookings,
 trips, and a record of every handoff.
 
 Two requirements drive the choice:
+
 1. Broken references must be impossible. The database has to enforce this,
    not the application code. A trip pointing at a child who no longer
    exists is a safety problem.
-2Handoff and audit rows must be impossible to change afterwards. That
+   2Handoff and audit rows must be impossible to change afterwards. That
    includes changes made by the application itself.
 
 ## Decision
@@ -24,6 +25,7 @@ It has compound unique indexes, partial unique indexes, and multi
 document transactions. None of those were the deciding factor.
 
 Two things decided it.
+
 1. Foreign keys with delete policies. MongoDB has no equivalent. Every
    reference check would live in application code. That is the easiest
    place to forget one.

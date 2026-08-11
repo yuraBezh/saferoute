@@ -1,4 +1,4 @@
-import * as z from "zod";
+import * as z from 'zod';
 import { childFormText } from '@/lib/children/child-form-text';
 
 const getTodayAsISO = () => new Date().toISOString().slice(0, 10);
@@ -9,13 +9,18 @@ const {
 } = childFormText.fields;
 
 export const childSchema = z.object({
-	firstName: z.string({ error: firstNameText.invalid }).trim()
+	firstName: z
+		.string({ error: firstNameText.invalid })
+		.trim()
 		.min(1, { error: firstNameText.required })
 		.max(50),
-	lastName: z.string({ error: lastNameText.invalid }).trim()
+	lastName: z
+		.string({ error: lastNameText.invalid })
+		.trim()
 		.min(1, { error: lastNameText.required })
 		.max(50),
-	birthDate: z.string({ error: birthDateText.required })
+	birthDate: z
+		.string({ error: birthDateText.required })
 		.min(1, { error: birthDateText.required })
 		.regex(/^\d{4}-\d{2}-\d{2}$/, birthDateText.invalid)
 		.refine(
@@ -23,7 +28,7 @@ export const childSchema = z.object({
 				const today = getTodayAsISO();
 				return birthDate <= today;
 			},
-			{ error: birthDateText.future }
+			{ error: birthDateText.future },
 		)
 		.refine(
 			(birthDate) => {
@@ -34,13 +39,13 @@ export const childSchema = z.object({
 
 				return birthDate > eighteenYearsAgoToday;
 			},
-			{ error: birthDateText.tooOld }
+			{ error: birthDateText.tooOld },
 		)
 		.refine(
 			(birthDate) => {
 				const today = getTodayAsISO();
-				const [year, month, day] = today.split("-");
-				const threeYearsAgoToday = [Number(year) - 3,	month, day ].join("-");
+				const [year, month, day] = today.split('-');
+				const threeYearsAgoToday = [Number(year) - 3, month, day].join('-');
 
 				return birthDate <= threeYearsAgoToday;
 			},

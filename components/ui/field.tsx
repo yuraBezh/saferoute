@@ -12,7 +12,10 @@ export function Field({ id, label, error, ...inputProps }: FieldProps) {
 
 	return (
 		<div>
-			<label className="mb-1.5 block text-sm font-medium text-gray-800" htmlFor={id}>
+			<label
+				className="mb-1.5 block text-sm font-medium text-gray-800"
+				htmlFor={id}
+			>
 				{label}
 			</label>
 			<Input

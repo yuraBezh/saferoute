@@ -19,7 +19,10 @@ const {
 
 export function ChildForm() {
 	const initialState: ChildFormState = { message: '', errors: {} };
-	const [formState, action, isPending] = useActionState(childFormAction, initialState);
+	const [formState, action, isPending] = useActionState(
+		childFormAction,
+		initialState,
+	);
 	const [values, setValues] = useState({
 		firstName: '',
 		lastName: '',
@@ -37,9 +40,7 @@ export function ChildForm() {
 					<h1 className="text-2xl font-semibold tracking-tight text-gray-950">
 						{title}
 					</h1>
-					<p className="mt-2 text-sm leading-6 text-gray-600">
-						{description}
-					</p>
+					<p className="mt-2 text-sm leading-6 text-gray-600">{description}</p>
 				</div>
 
 				<div className="space-y-5">
@@ -49,7 +50,9 @@ export function ChildForm() {
 						error={formState.errors?.firstName?.[0]}
 						name="firstName"
 						value={values.firstName}
-						onChange={(event) => setValues({ ...values, firstName: event.target.value })}
+						onChange={(event) =>
+							setValues({ ...values, firstName: event.target.value })
+						}
 						autoComplete="given-name"
 					/>
 
@@ -59,7 +62,9 @@ export function ChildForm() {
 						error={formState.errors?.lastName?.[0]}
 						name="lastName"
 						value={values.lastName}
-						onChange={(event) => setValues({ ...values, lastName: event.target.value })}
+						onChange={(event) =>
+							setValues({ ...values, lastName: event.target.value })
+						}
 						autoComplete="family-name"
 					/>
 
@@ -70,7 +75,9 @@ export function ChildForm() {
 						type="date"
 						name="birthDate"
 						value={values.birthDate}
-						onChange={(event) => setValues({ ...values, birthDate: event.target.value })}
+						onChange={(event) =>
+							setValues({ ...values, birthDate: event.target.value })
+						}
 						required
 					/>
 
@@ -83,14 +90,11 @@ export function ChildForm() {
 						</p>
 					)}
 
-					<Button
-						type="submit"
-						disabled={isPending}
-					>
+					<Button type="submit" disabled={isPending}>
 						{isPending ? submitting : submit}
 					</Button>
 				</div>
 			</form>
 		</main>
-	)
+	);
 }

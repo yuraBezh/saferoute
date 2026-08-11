@@ -28,8 +28,12 @@ describe('ChildForm', () => {
 	it('renders all form controls', () => {
 		render(<ChildForm />);
 
-		expect(screen.getByRole('textbox', { name: firstNameText.label })).toBeDefined();
-		expect(screen.getByRole('textbox', { name: lastNameText.label })).toBeDefined();
+		expect(
+			screen.getByRole('textbox', { name: firstNameText.label }),
+		).toBeDefined();
+		expect(
+			screen.getByRole('textbox', { name: lastNameText.label }),
+		).toBeDefined();
 		expect(screen.getByLabelText(birthDateText.label)).toBeDefined();
 		expect(screen.getByRole('button', { name: submit })).toBeDefined();
 	});
@@ -40,13 +44,21 @@ describe('ChildForm', () => {
 			errors: { birthDate: [birthDateText.future] },
 		});
 		const { container } = render(<ChildForm />);
-		const firstName = screen.getByRole('textbox', { name: firstNameText.label }) as HTMLInputElement;
-		const lastName = screen.getByRole('textbox', { name: lastNameText.label }) as HTMLInputElement;
-		const birthDate = screen.getByLabelText(birthDateText.label) as HTMLInputElement;
+		const firstName = screen.getByRole('textbox', {
+			name: firstNameText.label,
+		}) as HTMLInputElement;
+		const lastName = screen.getByRole('textbox', {
+			name: lastNameText.label,
+		}) as HTMLInputElement;
+		const birthDate = screen.getByLabelText(
+			birthDateText.label,
+		) as HTMLInputElement;
 
 		fireEvent.change(firstName, { target: { value: 'Miles' } });
 		fireEvent.change(lastName, { target: { value: 'Davis' } });
-		fireEvent.change(birthDate, { target: { value: dateFromToday({ days: 1 }) } });
+		fireEvent.change(birthDate, {
+			target: { value: dateFromToday({ days: 1 }) },
+		});
 		fireEvent.submit(container.querySelector('form')!);
 
 		await screen.findByText(birthDateText.future);
@@ -70,15 +82,20 @@ describe('ChildForm', () => {
 
 	it('disables the button while submitting', async () => {
 		let resolveAction!: (state: { message: string; errors: object }) => void;
-		mocks.childFormAction.mockImplementation(() => new Promise((resolve) => {
-			resolveAction = resolve;
-		}));
+		mocks.childFormAction.mockImplementation(
+			() =>
+				new Promise((resolve) => {
+					resolveAction = resolve;
+				}),
+		);
 		const { container } = render(<ChildForm />);
 
 		fireEvent.submit(container.querySelector('form')!);
 
 		await waitFor(() => {
-			const button = screen.getByRole('button', { name: submitting }) as HTMLButtonElement;
+			const button = screen.getByRole('button', {
+				name: submitting,
+			}) as HTMLButtonElement;
 			expect(button.disabled).toBe(true);
 		});
 
