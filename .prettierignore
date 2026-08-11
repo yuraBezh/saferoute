@@ -1,0 +1,5 @@
+.next
+app/generated
+coverage
+node_modules
+.husky/_

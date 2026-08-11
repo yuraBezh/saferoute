@@ -6,8 +6,11 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
+    "prepare": "husky",
     "lint": "eslint",
-    "typecheck": "prisma generate && next typegen && tsc --noEmit",
+    "format": "prettier --write .",
+    "pretypecheck": "prisma generate && next typegen",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "tsx prisma/seed.ts"
@@ -32,10 +35,19 @@
     "@vitejs/plugin-react": "^6.0.5",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "tsx": "^4.23.11",
     "typescript": "^5",
     "vitest": "^4.1.10"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
