@@ -1,4 +1,4 @@
-name: Unit tests
+name: Quality checks
 
 on:
   pull_request:
@@ -7,11 +7,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: unit-tests-${{ github.event.pull_request.number }}
+  group: quality-checks-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  test:
+  checks:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -27,6 +27,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check TypeScript
+        run: npm run typecheck
 
       - name: Run unit tests
         run: npm test
