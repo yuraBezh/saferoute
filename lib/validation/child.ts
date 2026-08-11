@@ -26,7 +26,7 @@ export const childSchema = z.object({
 				const eighteenYearsAgo = Number(year) - 18;
 				const eighteenYearsAgoToday = [eighteenYearsAgo, month, day].join('-');
 
-				return birthDate >= eighteenYearsAgoToday;
+				return birthDate > eighteenYearsAgoToday;
 			},
 			{ error: "Child must be younger than 18 years old" }
 		)
