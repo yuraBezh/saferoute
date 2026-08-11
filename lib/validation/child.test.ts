@@ -42,31 +42,53 @@ describe('childSchema', () => {
 	it.each([
 		['firstName', '', firstNameText.required],
 		['lastName', '   ', lastNameText.required],
-	] as const)('returns a field error for an empty %s', (field, value, message) => {
-		const result = childSchema.safeParse({ ...validChild(), [field]: value });
+	] as const)(
+		'returns a field error for an empty %s',
+		(field, value, message) => {
+			const result = childSchema.safeParse({ ...validChild(), [field]: value });
 
-		expect(result.success).toBe(false);
-		if (!result.success) {
-			expect(result.error.flatten().fieldErrors[field]).toContain(message);
-		}
-	});
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.flatten().fieldErrors[field]).toContain(message);
+			}
+		},
+	);
 
 	it.each([
 		['empty', (): string => '', birthDateText.required],
 		['malformed', (): string => 'not-a-date', birthDateText.invalid],
-		['tomorrow', (): string => dateFromToday({ days: 1 }), birthDateText.future],
-		['one day under 3 years old', (): string => dateFromToday({ years: -3, days: 1 }), birthDateText.tooYoung],
-		['exactly 18 years old', (): string => dateFromToday({ years: -18 }), birthDateText.tooOld],
-		['one day over 18 years old', (): string => dateFromToday({ years: -18, days: -1 }), birthDateText.tooOld],
-	] as const)('rejects a %s birth date with a specific error', (_case, getBirthDate, message) => {
-		const result = childSchema.safeParse({
-			...validChild(),
-			birthDate: getBirthDate(),
-		});
+		[
+			'tomorrow',
+			(): string => dateFromToday({ days: 1 }),
+			birthDateText.future,
+		],
+		[
+			'one day under 3 years old',
+			(): string => dateFromToday({ years: -3, days: 1 }),
+			birthDateText.tooYoung,
+		],
+		[
+			'exactly 18 years old',
+			(): string => dateFromToday({ years: -18 }),
+			birthDateText.tooOld,
+		],
+		[
+			'one day over 18 years old',
+			(): string => dateFromToday({ years: -18, days: -1 }),
+			birthDateText.tooOld,
+		],
+	] as const)(
+		'rejects a %s birth date with a specific error',
+		(_case, getBirthDate, message) => {
+			const result = childSchema.safeParse({
+				...validChild(),
+				birthDate: getBirthDate(),
+			});
 
-		expect(result.success).toBe(false);
-		if (!result.success) {
-			expect(result.error.flatten().fieldErrors.birthDate).toContain(message);
-		}
-	});
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.flatten().fieldErrors.birthDate).toContain(message);
+			}
+		},
+	);
 });

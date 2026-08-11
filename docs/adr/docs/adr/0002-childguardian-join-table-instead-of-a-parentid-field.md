@@ -8,14 +8,16 @@ Status: accepted
 A child in SafeRoute can have more than one responsible adult, and each adult can have different permissions.
 
 For example:
-1. Divorced parents. The mother books and pays for the trip, but the father 
+
+1. Divorced parents. The mother books and pays for the trip, but the father
    still needs to see the child’s route in real time.
 2. A grandmother who meets the child at home. She can confirm that the child arrived
    safely, but she does not book or pay for trips.
 3. A court order. A parent stays a parent, but loses the right to arrange
    where the child goes.
 
-These cases show two separate questions: 
+These cases show two separate questions:
+
 1. What is this adult’s relationship to the child?
 2. What is this adult allowed to do?
 
@@ -27,15 +29,16 @@ We will add a `ChildGuardian` model between `Child` and `User`.
 Each `ChildGuardian` record represents one adult’s relationship with one child.
 
 It stores:
+
 - the relationship type, such as mother, father, or other;
 - whether the adult is the primary guardian;
 - whether the adult can book trips;
 - whether the adult can approve a handoff.
 
-The combination of `childId` and `userId` must be unique, 
+The combination of `childId` and `userId` must be unique,
 so the same adult cannot be linked to the same child more than once.
 
-We use an explicit `ChildGuardian` model instead of a simple many-to-many 
+We use an explicit `ChildGuardian` model instead of a simple many-to-many
 relation because the relationship itself contains important information.
 
 A simple many-to-many relation would only tell us:
@@ -56,6 +59,7 @@ This means roughly three queries instead of one. However, the number of queries 
 All child-related permission checks will now use the `ChildGuardian` table.
 
 For example:
+
 - Can this user see the child?
 - Can this user book a trip for the child?
 - Can this user confirm a handoff?

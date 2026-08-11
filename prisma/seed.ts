@@ -1,4 +1,4 @@
-import "dotenv/config";
+import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
 import { GuardianRelationship } from '@/app/generated/prisma/enums';
 
@@ -8,23 +8,43 @@ async function main() {
 	await prisma.user.deleteMany();
 
 	const mother = await prisma.user.create({
-		data: { email: "mother@example.com", fullName: "Anna Krasinski", passwordHash: null },
+		data: {
+			email: 'mother@example.com',
+			fullName: 'Anna Krasinski',
+			passwordHash: null,
+		},
 	});
 
 	const father = await prisma.user.create({
-		data: { email: "father@example.com", fullName: "Devid Krasinski", passwordHash: null },
+		data: {
+			email: 'father@example.com',
+			fullName: 'Devid Krasinski',
+			passwordHash: null,
+		},
 	});
 
 	const john = await prisma.child.create({
-		data: { firstName: "John", lastName: "Krasinski", birthDate: new Date("2010-01-01") },
+		data: {
+			firstName: 'John',
+			lastName: 'Krasinski',
+			birthDate: new Date('2010-01-01'),
+		},
 	});
 
 	const bobby = await prisma.child.create({
-		data: { firstName: "Bobby", lastName: "White", birthDate: new Date("2004-12-31") },
+		data: {
+			firstName: 'Bobby',
+			lastName: 'White',
+			birthDate: new Date('2004-12-31'),
+		},
 	});
 
 	const nick = await prisma.child.create({
-		data: { firstName: "Nick", lastName: "Johnson", birthDate: new Date("2006-03-17") },
+		data: {
+			firstName: 'Nick',
+			lastName: 'Johnson',
+			birthDate: new Date('2006-03-17'),
+		},
 	});
 
 	await prisma.childGuardian.createMany({

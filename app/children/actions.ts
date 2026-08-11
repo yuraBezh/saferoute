@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -24,7 +24,7 @@ export async function childFormAction(
 		const lastName = formData.get('lastName');
 		const birthDate = formData.get('birthDate');
 
-		const result = childSchema.safeParse({firstName, lastName, birthDate});
+		const result = childSchema.safeParse({ firstName, lastName, birthDate });
 
 		if (!result.success) {
 			const { fieldErrors } = result.error.flatten();
@@ -40,10 +40,9 @@ export async function childFormAction(
 				firstName: result.data.firstName,
 				lastName: result.data.lastName,
 				birthDate: new Date(`${result.data.birthDate}T00:00:00.000Z`),
-			}
+			},
 		});
-
-	} catch(err: unknown) {
+	} catch (err: unknown) {
 		console.error('Failed to create child:', err);
 
 		return {
@@ -52,6 +51,6 @@ export async function childFormAction(
 		};
 	}
 
-	revalidatePath("/");
+	revalidatePath('/');
 	redirect('/');
 }
