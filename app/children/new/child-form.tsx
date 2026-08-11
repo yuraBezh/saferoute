@@ -2,9 +2,21 @@
 
 import { useActionState, useState } from 'react';
 import { childFormAction, type ChildFormState } from '@/app/children/actions';
+import { childFormText } from '@/lib/children/child-form-text';
 
 const inputClassName =
 	'w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 aria-invalid:border-red-500 aria-invalid:focus:border-red-500 aria-invalid:focus:ring-red-100';
+const {
+	title,
+	description,
+	submit,
+	submitting,
+	fields: {
+		firstName: firstNameText,
+		lastName: lastNameText,
+		birthDate: birthDateText,
+	},
+} = childFormText;
 
 export function ChildForm() {
 	const initialState: ChildFormState = { message: '', errors: {} };
@@ -24,17 +36,17 @@ export function ChildForm() {
 			>
 				<div className="mb-7">
 					<h1 className="text-2xl font-semibold tracking-tight text-gray-950">
-						Add a child
+						{title}
 					</h1>
 					<p className="mt-2 text-sm leading-6 text-gray-600">
-						Enter the child&apos;s information below.
+						{description}
 					</p>
 				</div>
 
 				<div className="space-y-5">
 					<div>
 					<label className="mb-1.5 block text-sm font-medium text-gray-800" htmlFor="firstName">
-						First Name
+						{firstNameText.label}
 					</label>
 					<input
 						name="firstName"
@@ -55,7 +67,7 @@ export function ChildForm() {
 
 					<div>
 					<label className="mb-1.5 block text-sm font-medium text-gray-800" htmlFor="lastName">
-						Last Name
+						{lastNameText.label}
 					</label>
 					<input
 						name="lastName"
@@ -76,7 +88,7 @@ export function ChildForm() {
 
 					<div>
 					<label className="mb-1.5 block text-sm font-medium text-gray-800" htmlFor="birthDate">
-						Birth Date
+						{birthDateText.label}
 					</label>
 					<input
 						type="date"
@@ -110,7 +122,7 @@ export function ChildForm() {
 						disabled={isPending}
 						className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
 					>
-						{isPending ? 'Creating…' : 'Create child'}
+						{isPending ? submitting : submit}
 					</button>
 				</div>
 			</form>

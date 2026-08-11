@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dateFromToday } from '@/test/date';
+import { childFormText } from '@/lib/children/child-form-text';
+
+const { saveError, fields: { birthDate: birthDateText } } = childFormText;
 
 const mocks = vi.hoisted(() => ({
 	createChild: vi.fn(),
@@ -49,7 +52,7 @@ describe('childFormAction', () => {
 			birthDate: '',
 		}));
 
-		expect(result.errors?.birthDate?.[0]).toBe('Birth date is required');
+		expect(result.errors?.birthDate?.[0]).toBe(birthDateText.required);
 		expect(mocks.createChild).not.toHaveBeenCalled();
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
@@ -87,7 +90,7 @@ describe('childFormAction', () => {
 		}));
 
 		expect(result).toEqual({
-			message: 'Unable to save the child. Please try again.',
+			message: saveError,
 			errors: {},
 		});
 		expect(mocks.redirect).not.toHaveBeenCalled();

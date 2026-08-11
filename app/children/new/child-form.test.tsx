@@ -1,6 +1,18 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { dateFromToday } from '@/test/date';
+import { childFormText } from '@/lib/children/child-form-text';
+
+const {
+	saveError,
+	submit,
+	submitting,
+	fields: {
+		firstName: firstNameText,
+		lastName: lastNameText,
+		birthDate: birthDateText,
+	},
+} = childFormText;
 
 const mocks = vi.hoisted(() => ({
 	childFormAction: vi.fn(),
@@ -16,28 +28,28 @@ describe('ChildForm', () => {
 	it('renders all form controls', () => {
 		render(<ChildForm />);
 
-		expect(screen.getByRole('textbox', { name: 'First Name' })).toBeDefined();
-		expect(screen.getByRole('textbox', { name: 'Last Name' })).toBeDefined();
-		expect(screen.getByLabelText('Birth Date')).toBeDefined();
-		expect(screen.getByRole('button', { name: 'Create child' })).toBeDefined();
+		expect(screen.getByRole('textbox', { name: firstNameText.label })).toBeDefined();
+		expect(screen.getByRole('textbox', { name: lastNameText.label })).toBeDefined();
+		expect(screen.getByLabelText(birthDateText.label)).toBeDefined();
+		expect(screen.getByRole('button', { name: submit })).toBeDefined();
 	});
 
 	it('keeps names when the birth date is invalid', async () => {
 		mocks.childFormAction.mockResolvedValue({
 			message: '',
-			errors: { birthDate: ['Birth date cannot be in the future'] },
+			errors: { birthDate: [birthDateText.future] },
 		});
 		const { container } = render(<ChildForm />);
-		const firstName = screen.getByRole('textbox', { name: 'First Name' }) as HTMLInputElement;
-		const lastName = screen.getByRole('textbox', { name: 'Last Name' }) as HTMLInputElement;
-		const birthDate = screen.getByLabelText('Birth Date') as HTMLInputElement;
+		const firstName = screen.getByRole('textbox', { name: firstNameText.label }) as HTMLInputElement;
+		const lastName = screen.getByRole('textbox', { name: lastNameText.label }) as HTMLInputElement;
+		const birthDate = screen.getByLabelText(birthDateText.label) as HTMLInputElement;
 
 		fireEvent.change(firstName, { target: { value: 'Miles' } });
 		fireEvent.change(lastName, { target: { value: 'Davis' } });
 		fireEvent.change(birthDate, { target: { value: dateFromToday({ days: 1 }) } });
 		fireEvent.submit(container.querySelector('form')!);
 
-		await screen.findByText('Birth date cannot be in the future');
+		await screen.findByText(birthDateText.future);
 		expect(firstName.value).toBe('Miles');
 		expect(lastName.value).toBe('Davis');
 		expect(birthDate.getAttribute('aria-invalid')).toBe('true');
@@ -45,14 +57,14 @@ describe('ChildForm', () => {
 
 	it('shows a general save error', async () => {
 		mocks.childFormAction.mockResolvedValue({
-			message: 'Unable to save the child. Please try again.',
+			message: saveError,
 			errors: {},
 		});
 		const { container } = render(<ChildForm />);
 
 		fireEvent.submit(container.querySelector('form')!);
 
-		const error = await screen.findByText('Unable to save the child. Please try again.');
+		const error = await screen.findByText(saveError);
 		expect(error.getAttribute('aria-live')).toBe('polite');
 	});
 
@@ -66,13 +78,13 @@ describe('ChildForm', () => {
 		fireEvent.submit(container.querySelector('form')!);
 
 		await waitFor(() => {
-			const button = screen.getByRole('button', { name: 'Creating…' }) as HTMLButtonElement;
+			const button = screen.getByRole('button', { name: submitting }) as HTMLButtonElement;
 			expect(button.disabled).toBe(true);
 		});
 
 		resolveAction({ message: '', errors: {} });
 		await waitFor(() => {
-			expect(screen.getByRole('button', { name: 'Create child' })).toBeDefined();
+			expect(screen.getByRole('button', { name: submit })).toBeDefined();
 		});
 	});
 });

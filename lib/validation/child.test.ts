@@ -1,6 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { childSchema } from '@/lib/validation/child';
 import { dateFromToday } from '@/test/date';
+import { childFormText } from '@/lib/children/child-form-text';
+
+const {
+	firstName: firstNameText,
+	lastName: lastNameText,
+	birthDate: birthDateText,
+} = childFormText.fields;
 
 const validChild = () => ({
 	firstName: 'Miles',
@@ -33,8 +40,8 @@ describe('childSchema', () => {
 	});
 
 	it.each([
-		['firstName', '', 'First name is required'],
-		['lastName', '   ', 'Last name is required'],
+		['firstName', '', firstNameText.required],
+		['lastName', '   ', lastNameText.required],
 	] as const)('returns a field error for an empty %s', (field, value, message) => {
 		const result = childSchema.safeParse({ ...validChild(), [field]: value });
 
@@ -45,11 +52,12 @@ describe('childSchema', () => {
 	});
 
 	it.each([
-		['empty', (): string => '', 'Birth date is required'],
-		['malformed', (): string => 'not-a-date', 'Select a valid birth date'],
-		['tomorrow', (): string => dateFromToday({ days: 1 }), 'Birth date cannot be in the future'],
-		['one day under 3 years old', (): string => dateFromToday({ years: -3, days: 1 }), 'Child must be at least 3 years old'],
-		['one day over 18 years old', (): string => dateFromToday({ years: -18, days: -1 }), 'Child must be younger than 18 years old'],
+		['empty', (): string => '', birthDateText.required],
+		['malformed', (): string => 'not-a-date', birthDateText.invalid],
+		['tomorrow', (): string => dateFromToday({ days: 1 }), birthDateText.future],
+		['one day under 3 years old', (): string => dateFromToday({ years: -3, days: 1 }), birthDateText.tooYoung],
+		['exactly 18 years old', (): string => dateFromToday({ years: -18 }), birthDateText.tooOld],
+		['one day over 18 years old', (): string => dateFromToday({ years: -18, days: -1 }), birthDateText.tooOld],
 	] as const)('rejects a %s birth date with a specific error', (_case, getBirthDate, message) => {
 		const result = childSchema.safeParse({
 			...validChild(),

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { childSchema } from '@/lib/validation/child';
 import { prisma } from '@/lib/prisma';
+import { childFormText } from '@/lib/children/child-form-text';
 
 export type ChildFormState = {
 	message: string;
@@ -46,7 +47,7 @@ export async function childFormAction(
 		console.error('Failed to create child:', err);
 
 		return {
-			message: 'Unable to save the child. Please try again.',
+			message: childFormText.saveError,
 			errors: {},
 		};
 	}

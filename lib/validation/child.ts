@@ -1,23 +1,29 @@
 import * as z from "zod";
+import { childFormText } from '@/lib/children/child-form-text';
 
 const getTodayAsISO = () => new Date().toISOString().slice(0, 10);
+const {
+	firstName: firstNameText,
+	lastName: lastNameText,
+	birthDate: birthDateText,
+} = childFormText.fields;
 
 export const childSchema = z.object({
-	firstName: z.string({ error: 'Enter a valid first name' }).trim()
-		.min(1, { error: 'First name is required' })
+	firstName: z.string({ error: firstNameText.invalid }).trim()
+		.min(1, { error: firstNameText.required })
 		.max(50),
-	lastName: z.string({ error: 'Enter a valid last name' }).trim()
-		.min(1, { error: 'Last name is required' })
+	lastName: z.string({ error: lastNameText.invalid }).trim()
+		.min(1, { error: lastNameText.required })
 		.max(50),
-	birthDate: z.string({ error: 'Birth date is required' })
-		.min(1, { error: 'Birth date is required' })
-		.regex(/^\d{4}-\d{2}-\d{2}$/, 'Select a valid birth date')
+	birthDate: z.string({ error: birthDateText.required })
+		.min(1, { error: birthDateText.required })
+		.regex(/^\d{4}-\d{2}-\d{2}$/, birthDateText.invalid)
 		.refine(
 			(birthDate) => {
 				const today = getTodayAsISO();
 				return birthDate <= today;
 			},
-			{ error: "Birth date cannot be in the future" }
+			{ error: birthDateText.future }
 		)
 		.refine(
 			(birthDate) => {
@@ -28,7 +34,7 @@ export const childSchema = z.object({
 
 				return birthDate > eighteenYearsAgoToday;
 			},
-			{ error: "Child must be younger than 18 years old" }
+			{ error: birthDateText.tooOld }
 		)
 		.refine(
 			(birthDate) => {
@@ -38,8 +44,6 @@ export const childSchema = z.object({
 
 				return birthDate <= threeYearsAgoToday;
 			},
-			{ error: "Child must be at least 3 years old" },
+			{ error: birthDateText.tooYoung },
 		),
 });
-
-export type ChildInput = z.infer<typeof childSchema>;
