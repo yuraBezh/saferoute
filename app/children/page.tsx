@@ -12,14 +12,15 @@ export default async function Children() {
 			_count: { select: { guardians: true } },
 		},
 	});
+	const { title, childCount, addChild, yearsOld, guardianCount } = childrenText;
 
 	return (
 		<main className="mx-auto w-full max-w-4xl px-6 py-10">
 			<div className="mb-5 flex items-center justify-between gap-4">
 				<div>
-					<PageTitle>{childrenText.title}</PageTitle>
+					<PageTitle>{title}</PageTitle>
 					<p className="mt-1 text-sm text-gray-500">
-						{childrenText.childCount(children.length)}
+						{childCount(children.length)}
 					</p>
 				</div>
 				<Link
@@ -27,7 +28,7 @@ export default async function Children() {
 					className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50"
 				>
 					<PlusIcon />
-					{childrenText.addChild}
+					{addChild}
 				</Link>
 			</div>
 
@@ -47,8 +48,8 @@ export default async function Children() {
 								{child.firstName} {child.lastName}
 							</p>
 							<p className="text-sm text-gray-500">
-								{getAge(child.birthDate)} {childrenText.yearsOld} ·{' '}
-								{childrenText.guardianCount(child._count.guardians)}
+								{getAge(child.birthDate)} {yearsOld} ·{' '}
+								{guardianCount(child._count.guardians)}
 							</p>
 						</div>
 						<ChevronRightIcon />
