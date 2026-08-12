@@ -1,11 +1,8 @@
 import type { GuardianRelationship } from '@/app/generated/prisma/client';
+import { childDetailsText } from '@/lib/children/child-details-text';
 
-const relationshipLabels: Record<GuardianRelationship, string> = {
-	MOTHER: 'Mother',
-	FATHER: 'Father',
-	GUARDIAN: 'Guardian',
-	OTHER: 'Other',
-};
+const { title, empty, primary, canBook, viewOnly, relationships } =
+	childDetailsText.guardians;
 
 type Guardian = {
 	id: string;
@@ -25,7 +22,7 @@ export function GuardiansList({ guardians }: { guardians: Guardian[] }) {
 				id="guardians-heading"
 				className="mb-3 text-lg font-bold tracking-tight"
 			>
-				Guardians
+				{title}
 			</h2>
 			<div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 				{guardians.length ? (
@@ -39,28 +36,25 @@ export function GuardiansList({ guardians }: { guardians: Guardian[] }) {
 									{guardian.user.fullName}
 								</h3>
 								<p className="mt-0.5 truncate text-sm text-gray-500">
-									{relationshipLabels[guardian.relationship]} ·{' '}
-									{guardian.user.email}
+									{relationships[guardian.relationship]} · {guardian.user.email}
 								</p>
 							</div>
 							<div className="flex flex-wrap gap-2 sm:justify-end">
 								{guardian.isPrimary && (
 									<span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-										Primary
+										{primary}
 									</span>
 								)}
 								<span
 									className={`rounded-full px-3 py-1 text-xs font-medium ${guardian.canBook ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
 								>
-									{guardian.canBook ? 'Can book' : 'View only'}
+									{guardian.canBook ? canBook : viewOnly}
 								</span>
 							</div>
 						</div>
 					))
 				) : (
-					<p className="px-4 py-5 text-sm text-gray-500">
-						No guardians added yet.
-					</p>
+					<p className="px-4 py-5 text-sm text-gray-500">{empty}</p>
 				)}
 			</div>
 		</section>
