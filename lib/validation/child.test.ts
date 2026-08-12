@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { childSchema } from '@/lib/validation/child';
 import { dateFromToday } from '@/test/date';
-import { childFormText } from '@/lib/children/child-form-text';
+import { childFormText } from '@/lib/content/child-form-text';
 
 const {
 	firstName: firstNameText,

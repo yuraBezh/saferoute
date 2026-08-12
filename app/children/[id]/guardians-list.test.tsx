@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { GuardianRelationship } from '@/app/generated/prisma/enums';
-import { childDetailsText } from '@/lib/children/child-details-text';
+import { childDetailsText } from '@/lib/content/child-details-text';
 import { GuardiansList } from './guardians-list';
 
-const { empty, primary, canBook, viewOnly, relationships } =
+const { empty, primary, canBook, viewOnly, details, relationships } =
 	childDetailsText.guardians;
 
 const motherFixture = {
@@ -51,7 +51,7 @@ describe('GuardiansList', () => {
 
 		expect(screen.getByText(motherFixture.user.fullName)).toBeDefined();
 		expect(
-			screen.getByText(`${relationships.MOTHER} · ${motherFixture.user.email}`),
+			screen.getByText(details(relationships.MOTHER, motherFixture.user.email)),
 		).toBeDefined();
 	});
 
@@ -97,18 +97,18 @@ describe('GuardiansList', () => {
 		);
 
 		expect(
-			screen.getByText(`${relationships.MOTHER} · ${motherFixture.user.email}`),
+			screen.getByText(details(relationships.MOTHER, motherFixture.user.email)),
 		).toBeDefined();
 		expect(
-			screen.getByText(`${relationships.FATHER} · ${fatherFixture.user.email}`),
+			screen.getByText(details(relationships.FATHER, fatherFixture.user.email)),
 		).toBeDefined();
 		expect(
 			screen.getByText(
-				`${relationships.GUARDIAN} · ${guardianFixture.user.email}`,
+				details(relationships.GUARDIAN, guardianFixture.user.email),
 			),
 		).toBeDefined();
 		expect(
-			screen.getByText(`${relationships.OTHER} · ${otherFixture.user.email}`),
+			screen.getByText(details(relationships.OTHER, otherFixture.user.email)),
 		).toBeDefined();
 	});
 });

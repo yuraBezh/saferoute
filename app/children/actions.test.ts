@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dateFromToday } from '@/test/date';
-import { childFormText } from '@/lib/children/child-form-text';
+import { childFormText } from '@/lib/content/child-form-text';
 
 const {
 	saveError,

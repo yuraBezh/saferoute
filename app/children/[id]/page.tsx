@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma';
+import { childDetailsText } from '@/lib/content/child-details-text';
+import { childrenText } from '@/lib/content/children-text';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChildHeader } from './child-header';
@@ -47,7 +49,7 @@ export default async function ChildDetailsPage({
 							strokeLinejoin="round"
 						/>
 					</svg>
-					Children
+					{childrenText.title}
 				</Link>
 
 				<section className="rounded-xl border border-gray-200 bg-white px-5 py-5 shadow-sm sm:px-6">
@@ -62,13 +64,17 @@ export default async function ChildDetailsPage({
 
 					<dl className="space-y-3 text-sm">
 						<div className="flex items-center justify-between gap-6">
-							<dt className="font-medium text-gray-500">Date of birth</dt>
+							<dt className="font-medium text-gray-500">
+								{childDetailsText.details.dateOfBirth}
+							</dt>
 							<dd className="text-right font-medium text-gray-900">
 								{formatDate(child.birthDate)}
 							</dd>
 						</div>
 						<div className="flex items-center justify-between gap-6">
-							<dt className="font-medium text-gray-500">Added</dt>
+							<dt className="font-medium text-gray-500">
+								{childDetailsText.details.added}
+							</dt>
 							<dd className="text-right font-medium text-gray-900">
 								{formatDate(child.createdAt)}
 							</dd>

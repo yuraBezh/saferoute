@@ -4,6 +4,7 @@ import { PageTitle } from '@/components/ui/page-title';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { getAge } from '@/lib/children/get-age';
+import { childrenText } from '@/lib/content/children-text';
 
 export default async function Children() {
 	const children = await prisma.child.findMany({
@@ -16,9 +17,9 @@ export default async function Children() {
 		<main className="mx-auto w-full max-w-4xl px-6 py-10">
 			<div className="mb-5 flex items-center justify-between gap-4">
 				<div>
-					<PageTitle>Children</PageTitle>
+					<PageTitle>{childrenText.title}</PageTitle>
 					<p className="mt-1 text-sm text-gray-500">
-						{children.length} {children.length === 1 ? 'child' : 'children'}
+						{childrenText.childCount(children.length)}
 					</p>
 				</div>
 				<Link
@@ -26,7 +27,7 @@ export default async function Children() {
 					className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50"
 				>
 					<PlusIcon />
-					Add child
+					{childrenText.addChild}
 				</Link>
 			</div>
 
@@ -46,8 +47,8 @@ export default async function Children() {
 								{child.firstName} {child.lastName}
 							</p>
 							<p className="text-sm text-gray-500">
-								{getAge(child.birthDate)} years old · {child._count.guardians}{' '}
-								{child._count.guardians === 1 ? 'guardian' : 'guardians'}
+								{getAge(child.birthDate)} {childrenText.yearsOld} ·{' '}
+								{childrenText.guardianCount(child._count.guardians)}
 							</p>
 						</div>
 						<ChevronRightIcon />
