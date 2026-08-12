@@ -2,19 +2,7 @@ import { ChevronRightIcon, PlusIcon } from '@/components/ui/icons';
 import { PageTitle } from '@/components/ui/page-title';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-
-function getAge(birthDate: Date) {
-	const today = new Date();
-	let age = today.getUTCFullYear() - birthDate.getUTCFullYear();
-	const birthdayHasPassed =
-		today.getUTCMonth() > birthDate.getUTCMonth() ||
-		(today.getUTCMonth() === birthDate.getUTCMonth() &&
-			today.getUTCDate() >= birthDate.getUTCDate());
-
-	if (!birthdayHasPassed) age -= 1;
-
-	return age;
-}
+import { getAge } from '@/lib/children/get-age';
 
 export default async function Children() {
 	const children = await prisma.child.findMany({
