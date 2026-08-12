@@ -1,21 +1,14 @@
-import type { GuardianRelationship } from '@/app/generated/prisma/client';
+import { ChevronRightIcon, PlusIcon } from '@/components/ui/icons';
+import { InitialsAvatar } from '@/components/ui/initials-avatar';
 import { PageTitle } from '@/components/ui/page-title';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-
-const relationshipLabels: Record<GuardianRelationship, string> = {
-	MOTHER: 'mother',
-	FATHER: 'father',
-	GUARDIAN: 'guardian',
-	OTHER: 'other',
-};
+import { getAge } from '@/lib/children/get-age';
 
 export default async function Children() {
 	const children = await prisma.child.findMany({
 		include: {
-			guardians: {
-				include: { user: true },
-			},
+			_count: { select: { guardians: true } },
 		},
 	});
 
@@ -32,13 +25,7 @@ export default async function Children() {
 					href="/children/new"
 					className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50"
 				>
-					<svg
-						aria-hidden="true"
-						viewBox="0 0 20 20"
-						className="size-4 fill-none stroke-current stroke-2"
-					>
-						<path d="M10 4v12M4 10h12" strokeLinecap="round" />
-					</svg>
+					<PlusIcon />
 					Add child
 				</Link>
 			</div>
@@ -48,27 +35,22 @@ export default async function Children() {
 					<Link
 						key={child.id}
 						href={`/children/${child.id}`}
-						className="block px-6 py-5 hover:bg-gray-50"
+						className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50"
 					>
-						<p className="font-semibold text-gray-900">
-							{child.firstName} {child.lastName}
-							<span className="font-normal text-gray-500">
-								{' · '}
-								{child.birthDate.toLocaleDateString('en-GB')}
-							</span>
-						</p>
-
-						<div className="mt-2 space-y-1 pl-5 text-sm text-gray-600">
-							{child.guardians.map((guardian) => (
-								<p key={guardian.id}>
-									{guardian.user.fullName}
-									{' — '}
-									{relationshipLabels[guardian.relationship]}
-									{' · '}
-									{guardian.canBook ? 'can book' : 'view only'}
-								</p>
-							))}
+						<InitialsAvatar
+							initials={`${child.firstName[0]}${child.lastName[0]}`}
+							size="sm"
+						/>
+						<div className="min-w-0 flex-1">
+							<p className="truncate font-semibold text-gray-900">
+								{child.firstName} {child.lastName}
+							</p>
+							<p className="text-sm text-gray-500">
+								{getAge(child.birthDate)} years old · {child._count.guardians}{' '}
+								{child._count.guardians === 1 ? 'guardian' : 'guardians'}
+							</p>
 						</div>
+						<ChevronRightIcon />
 					</Link>
 				))}
 			</div>

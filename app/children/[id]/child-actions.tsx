@@ -1,5 +1,5 @@
+import { DeleteIcon, EditIcon } from '@/components/ui/icons';
 import Link from 'next/link';
-import { DeleteIcon, EditIcon } from './action-icons';
 
 const actionClassName =
 	'inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition sm:flex-none';

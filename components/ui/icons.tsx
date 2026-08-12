@@ -1,3 +1,31 @@
+export function PlusIcon() {
+	return (
+		<svg
+			aria-hidden="true"
+			viewBox="0 0 20 20"
+			className="size-4 fill-none stroke-current stroke-2"
+		>
+			<path d="M10 4v12M4 10h12" strokeLinecap="round" />
+		</svg>
+	);
+}
+
+export function ChevronRightIcon() {
+	return (
+		<svg
+			aria-hidden="true"
+			viewBox="0 0 20 20"
+			className="size-5 shrink-0 fill-none stroke-gray-400 stroke-2"
+		>
+			<path
+				d="m7.5 4.5 5.5 5.5-5.5 5.5"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+}
+
 export function EditIcon() {
 	return (
 		<svg
