@@ -5,6 +5,7 @@ import { childFormAction, type ChildFormState } from '@/app/children/actions';
 import { childFormText } from '@/lib/children/child-form-text';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
+import { PageTitle } from '@/components/ui/page-title';
 const {
 	title,
 	description,
@@ -37,9 +38,7 @@ export function ChildForm() {
 				className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
 			>
 				<div className="mb-7">
-					<h1 className="text-2xl font-semibold tracking-tight text-gray-950">
-						{title}
-					</h1>
+					<PageTitle>{title}</PageTitle>
 					<p className="mt-2 text-sm leading-6 text-gray-600">{description}</p>
 				</div>
 
