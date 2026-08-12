@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { childFormText } from '@/lib/children/child-form-text';
+import { childFormText } from '@/lib/content/child-form-text';
 
 const getTodayAsISO = () => new Date().toISOString().slice(0, 10);
 const {

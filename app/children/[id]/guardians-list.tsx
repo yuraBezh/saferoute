@@ -1,7 +1,7 @@
 import type { GuardianRelationship } from '@/app/generated/prisma/client';
-import { childDetailsText } from '@/lib/children/child-details-text';
+import { childDetailsText } from '@/lib/content/child-details-text';
 
-const { title, empty, primary, canBook, viewOnly, relationships } =
+const { title, empty, primary, canBook, viewOnly, details, relationships } =
 	childDetailsText.guardians;
 
 type Guardian = {
@@ -36,7 +36,10 @@ export function GuardiansList({ guardians }: { guardians: Guardian[] }) {
 									{guardian.user.fullName}
 								</h3>
 								<p className="mt-0.5 truncate text-sm text-gray-500">
-									{relationships[guardian.relationship]} · {guardian.user.email}
+									{details(
+										relationships[guardian.relationship],
+										guardian.user.email,
+									)}
 								</p>
 							</div>
 							<div className="flex flex-wrap gap-2 sm:justify-end">

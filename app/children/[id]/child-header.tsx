@@ -1,6 +1,7 @@
 import { InitialsAvatar } from '@/components/ui/initials-avatar';
 import { ChildActions } from './child-actions';
 import { getAge } from '@/lib/children/get-age';
+import { childrenText } from '@/lib/content/children-text';
 
 export function ChildHeader({
 	id,
@@ -24,7 +25,7 @@ export function ChildHeader({
 						{firstName} {lastName}
 					</h1>
 					<p className="mt-0.5 text-sm font-medium text-gray-500">
-						{getAge(birthDate)} years old
+						{getAge(birthDate)} {childrenText.yearsOld}
 					</p>
 				</div>
 			</div>

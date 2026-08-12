@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { childSchema } from '@/lib/validation/child';
 import { prisma } from '@/lib/prisma';
-import { childFormText } from '@/lib/children/child-form-text';
+import { childFormText } from '@/lib/content/child-form-text';
 
 export type ChildFormState = {
 	message: string;

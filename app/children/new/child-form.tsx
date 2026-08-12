@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { childFormAction, type ChildFormState } from '@/app/children/actions';
-import { childFormText } from '@/lib/children/child-form-text';
+import { childFormText } from '@/lib/content/child-form-text';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { PageTitle } from '@/components/ui/page-title';
