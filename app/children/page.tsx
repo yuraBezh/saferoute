@@ -1,4 +1,5 @@
 import { ChevronRightIcon, PlusIcon } from '@/components/ui/icons';
+import { InitialsAvatar } from '@/components/ui/initials-avatar';
 import { PageTitle } from '@/components/ui/page-title';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
@@ -36,10 +37,10 @@ export default async function Children() {
 						href={`/children/${child.id}`}
 						className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50"
 					>
-						<div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
-							{child.firstName[0]}
-							{child.lastName[0]}
-						</div>
+						<InitialsAvatar
+							initials={`${child.firstName[0]}${child.lastName[0]}`}
+							size="sm"
+						/>
 						<div className="min-w-0 flex-1">
 							<p className="truncate font-semibold text-gray-900">
 								{child.firstName} {child.lastName}
