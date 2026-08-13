@@ -14,6 +14,11 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "db:e2e:up": "docker compose -f compose.e2e.yml up -d --wait",
+    "db:e2e:reset": "dotenv --override -e .env.e2e -- node scripts/verify-e2e-database.mjs && dotenv --override -e .env.e2e -- prisma migrate reset --force",
+    "test:e2e:prepare": "npm run db:e2e:up && npm run db:e2e:reset && dotenv --override -e .env.e2e -- npm run seed",
+    "test:e2e": "npm run test:e2e:prepare && dotenv --override -e .env.e2e -- playwright test",
+    "test:e2e:ui": "npm run test:e2e:prepare && dotenv --override -e .env.e2e -- playwright test --ui",
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
@@ -27,6 +32,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
@@ -35,6 +41,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.5",
     "@vitest/coverage-v8": "^4.1.10",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "husky": "^9.1.7",
