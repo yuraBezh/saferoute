@@ -5,6 +5,8 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -39,3 +41,5 @@ next-env.d.ts
 .windsurf/
 .idea/
 skills-lock.json
+
+!.env.e2e.example
