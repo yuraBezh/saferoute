@@ -14,7 +14,7 @@ export function ChildHeader({
 	lastName: string;
 	birthDate: Date;
 }) {
-	const initials = `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
+	const initials = `${firstName[0]}${lastName[0]}`.toUpperCase();
 
 	return (
 		<div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
