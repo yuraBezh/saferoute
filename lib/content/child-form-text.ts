@@ -1,6 +1,5 @@
 export const childFormText = {
-	title: 'Add a child',
-	description: "Enter the child's information below.",
+	cancel: 'Cancel',
 	fields: {
 		firstName: {
 			label: 'First Name',
@@ -21,7 +20,22 @@ export const childFormText = {
 			tooOld: 'Child must be younger than 18 years old',
 		},
 	},
-	saveError: 'Unable to save the child. Please try again.',
+} as const;
+
+export const createChildFormText = {
+	title: 'Add a child',
+	description: "Enter the child's information below.",
 	submit: 'Create child',
 	submitting: 'Creating…',
+	saveError: 'Unable to save the child. Please try again.',
+} as const;
+
+export const editChildFormText = {
+	title: 'Edit child',
+	description: (fullName: string) => `Update ${fullName}'s information.`,
+	submit: 'Save changes',
+	submitting: 'Saving…',
+	validationError: 'Please fix the highlighted fields.',
+	notFoundError: 'This child no longer exists.',
+	saveError: 'Something went wrong. Please try again.',
 } as const;

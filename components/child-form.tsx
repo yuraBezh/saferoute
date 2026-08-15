@@ -1,16 +1,14 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import { childFormAction, type ChildFormState } from '@/app/children/actions';
+import { type ChildFormState } from '@/app/children/actions';
 import { childFormText } from '@/lib/content/child-form-text';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
-import { PageTitle } from '@/components/ui/page-title';
+import Link from 'next/link';
+
 const {
-	title,
-	description,
-	submit,
-	submitting,
+	cancel,
 	fields: {
 		firstName: firstNameText,
 		lastName: lastNameText,
@@ -18,30 +16,46 @@ const {
 	},
 } = childFormText;
 
-export function ChildForm() {
+type ChildFormProps = {
+	formAction: (
+		state: ChildFormState,
+		formData: FormData,
+	) => Promise<ChildFormState>;
+	defaultValues?: { firstName: string; lastName: string; birthDate: string };
+	submitLabel: string;
+	submittingLabel: string;
+	cancelHref?: string;
+};
+
+export function ChildForm(props: ChildFormProps) {
+	const {
+		formAction,
+		defaultValues,
+		submitLabel,
+		submittingLabel,
+		cancelHref,
+	} = props;
+
 	const initialState: ChildFormState = { message: '', errors: {} };
 	const [formState, action, isPending] = useActionState(
-		childFormAction,
+		formAction,
 		initialState,
 	);
-	const [values, setValues] = useState({
-		firstName: '',
-		lastName: '',
-		birthDate: '',
-	});
+	const [values, setValues] = useState(
+		defaultValues ?? {
+			firstName: '',
+			lastName: '',
+			birthDate: '',
+		},
+	);
 
 	return (
-		<main className="mx-auto w-full max-w-xl px-4 py-10 sm:px-6">
+		<div className="w-full">
 			<form
 				action={action}
 				noValidate
-				className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
+				className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6"
 			>
-				<div className="mb-7">
-					<PageTitle>{title}</PageTitle>
-					<p className="mt-2 text-sm leading-6 text-gray-600">{description}</p>
-				</div>
-
 				<div className="space-y-5">
 					<Field
 						id="firstName"
@@ -89,11 +103,21 @@ export function ChildForm() {
 						</p>
 					)}
 
-					<Button type="submit" disabled={isPending}>
-						{isPending ? submitting : submit}
-					</Button>
+					<div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+						{cancelHref && (
+							<Link
+								href={cancelHref}
+								className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
+							>
+								{cancel}
+							</Link>
+						)}
+						<Button type="submit" disabled={isPending}>
+							{isPending ? submittingLabel : submitLabel}
+						</Button>
+					</div>
 				</div>
 			</form>
-		</main>
+		</div>
 	);
 }

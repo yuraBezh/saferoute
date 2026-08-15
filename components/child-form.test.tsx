@@ -1,32 +1,38 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dateFromToday } from '@/test/date';
-import { childFormText } from '@/lib/content/child-form-text';
+import {
+	childFormText,
+	createChildFormText,
+} from '@/lib/content/child-form-text';
+import { ChildForm } from '@/components/child-form';
 
 const {
-	saveError,
-	submit,
-	submitting,
 	fields: {
 		firstName: firstNameText,
 		lastName: lastNameText,
 		birthDate: birthDateText,
 	},
 } = childFormText;
+const { saveError, submit, submitting } = createChildFormText;
 
 const mocks = vi.hoisted(() => ({
 	childFormAction: vi.fn(),
 }));
 
-vi.mock('@/app/children/actions', () => ({
-	childFormAction: mocks.childFormAction,
-}));
-
-import { ChildForm } from '@/app/children/new/child-form';
+const childFormProps = {
+	formAction: mocks.childFormAction,
+	submitLabel: submit,
+	submittingLabel: submitting,
+};
 
 describe('ChildForm', () => {
+	beforeEach(() => {
+		mocks.childFormAction.mockReset();
+	});
+
 	it('renders all form controls', () => {
-		render(<ChildForm />);
+		render(<ChildForm {...childFormProps} />);
 
 		expect(
 			screen.getByRole('textbox', { name: firstNameText.label }),
@@ -43,7 +49,7 @@ describe('ChildForm', () => {
 			message: '',
 			errors: { birthDate: [birthDateText.future] },
 		});
-		const { container } = render(<ChildForm />);
+		const { container } = render(<ChildForm {...childFormProps} />);
 		const firstName = screen.getByRole('textbox', {
 			name: firstNameText.label,
 		}) as HTMLInputElement;
@@ -72,7 +78,7 @@ describe('ChildForm', () => {
 			message: saveError,
 			errors: {},
 		});
-		const { container } = render(<ChildForm />);
+		const { container } = render(<ChildForm {...childFormProps} />);
 
 		fireEvent.submit(container.querySelector('form')!);
 
@@ -88,7 +94,7 @@ describe('ChildForm', () => {
 					resolveAction = resolve;
 				}),
 		);
-		const { container } = render(<ChildForm />);
+		const { container } = render(<ChildForm {...childFormProps} />);
 
 		fireEvent.submit(container.querySelector('form')!);
 

@@ -1,5 +1,38 @@
-import { ChildForm } from '@/app/children/new/child-form';
+import { ChildForm } from '@/components/child-form';
+import { createChildFormText } from '@/lib/content/child-form-text';
+import { childFormAction } from '@/app/children/actions';
+import { PageTitle } from '@/components/ui/page-title';
+import { childrenText } from '@/lib/content/children-text';
+import Link from 'next/link';
 
 export default function AddNewChildrenPage() {
-	return <ChildForm />;
+	const defaultValues = { firstName: '', lastName: '', birthDate: '' };
+	const { title, description, submit, submitting } = createChildFormText;
+
+	return (
+		<main className="min-h-screen bg-white py-6 text-gray-950 sm:py-8">
+			<div className="mx-auto w-full max-w-xl px-4 sm:px-6">
+				<Link
+					href="/children"
+					className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-950"
+				>
+					<span aria-hidden="true">←</span>
+					{childrenText.title}
+				</Link>
+
+				<header className="mb-5">
+					<PageTitle>{title}</PageTitle>
+					<p className="mt-1 text-sm leading-6 text-gray-600">{description}</p>
+				</header>
+
+				<ChildForm
+					formAction={childFormAction}
+					submitLabel={submit}
+					submittingLabel={submitting}
+					defaultValues={defaultValues}
+					cancelHref="/children"
+				/>
+			</div>
+		</main>
+	);
 }
