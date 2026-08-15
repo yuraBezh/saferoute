@@ -44,6 +44,38 @@ describe('ChildForm', () => {
 		expect(screen.getByRole('button', { name: submit })).toBeDefined();
 	});
 
+	it('prefills editable values and links cancel to the provided page', () => {
+		const child = {
+			firstName: 'John',
+			lastName: 'Krasinski',
+			birthDate: '2010-01-01',
+		};
+		const cancelHref = '/children/child-1';
+
+		render(
+			<ChildForm
+				{...childFormProps}
+				defaultValues={child}
+				cancelHref={cancelHref}
+			/>,
+		);
+
+		expect(
+			(screen.getByLabelText(firstNameText.label) as HTMLInputElement).value,
+		).toBe(child.firstName);
+		expect(
+			(screen.getByLabelText(lastNameText.label) as HTMLInputElement).value,
+		).toBe(child.lastName);
+		expect(
+			(screen.getByLabelText(birthDateText.label) as HTMLInputElement).value,
+		).toBe(child.birthDate);
+		expect(
+			screen
+				.getByRole('link', { name: childFormText.cancel })
+				.getAttribute('href'),
+		).toBe(cancelHref);
+	});
+
 	it('keeps names when the birth date is invalid', async () => {
 		mocks.childFormAction.mockResolvedValue({
 			message: '',

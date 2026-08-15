@@ -6,9 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { childSchema } from '@/lib/validation/child';
 import { editChildFormText } from '@/lib/content/child-form-text';
+import { RECORD_NOT_FOUND_ERROR_CODE } from '@/lib/prisma-error-codes';
 import { z } from 'zod';
-
-const RECORD_NOT_FOUND_ERROR_CODE = 'P2025';
 
 function parseChildForm(formData: FormData) {
 	const result = childSchema.safeParse({
