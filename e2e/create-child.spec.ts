@@ -1,12 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
-import { childFormText } from '@/lib/content/child-form-text';
+import {
+	childFormText,
+	createChildFormText,
+} from '@/lib/content/child-form-text';
 import { childrenText } from '@/lib/content/children-text';
 
 const {
-	submit,
 	fields: { firstName, lastName, birthDate },
 } = childFormText;
+const { submit } = createChildFormText;
 
 test('creates a child and shows it in the children list', async ({ page }) => {
 	const child = {

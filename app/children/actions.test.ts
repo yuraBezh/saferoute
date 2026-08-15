@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dateFromToday } from '@/test/date';
-import { childFormText } from '@/lib/content/child-form-text';
+import {
+	childFormText,
+	createChildFormText,
+} from '@/lib/content/child-form-text';
 
 const {
-	saveError,
 	fields: { birthDate: birthDateText },
 } = childFormText;
+const { saveError } = createChildFormText;
 
 const mocks = vi.hoisted(() => ({
 	createChild: vi.fn(),

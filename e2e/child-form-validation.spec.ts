@@ -1,10 +1,13 @@
 import { expect, test } from '@playwright/test';
-import { childFormText } from '@/lib/content/child-form-text';
+import {
+	childFormText,
+	createChildFormText,
+} from '@/lib/content/child-form-text';
 
 const {
-	submit,
 	fields: { firstName, lastName, birthDate },
 } = childFormText;
+const { submit } = createChildFormText;
 
 test('shows errors for required child fields', async ({ page }) => {
 	await page.goto('/children/new');
