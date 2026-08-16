@@ -5,6 +5,8 @@ const isUiMode = process.argv.includes('--ui');
 
 config({ path: '.env.e2e', override: true, quiet: true });
 
+process.env.NEXT_DIST_DIR = '.next-e2e';
+
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
