@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { editChildAction } from '@/app/children/[id]/edit/action';
 import { editChildFormText } from '@/lib/content/child-form-text';
 import Link from 'next/link';
+import { ArrowLeftIcon } from '@/components/ui/icons';
 
 const { title, description, submit, submitting } = editChildFormText;
 
@@ -32,7 +33,7 @@ export default async function EditChildrenPage({
 					href={`/children/${id}`}
 					className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-950"
 				>
-					<span aria-hidden="true">←</span>
+					<ArrowLeftIcon />
 					{fullName}
 				</Link>
 

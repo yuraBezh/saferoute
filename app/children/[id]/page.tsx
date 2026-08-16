@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChildHeader } from './child-header';
 import { GuardiansList } from './guardians-list';
+import { ArrowLeftIcon } from '@/components/ui/icons';
 
 function formatDate(date: Date) {
 	return new Intl.DateTimeFormat('en-US', {
@@ -38,17 +39,7 @@ export default async function ChildDetailsPage({
 					href="/children"
 					className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-950"
 				>
-					<svg
-						aria-hidden="true"
-						viewBox="0 0 20 20"
-						className="size-4 fill-none stroke-current stroke-2"
-					>
-						<path
-							d="m12.5 15-5-5 5-5M8 10h8"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-						/>
-					</svg>
+					<ArrowLeftIcon />
 					{childrenText.title}
 				</Link>
 
