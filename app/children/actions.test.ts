@@ -15,6 +15,7 @@ const { saveError } = createChildFormText;
 const mocks = vi.hoisted(() => ({
 	createChild: vi.fn(),
 	updateChild: vi.fn(),
+	deleteChild: vi.fn(),
 	revalidatePath: vi.fn(),
 	redirect: vi.fn(),
 }));
@@ -24,6 +25,7 @@ vi.mock('@/lib/prisma', () => ({
 		child: {
 			create: mocks.createChild,
 			update: mocks.updateChild,
+			delete: mocks.deleteChild,
 		},
 	},
 }));
@@ -38,6 +40,7 @@ vi.mock('next/navigation', () => ({
 
 import {
 	createChildAction,
+	deleteChildAction,
 	editChildAction,
 	type ChildFormState,
 } from '@/app/children/actions';
@@ -232,5 +235,42 @@ describe('editChildAction', () => {
 		expect(mocks.redirect).not.toHaveBeenCalled();
 
 		consoleError.mockRestore();
+	});
+});
+
+describe('deleteChildAction', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('deletes the child and check children page revalidation', async () => {
+		const child = { id: 'child-1' };
+		mocks.deleteChild.mockResolvedValue({});
+
+		await deleteChildAction(child.id);
+
+		expect(mocks.deleteChild).toHaveBeenCalledWith({
+			where: { id: child.id },
+		});
+		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
+	});
+
+	it('treats an already deleted child as a successful deletion', async () => {
+		const child = { id: 'missing-child' };
+		mocks.deleteChild.mockRejectedValue({
+			code: RECORD_NOT_FOUND_ERROR_CODE,
+		});
+
+		await expect(deleteChildAction(child.id)).resolves.toBeUndefined();
+		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
+	});
+
+	it('throws DB deletion errors', async () => {
+		const child = { id: 'child-1' };
+		const error = new Error('Database unavailable');
+		mocks.deleteChild.mockRejectedValue(error);
+
+		await expect(deleteChildAction(child.id)).rejects.toBe(error);
+		expect(mocks.revalidatePath).not.toHaveBeenCalled();
 	});
 });
