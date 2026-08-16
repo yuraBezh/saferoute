@@ -104,3 +104,20 @@ export async function editChildAction(
 	revalidatePath(`/children/${id}`);
 	redirect(`/children/${id}`);
 }
+
+export async function deleteChildAction(id: string): Promise<void> {
+	try {
+		await prisma.child.delete({ where: { id } });
+	} catch (err) {
+		if (
+			!err ||
+			typeof err !== 'object' ||
+			!('code' in err) ||
+			err.code !== RECORD_NOT_FOUND_ERROR_CODE
+		) {
+			throw err;
+		}
+	}
+
+	revalidatePath('/children');
+}

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { childDetailsText } from '@/lib/content/child-details-text';
+import childDetailsText from '@/lib/content/child-details-text';
 import { childrenText } from '@/lib/content/children-text';
 
 const mocks = vi.hoisted(() => ({ getAge: vi.fn() }));
@@ -34,7 +34,7 @@ describe('ChildHeader', () => {
 		).toBeDefined();
 	});
 
-	it('links Edit to the child edit page', () => {
+	it('renders the child actions', () => {
 		render(<ChildHeader {...childFixture} />);
 
 		expect(
@@ -42,5 +42,8 @@ describe('ChildHeader', () => {
 				.getByRole('link', { name: childDetailsText.actions.edit })
 				.getAttribute('href'),
 		).toBe(`/children/${childFixture.id}/edit`);
+		expect(
+			screen.getByRole('button', { name: childDetailsText.actions.delete }),
+		).toBeDefined();
 	});
 });

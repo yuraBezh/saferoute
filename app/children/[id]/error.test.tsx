@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { childDetailsText } from '@/lib/content/child-details-text';
+import childDetailsText from '@/lib/content/child-details-text';
 import ChildDetailsError from './error';
 
 describe('ChildDetailsError', () => {

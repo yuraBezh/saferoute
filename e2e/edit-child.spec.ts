@@ -5,7 +5,7 @@ import {
 	createChildFormText,
 	editChildFormText,
 } from '@/lib/content/child-form-text';
-import { childDetailsText } from '@/lib/content/child-details-text';
+import childDetailsText from '@/lib/content/child-details-text';
 import { dateFromToday } from '@/test/date';
 
 const {
