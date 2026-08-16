@@ -4,7 +4,13 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { childSchema } from '@/lib/validation/child';
 import { prisma } from '@/lib/prisma';
-import { createChildFormText } from '@/lib/content/child-form-text';
+import {
+	childFormText,
+	createChildFormText,
+	editChildFormText,
+} from '@/lib/content/child-form-text';
+import { RECORD_NOT_FOUND_ERROR_CODE } from '@/lib/prisma-error-codes';
+import { z } from 'zod';
 
 export type ChildFormState = {
 	message: string;
@@ -15,32 +21,38 @@ export type ChildFormState = {
 	};
 };
 
-export async function childFormAction(
-	_formState: ChildFormState,
+function parseChildForm(formData: FormData) {
+	return childSchema.safeParse({
+		firstName: formData.get('firstName'),
+		lastName: formData.get('lastName'),
+		birthDate: formData.get('birthDate'),
+	});
+}
+
+function toChildData(data: z.infer<typeof childSchema>) {
+	return {
+		firstName: data.firstName,
+		lastName: data.lastName,
+		birthDate: new Date(`${data.birthDate}T00:00:00.000Z`),
+	};
+}
+
+export async function createChildAction(
+	_prevState: ChildFormState,
 	formData: FormData,
 ): Promise<ChildFormState> {
+	const parsed = parseChildForm(formData);
+
+	if (!parsed.success) {
+		return {
+			message: childFormText.validationError,
+			errors: z.flattenError(parsed.error).fieldErrors,
+		};
+	}
+
 	try {
-		const firstName = formData.get('firstName');
-		const lastName = formData.get('lastName');
-		const birthDate = formData.get('birthDate');
-
-		const result = childSchema.safeParse({ firstName, lastName, birthDate });
-
-		if (!result.success) {
-			const { fieldErrors } = result.error.flatten();
-
-			return {
-				message: '',
-				errors: fieldErrors,
-			};
-		}
-
 		await prisma.child.create({
-			data: {
-				firstName: result.data.firstName,
-				lastName: result.data.lastName,
-				birthDate: new Date(`${result.data.birthDate}T00:00:00.000Z`),
-			},
+			data: toChildData(parsed.data),
 		});
 	} catch (err: unknown) {
 		console.error('Failed to create child:', err);
@@ -53,4 +65,42 @@ export async function childFormAction(
 
 	revalidatePath('/');
 	redirect('/');
+}
+
+export async function editChildAction(
+	id: string,
+	_prevState: ChildFormState,
+	formData: FormData,
+): Promise<ChildFormState> {
+	const parsed = parseChildForm(formData);
+
+	if (!parsed.success) {
+		return {
+			message: childFormText.validationError,
+			errors: z.flattenError(parsed.error).fieldErrors,
+		};
+	}
+
+	try {
+		await prisma.child.update({
+			where: { id },
+			data: toChildData(parsed.data),
+		});
+	} catch (err) {
+		if (
+			err &&
+			typeof err === 'object' &&
+			'code' in err &&
+			err.code === RECORD_NOT_FOUND_ERROR_CODE
+		) {
+			return { message: editChildFormText.notFoundError };
+		}
+
+		console.error('Failed to update child', err);
+		return { message: editChildFormText.saveError };
+	}
+
+	revalidatePath('/children');
+	revalidatePath(`/children/${id}`);
+	redirect(`/children/${id}`);
 }

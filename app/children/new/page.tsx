@@ -1,6 +1,6 @@
 import { ChildForm } from '@/components/child-form';
 import { createChildFormText } from '@/lib/content/child-form-text';
-import { childFormAction } from '@/app/children/actions';
+import { createChildAction } from '@/app/children/actions';
 import { PageTitle } from '@/components/ui/page-title';
 import { childrenText } from '@/lib/content/children-text';
 import Link from 'next/link';
@@ -27,7 +27,7 @@ export default function AddNewChildrenPage() {
 				</header>
 
 				<ChildForm
-					formAction={childFormAction}
+					formAction={createChildAction}
 					submitLabel={submit}
 					submittingLabel={submitting}
 					defaultValues={defaultValues}

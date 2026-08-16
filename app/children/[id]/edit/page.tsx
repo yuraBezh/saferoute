@@ -2,7 +2,7 @@ import { ChildForm } from '@/components/child-form';
 import { PageTitle } from '@/components/ui/page-title';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import { editChildAction } from '@/app/children/[id]/edit/action';
+import { editChildAction } from '@/app/children/actions';
 import { editChildFormText } from '@/lib/content/child-form-text';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@/components/ui/icons';

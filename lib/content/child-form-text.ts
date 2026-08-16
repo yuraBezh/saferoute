@@ -1,5 +1,6 @@
 export const childFormText = {
 	cancel: 'Cancel',
+	validationError: 'Please fix the highlighted fields.',
 	fields: {
 		firstName: {
 			label: 'First Name',
@@ -35,7 +36,6 @@ export const editChildFormText = {
 	description: (fullName: string) => `Update ${fullName}'s information.`,
 	submit: 'Save changes',
 	submitting: 'Saving…',
-	validationError: 'Please fix the highlighted fields.',
 	notFoundError: 'This child no longer exists.',
 	saveError: 'Something went wrong. Please try again.',
 } as const;
