@@ -4,6 +4,7 @@ import { childFormAction } from '@/app/children/actions';
 import { PageTitle } from '@/components/ui/page-title';
 import { childrenText } from '@/lib/content/children-text';
 import Link from 'next/link';
+import { ArrowLeftIcon } from '@/components/ui/icons';
 
 export default function AddNewChildrenPage() {
 	const defaultValues = { firstName: '', lastName: '', birthDate: '' };
@@ -16,7 +17,7 @@ export default function AddNewChildrenPage() {
 					href="/children"
 					className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-950"
 				>
-					<span aria-hidden="true">←</span>
+					<ArrowLeftIcon />
 					{childrenText.title}
 				</Link>
 

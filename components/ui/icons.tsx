@@ -26,6 +26,22 @@ export function ChevronRightIcon() {
 	);
 }
 
+export function ArrowLeftIcon() {
+	return (
+		<svg
+			aria-hidden="true"
+			viewBox="0 0 20 20"
+			className="size-4 fill-none stroke-current stroke-2"
+		>
+			<path
+				d="m12.5 15-5-5 5-5M8 10h8"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+}
+
 export function EditIcon() {
 	return (
 		<svg
