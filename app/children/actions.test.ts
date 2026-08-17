@@ -78,7 +78,7 @@ describe('createChildAction', () => {
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
 
-	it('creates a child from validated data and redirects home', async () => {
+	it('creates a child and redirects to the children list', async () => {
 		mocks.createChild.mockResolvedValue({});
 		const birthDate = dateFromToday({ years: -6 });
 
@@ -98,8 +98,8 @@ describe('createChildAction', () => {
 				birthDate: new Date(`${birthDate}T00:00:00.000Z`),
 			},
 		});
-		expect(mocks.revalidatePath).toHaveBeenCalledWith('/');
-		expect(mocks.redirect).toHaveBeenCalledWith('/');
+		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
+		expect(mocks.redirect).toHaveBeenCalledWith('/children');
 	});
 
 	it('returns a general message when saving fails', async () => {
