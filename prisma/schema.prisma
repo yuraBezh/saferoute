@@ -32,6 +32,7 @@ model User {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   guardedChildren ChildGuardian[]
+  ownedLocations  Location[]
 }
 
 enum GuardianRelationship {
@@ -55,4 +56,31 @@ model ChildGuardian {
 
   @@unique([childId, userId])
   @@index([userId])
+}
+
+enum LocationType {
+  HOME
+  SCHOOL
+  ACTIVITY
+}
+
+model Location {
+  id           String       @id @default(cuid())
+  type         LocationType
+  name         String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  postalCode   String
+  latitude     Float?
+  longitude    Float?
+  timezone     String       @default("America/Chicago")
+  owner        User?        @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  ownerUserId  String?
+  isVerified   Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([ownerUserId])
 }
