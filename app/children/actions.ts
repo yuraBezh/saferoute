@@ -63,8 +63,8 @@ export async function createChildAction(
 		};
 	}
 
-	revalidatePath('/');
-	redirect('/');
+	revalidatePath('/children');
+	redirect('/children');
 }
 
 export async function editChildAction(
