@@ -45,7 +45,7 @@ function run(command, args) {
 	}
 }
 
-run('docker', ['compose', '-f', 'compose.e2e.yml', 'up', '-d', '--wait']);
+run('docker', ['compose', '-f', 'docker-compose.e2e.yml', 'up', '-d', '--wait']);
 run('npm', ['exec', '--', 'prisma', 'migrate', 'reset', '--force']);
-run('npm', ['run', 'seed']);
+run('npm', ['run', 'db:seed']);
 run('npm', ['exec', '--', 'playwright', 'test', ...(isUiMode ? ['--ui'] : [])]);

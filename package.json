@@ -2,6 +2,9 @@
   "name": "saferoute",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -16,7 +19,12 @@
     "test:watch": "vitest",
     "test:e2e": "node scripts/run-e2e.mjs",
     "test:e2e:ui": "node scripts/run-e2e.mjs --ui",
-    "seed": "tsx prisma/seed.ts"
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "prisma db seed",
+    "db:reset": "docker compose down -v && docker compose up -d && prisma migrate dev"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
