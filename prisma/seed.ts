@@ -1,8 +1,12 @@
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
-import { GuardianRelationship } from '@/app/generated/prisma/enums';
+import {
+	GuardianRelationship,
+	LocationType,
+} from '@/app/generated/prisma/enums';
 
 async function main() {
+	await prisma.location.deleteMany();
 	await prisma.childGuardian.deleteMany();
 	await prisma.child.deleteMany();
 	await prisma.user.deleteMany();
@@ -21,6 +25,49 @@ async function main() {
 			fullName: 'Devid Krasinski',
 			passwordHash: null,
 		},
+	});
+
+	await prisma.location.createMany({
+		data: [
+			{
+				type: LocationType.SCHOOL,
+				name: 'Lamar High School',
+				addressLine1: '3325 Westheimer Rd',
+				city: 'Houston',
+				state: 'TX',
+				postalCode: '77098',
+				ownerUserId: null,
+				isVerified: true,
+			},
+			{
+				type: LocationType.HOME,
+				name: "Anna's Home",
+				addressLine1: '1515 Austin St',
+				city: 'Houston',
+				state: 'TX',
+				postalCode: '77002',
+				ownerUserId: mother.id,
+			},
+			{
+				type: LocationType.HOME,
+				name: "Devid's Home",
+				addressLine1: '404 Oxford St',
+				city: 'Houston',
+				state: 'TX',
+				postalCode: '77007',
+				ownerUserId: father.id,
+			},
+			{
+				type: LocationType.ACTIVITY,
+				name: 'Houston Ballet Academy',
+				addressLine1: '601 Preston St',
+				city: 'Houston',
+				state: 'TX',
+				postalCode: '77002',
+				ownerUserId: null,
+				isVerified: true,
+			},
+		],
 	});
 
 	const john = await prisma.child.create({
