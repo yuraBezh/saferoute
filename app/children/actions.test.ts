@@ -253,6 +253,7 @@ describe('deleteChildAction', () => {
 			where: { id: child.id },
 		});
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
+		expect(mocks.redirect).toHaveBeenCalledWith('/children');
 	});
 
 	it('treats an already deleted child as a successful deletion', async () => {
@@ -263,6 +264,7 @@ describe('deleteChildAction', () => {
 
 		await expect(deleteChildAction(child.id)).resolves.toBeUndefined();
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
+		expect(mocks.redirect).toHaveBeenCalledWith('/children');
 	});
 
 	it('throws DB deletion errors', async () => {
@@ -272,5 +274,6 @@ describe('deleteChildAction', () => {
 
 		await expect(deleteChildAction(child.id)).rejects.toBe(error);
 		expect(mocks.revalidatePath).not.toHaveBeenCalled();
+		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
 });

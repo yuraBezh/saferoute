@@ -54,7 +54,7 @@ describe('DeleteChildButton', () => {
 		expect(mocks.deleteChildAction).not.toHaveBeenCalled();
 	});
 
-	it('deletes the child, shows pending state, and closes on success', async () => {
+	it('submits the child deletion and shows pending state', async () => {
 		let resolveDelete: (() => void) | undefined;
 		mocks.deleteChildAction.mockReturnValue(
 			new Promise<void>((resolve) => {
@@ -85,8 +85,10 @@ describe('DeleteChildButton', () => {
 			resolveDelete?.();
 		});
 
-		await waitFor(() => {
-			expect(screen.queryByRole('alertdialog')).toBeNull();
-		});
+		expect(
+			within(dialog).getByRole('button', {
+				name: childDetailsText.deleteModal.delete,
+			}),
+		).toHaveProperty('disabled', false);
 	});
 });

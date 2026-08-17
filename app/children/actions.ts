@@ -120,4 +120,5 @@ export async function deleteChildAction(id: string): Promise<void> {
 	}
 
 	revalidatePath('/children');
+	redirect('/children');
 }

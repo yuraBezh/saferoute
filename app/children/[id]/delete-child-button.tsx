@@ -16,7 +16,6 @@ export function DeleteChildButton({ childId }: { childId: string }) {
 
 		startTransition(async () => {
 			await deleteChildAction(childId);
-			setIsOpen(false);
 		});
 	}
 
