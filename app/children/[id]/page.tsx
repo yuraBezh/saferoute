@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { childDetailsText } from '@/lib/content/child-details-text';
+import childDetailsText from '@/lib/content/child-details-text';
 import { childrenText } from '@/lib/content/children-text';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';

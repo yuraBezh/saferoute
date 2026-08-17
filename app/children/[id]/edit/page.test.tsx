@@ -26,7 +26,7 @@ vi.mock('next/navigation', () => ({
 	notFound: mocks.notFound,
 }));
 
-vi.mock('@/app/children/[id]/edit/action', () => ({
+vi.mock('@/app/children/actions', () => ({
 	editChildAction: mocks.editChildAction,
 }));
 

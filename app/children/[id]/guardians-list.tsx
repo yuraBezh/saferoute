@@ -1,5 +1,5 @@
 import type { GuardianRelationship } from '@/app/generated/prisma/client';
-import { childDetailsText } from '@/lib/content/child-details-text';
+import childDetailsText from '@/lib/content/child-details-text';
 
 const { title, empty, primary, canBook, viewOnly, details, relationships } =
 	childDetailsText.guardians;

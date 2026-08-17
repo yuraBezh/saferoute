@@ -1,4 +1,4 @@
-export const childDetailsText = {
+const childDetailsText = {
 	actions: {
 		edit: 'Edit',
 		delete: 'Delete',
@@ -10,6 +10,14 @@ export const childDetailsText = {
 	error: {
 		title: 'Something went wrong',
 		retry: 'Try again',
+	},
+	deleteModal: {
+		confirm: 'Are you sure?',
+		cancel: 'Cancel',
+		delete: 'Delete',
+		description:
+			'This action cannot be undone. This will permanently delete this child and remove its data from our servers.',
+		deleting: 'Deleting…',
 	},
 	guardians: {
 		title: 'Guardians',
@@ -27,3 +35,4 @@ export const childDetailsText = {
 		},
 	},
 } as const;
+export default childDetailsText;

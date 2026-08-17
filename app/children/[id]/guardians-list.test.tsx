@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { GuardianRelationship } from '@/app/generated/prisma/enums';
-import { childDetailsText } from '@/lib/content/child-details-text';
+import childDetailsText from '@/lib/content/child-details-text';
 import { GuardiansList } from './guardians-list';
 
 const { empty, primary, canBook, viewOnly, details, relationships } =

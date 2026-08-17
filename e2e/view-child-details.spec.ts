@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { childDetailsText } from '@/lib/content/child-details-text';
+import childDetailsText from '@/lib/content/child-details-text';
 
 const { title, details, relationships } = childDetailsText.guardians;
 

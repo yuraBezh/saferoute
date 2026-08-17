@@ -1,7 +1,8 @@
 import { InitialsAvatar } from '@/components/ui/initials-avatar';
-import { ChildActions } from './child-actions';
 import { getAge } from '@/lib/children/get-age';
 import { childrenText } from '@/lib/content/children-text';
+import { DeleteChildButton } from './delete-child-button';
+import { EditChildLink } from './edit-child-link';
 
 export function ChildHeader({
 	id,
@@ -30,7 +31,10 @@ export function ChildHeader({
 				</div>
 			</div>
 
-			<ChildActions childId={id} />
+			<div className="flex gap-3">
+				<EditChildLink childId={id} />
+				<DeleteChildButton childId={id} />
+			</div>
 		</div>
 	);
 }
