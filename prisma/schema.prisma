@@ -75,6 +75,7 @@ model Location {
   postalCode   String
   latitude     Float?
   longitude    Float?
+  // TODO: Derive this from coordinates during geocoding before supporting locations outside Central Time.
   timezone     String       @default("America/Chicago")
   owner        User?        @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   ownerUserId  String?
