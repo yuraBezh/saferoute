@@ -4,6 +4,7 @@ import {
 	GuardianRelationship,
 	LocationType,
 } from '@/app/generated/prisma/enums';
+import { toDbDate } from '@/lib/date';
 
 async function main() {
 	await prisma.location.deleteMany();
@@ -74,7 +75,7 @@ async function main() {
 		data: {
 			firstName: 'John',
 			lastName: 'Krasinski',
-			birthDate: new Date('2010-01-01'),
+			birthDate: toDbDate('2010-01-01'),
 		},
 	});
 
@@ -82,7 +83,7 @@ async function main() {
 		data: {
 			firstName: 'Bobby',
 			lastName: 'White',
-			birthDate: new Date('2004-12-31'),
+			birthDate: toDbDate('2010-01-01'),
 		},
 	});
 
@@ -90,7 +91,7 @@ async function main() {
 		data: {
 			firstName: 'Nick',
 			lastName: 'Johnson',
-			birthDate: new Date('2006-03-17'),
+			birthDate: toDbDate('2010-01-01'),
 		},
 	});
 
