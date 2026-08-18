@@ -1,8 +1,10 @@
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
-import { GuardianRelationship } from '@/app/generated/prisma/enums';
+import { GuardianRelationship, LocationType } from '@/generated/prisma/enums';
+import { toDbDate } from '@/lib/date';
 
 async function main() {
+	await prisma.location.deleteMany();
 	await prisma.childGuardian.deleteMany();
 	await prisma.child.deleteMany();
 	await prisma.user.deleteMany();
@@ -23,11 +25,54 @@ async function main() {
 		},
 	});
 
+	await prisma.location.createMany({
+		data: [
+			{
+				type: LocationType.SCHOOL,
+				name: 'Lamar High School',
+				addressLine1: '3325 Westheimer Rd',
+				city: 'Houston',
+				state: 'TX',
+				postalCode: '77098',
+				ownerUserId: null,
+				isVerified: true,
+			},
+			{
+				type: LocationType.HOME,
+				name: "Anna's Home",
+				addressLine1: '1515 Austin St',
+				city: 'Houston',
+				state: 'TX',
+				postalCode: '77002',
+				ownerUserId: mother.id,
+			},
+			{
+				type: LocationType.HOME,
+				name: "Devid's Home",
+				addressLine1: '404 Oxford St',
+				city: 'Houston',
+				state: 'TX',
+				postalCode: '77007',
+				ownerUserId: father.id,
+			},
+			{
+				type: LocationType.ACTIVITY,
+				name: 'Houston Ballet Academy',
+				addressLine1: '601 Preston St',
+				city: 'Houston',
+				state: 'TX',
+				postalCode: '77002',
+				ownerUserId: null,
+				isVerified: true,
+			},
+		],
+	});
+
 	const john = await prisma.child.create({
 		data: {
 			firstName: 'John',
 			lastName: 'Krasinski',
-			birthDate: new Date('2010-01-01'),
+			birthDate: toDbDate('2010-01-01'),
 		},
 	});
 
@@ -35,7 +80,7 @@ async function main() {
 		data: {
 			firstName: 'Bobby',
 			lastName: 'White',
-			birthDate: new Date('2004-12-31'),
+			birthDate: toDbDate('2010-01-01'),
 		},
 	});
 
@@ -43,7 +88,7 @@ async function main() {
 		data: {
 			firstName: 'Nick',
 			lastName: 'Johnson',
-			birthDate: new Date('2006-03-17'),
+			birthDate: toDbDate('2010-01-01'),
 		},
 	});
 
