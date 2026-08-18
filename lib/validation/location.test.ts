@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LocationType } from '@/app/generated/prisma/enums';
+import { LocationType } from '@/generated/prisma/enums';
 import { locationFormText } from '@/lib/content/location-form-text';
 import { locationSchema } from '@/lib/validation/location';
 

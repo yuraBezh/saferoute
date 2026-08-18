@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { LocationType } from '@/app/generated/prisma/enums';
+import { LocationType } from '@/generated/prisma/enums';
 import { locationFormText } from '@/lib/content/location-form-text';
 
 export const US_STATE_CODES = [

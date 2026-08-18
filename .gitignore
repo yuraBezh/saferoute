@@ -34,7 +34,7 @@ npm-debug.log*
 next-env.d.ts
 
 # Generated Prisma Client, rebuilt on every install and deploy
-/app/generated/prisma
+/generated/prisma
 
 # AI tooling and IDE settings, personal to each developer
 .agents/

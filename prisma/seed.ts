@@ -1,9 +1,6 @@
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
-import {
-	GuardianRelationship,
-	LocationType,
-} from '@/app/generated/prisma/enums';
+import { GuardianRelationship, LocationType } from '@/generated/prisma/enums';
 import { toDbDate } from '@/lib/date';
 
 async function main() {
