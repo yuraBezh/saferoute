@@ -82,7 +82,11 @@ export const locationSchema = z.object({
 		.trim()
 		.min(1, { error: fields.city.required })
 		.max(100),
-	state: z.enum(US_STATE_CODES, { error: fields.state.invalid }),
+	state: z
+		.string({ error: fields.state.invalid })
+		.trim()
+		.transform((value) => value.toUpperCase())
+		.pipe(z.enum(US_STATE_CODES, { error: fields.state.invalid })),
 	postalCode: z
 		.string({ error: fields.postalCode.invalid })
 		.trim()
