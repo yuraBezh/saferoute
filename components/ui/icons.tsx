@@ -73,3 +73,52 @@ export function DeleteIcon() {
 		</svg>
 	);
 }
+
+export function HomeIcon() {
+	return (
+		<svg
+			aria-hidden="true"
+			viewBox="0 0 24 24"
+			className="size-5 fill-none stroke-current stroke-2"
+		>
+			<path
+				d="M3 11 12 4l9 7M5 10v10h14V10M9 20v-6h6v6"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+}
+
+export function SchoolIcon() {
+	return (
+		<svg
+			aria-hidden="true"
+			viewBox="0 0 24 24"
+			className="size-5 fill-none stroke-current stroke-2"
+		>
+			<path
+				d="M3 10 12 5l9 5-9 5-9-5ZM7 12.2V17c3 2 7 2 10 0v-4.8M21 10v6"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+}
+
+export function MapPinIcon() {
+	return (
+		<svg
+			aria-hidden="true"
+			viewBox="0 0 24 24"
+			className="size-5 fill-none stroke-current stroke-2"
+		>
+			<path
+				d="M12 21s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12Z"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<circle cx="12" cy="9" r="2.5" />
+		</svg>
+	);
+}
