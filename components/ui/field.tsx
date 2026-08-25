@@ -4,10 +4,17 @@ import { Input } from '@/components/ui/input';
 type FieldProps = ComponentProps<typeof Input> & {
 	id: string;
 	label: string;
+	optionalLabel?: string;
 	error?: string;
 };
 
-export function Field({ id, label, error, ...inputProps }: FieldProps) {
+export function Field({
+	id,
+	label,
+	optionalLabel,
+	error,
+	...inputProps
+}: FieldProps) {
 	const errorId = `${id}-error`;
 
 	return (
@@ -17,6 +24,11 @@ export function Field({ id, label, error, ...inputProps }: FieldProps) {
 				htmlFor={id}
 			>
 				{label}
+				{optionalLabel && (
+					<span className="ml-1 font-normal text-gray-500">
+						{optionalLabel}
+					</span>
+				)}
 			</label>
 			<Input
 				{...inputProps}

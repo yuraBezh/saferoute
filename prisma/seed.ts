@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
 import { GuardianRelationship, LocationType } from '@/generated/prisma/enums';
+import { STUB_CURRENT_USER_EMAIL } from '@/lib/auth/stub-user';
 import { toDbDate } from '@/lib/date';
 
 async function main() {
@@ -11,7 +12,7 @@ async function main() {
 
 	const mother = await prisma.user.create({
 		data: {
-			email: 'mother@example.com',
+			email: STUB_CURRENT_USER_EMAIL,
 			fullName: 'Anna Krasinski',
 			passwordHash: null,
 		},

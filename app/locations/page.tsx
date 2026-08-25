@@ -12,6 +12,7 @@ import { locationsText } from '@/lib/content/locations-text';
 import { formatAddress } from '@/lib/locations/format-address';
 import { prisma } from '@/lib/prisma';
 import { LocationsEmptyState } from './locations-empty-state';
+import { getCurrentUserId } from '@/lib/auth/current-user';
 
 const LOCATION_TYPE_ORDER = [
 	LocationType.HOME,
@@ -26,7 +27,11 @@ const LOCATION_TYPE_ICONS = {
 } as const;
 
 export default async function LocationsPage() {
+	const currentUserId = await getCurrentUserId();
 	const locations = await prisma.location.findMany({
+		where: {
+			OR: [{ ownerUserId: currentUserId }, { ownerUserId: null }],
+		},
 		orderBy: [{ type: 'asc' }, { name: 'asc' }],
 	});
 	const locationsByType = Object.groupBy(
@@ -94,7 +99,7 @@ export default async function LocationsPage() {
 													{formatAddress(location)}
 												</p>
 											</div>
-											{location.ownerUserId !== null && (
+											{location.ownerUserId === currentUserId && (
 												<Link
 													href={`/locations/${location.id}/edit`}
 													className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-950"

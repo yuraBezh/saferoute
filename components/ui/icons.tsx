@@ -26,6 +26,18 @@ export function ChevronRightIcon() {
 	);
 }
 
+export function ChevronDownIcon() {
+	return (
+		<svg
+			aria-hidden="true"
+			viewBox="0 0 10 20"
+			className="size-4 fill-none stroke-current stroke-[1.75]"
+		>
+			<path d="m6 8 4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+		</svg>
+	);
+}
+
 export function ArrowLeftIcon() {
 	return (
 		<svg
