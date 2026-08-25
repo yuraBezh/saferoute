@@ -34,6 +34,7 @@ export function LocationForm({
 	defaultValues,
 	submitLabel,
 	cancelHref,
+	footerAction,
 }: LocationFormProps) {
 	const initialState: LocationFormState = { message: '', errors: {} };
 	const [formState, action, isPending] = useActionState(
@@ -167,18 +168,21 @@ export function LocationForm({
 						</p>
 					)}
 
-					<div className="mt-6 flex justify-end gap-3">
-						{cancelHref && (
-							<Link
-								href={cancelHref}
-								className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
-							>
-								{cancel}
-							</Link>
-						)}
-						<Button type="submit" disabled={isPending}>
-							{submitLabel}
-						</Button>
+					<div className="mt-6 flex items-center justify-between gap-3">
+						<div>{footerAction}</div>
+						<div className="flex gap-3">
+							{cancelHref && (
+								<Link
+									href={cancelHref}
+									className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
+								>
+									{cancel}
+								</Link>
+							)}
+							<Button type="submit" disabled={isPending}>
+								{submitLabel}
+							</Button>
+						</div>
 					</div>
 				</div>
 			</form>

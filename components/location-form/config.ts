@@ -1,6 +1,7 @@
 import type { LocationFormState } from '@/app/locations/actions';
 import { LocationType } from '@/generated/prisma/enums';
 import { locationFormText } from '@/lib/content/location-form-text';
+import type { ReactNode } from 'react';
 
 export type LocationFormValues = {
 	type: LocationType | '';
@@ -20,6 +21,7 @@ export type LocationFormProps = {
 	defaultValues?: LocationFormValues;
 	submitLabel: string;
 	cancelHref?: string;
+	footerAction?: ReactNode;
 };
 
 const typeText = locationFormText.fields.type;
