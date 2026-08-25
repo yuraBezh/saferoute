@@ -12,8 +12,9 @@ const mocks = vi.hoisted(() => ({
 	findLocation: vi.fn(),
 	getCurrentUserId: vi.fn(),
 	editLocationAction: vi.fn(),
+	deleteLocationAction: vi.fn(),
 	locationForm: vi.fn((props: LocationFormProps) => props.footerAction),
-	deleteLocationButton: vi.fn(() => null),
+	deleteButton: vi.fn(() => null),
 	notFound: vi.fn(() => {
 		throw new Error('NEXT_NOT_FOUND');
 	}),
@@ -33,14 +34,15 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/app/locations/actions', () => ({
 	editLocationAction: mocks.editLocationAction,
+	deleteLocationAction: mocks.deleteLocationAction,
 }));
 
 vi.mock('@/components/location-form', () => ({
 	LocationForm: mocks.locationForm,
 }));
 
-vi.mock('./delete-location-button', () => ({
-	DeleteLocationButton: mocks.deleteLocationButton,
+vi.mock('@/components/ui/delete-button', () => ({
+	DeleteButton: mocks.deleteButton,
 }));
 
 import EditLocationPage from './page';
@@ -120,8 +122,12 @@ describe('EditLocationPage', () => {
 			submitLabel: editLocationFormText.submit,
 			cancelHref: '/locations',
 		});
-		expect(mocks.deleteLocationButton).toHaveBeenCalledWith(
-			{ locationId: location.id },
+		expect(mocks.deleteButton).toHaveBeenCalledWith(
+			{
+				itemId: location.id,
+				deleteAction: mocks.deleteLocationAction,
+				text: editLocationFormText.delete,
+			},
 			undefined,
 		);
 

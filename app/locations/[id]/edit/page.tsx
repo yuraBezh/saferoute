@@ -1,14 +1,17 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { editLocationAction } from '@/app/locations/actions';
+import {
+	deleteLocationAction,
+	editLocationAction,
+} from '@/app/locations/actions';
 import { LocationForm } from '@/components/location-form';
+import { DeleteButton } from '@/components/ui/delete-button';
 import { ArrowLeftIcon } from '@/components/ui/icons';
 import { PageTitle } from '@/components/ui/page-title';
 import { getCurrentUserId } from '@/lib/auth/current-user';
 import { editLocationFormText } from '@/lib/content/location-form-text';
 import { locationsText } from '@/lib/content/locations-text';
 import { prisma } from '@/lib/prisma';
-import { DeleteLocationButton } from './delete-location-button';
 
 export default async function EditLocationPage({
 	params,
@@ -55,7 +58,13 @@ export default async function EditLocationPage({
 					defaultValues={defaultValues}
 					submitLabel={editLocationFormText.submit}
 					cancelHref="/locations"
-					footerAction={<DeleteLocationButton locationId={location.id} />}
+					footerAction={
+						<DeleteButton
+							itemId={location.id}
+							deleteAction={deleteLocationAction}
+							text={editLocationFormText.delete}
+						/>
+					}
 				/>
 			</div>
 		</main>
