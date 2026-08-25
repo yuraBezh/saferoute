@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import {
-	EditIcon,
 	HomeIcon,
 	MapPinIcon,
 	PlusIcon,
 	SchoolIcon,
 } from '@/components/ui/icons';
+import { EditLink } from '@/components/ui/edit-link';
 import { PageTitle } from '@/components/ui/page-title';
 import { LocationType } from '@/generated/prisma/enums';
 import { locationsText } from '@/lib/content/locations-text';
@@ -100,13 +100,10 @@ export default async function LocationsPage() {
 												</p>
 											</div>
 											{location.ownerUserId === currentUserId && (
-												<Link
+												<EditLink
 													href={`/locations/${location.id}/edit`}
-													className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-950"
-												>
-													<EditIcon />
-													{locationsText.edit}
-												</Link>
+													label={locationsText.edit}
+												/>
 											)}
 										</div>
 									))}

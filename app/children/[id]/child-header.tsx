@@ -1,8 +1,10 @@
+import { deleteChildAction } from '@/app/children/actions';
+import { DeleteButton } from '@/components/ui/delete-button';
+import { EditLink } from '@/components/ui/edit-link';
 import { InitialsAvatar } from '@/components/ui/initials-avatar';
 import { getAge } from '@/lib/children/get-age';
+import childDetailsText from '@/lib/content/child-details-text';
 import { childrenText } from '@/lib/content/children-text';
-import { DeleteChildButton } from './delete-child-button';
-import { EditChildLink } from './edit-child-link';
 
 export function ChildHeader({
 	id,
@@ -16,6 +18,7 @@ export function ChildHeader({
 	birthDate: Date;
 }) {
 	const initials = `${firstName[0]}${lastName[0]}`.toUpperCase();
+	const { actions, deleteModal } = childDetailsText;
 
 	return (
 		<div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -32,8 +35,12 @@ export function ChildHeader({
 			</div>
 
 			<div className="flex gap-3">
-				<EditChildLink childId={id} />
-				<DeleteChildButton childId={id} />
+				<EditLink href={`/children/${id}/edit`} label={actions.edit} />
+				<DeleteButton
+					itemId={id}
+					deleteAction={deleteChildAction}
+					text={{ trigger: actions.delete, ...deleteModal }}
+				/>
 			</div>
 		</div>
 	);

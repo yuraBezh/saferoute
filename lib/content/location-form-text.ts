@@ -52,6 +52,18 @@ export const createLocationFormText = {
 } as const;
 
 export const editLocationFormText = {
+	title: 'Edit location',
+	description: (name: string) => `Update ${name}'s details.`,
+	submit: 'Save changes',
 	notFoundError: 'This location no longer exists or cannot be edited.',
 	saveError: 'Unable to update the location. Please try again.',
+	delete: {
+		trigger: 'Delete',
+		confirm: 'Delete this location?',
+		description:
+			'This action cannot be undone. This location will be permanently deleted.',
+		cancel: 'Cancel',
+		delete: 'Delete',
+		deleting: 'Deleting…',
+	},
 } as const;
