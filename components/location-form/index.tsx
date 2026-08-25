@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useState } from 'react';
+import { startTransition, useActionState, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { SelectField } from '@/components/ui/select-field';
@@ -46,6 +46,12 @@ export function LocationForm({
 		<div className="w-full">
 			<form
 				action={action}
+				onSubmit={(event) => {
+					event.preventDefault();
+					const formData = new FormData(event.currentTarget);
+
+					startTransition(() => action(formData));
+				}}
 				noValidate
 				className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
 			>

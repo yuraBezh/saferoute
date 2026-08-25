@@ -108,20 +108,28 @@ describe('LocationForm', () => {
 	it('keeps entered values and marks an invalid field after an action error', async () => {
 		mocks.locationFormAction.mockResolvedValue({
 			message: locationFormText.validationError,
-			errors: { state: [stateText.invalid] },
+			errors: { postalCode: [postalCodeText.invalid] },
 		});
 		const { container } = render(<LocationForm {...locationFormProps} />);
 		const name = screen.getByLabelText(nameText.label) as HTMLInputElement;
 		const state = screen.getByLabelText(stateText.label) as HTMLSelectElement;
+		const postalCode = screen.getByLabelText(
+			postalCodeText.label,
+		) as HTMLInputElement;
 
 		fireEvent.change(name, { target: { value: location.name } });
+		fireEvent.change(state, { target: { value: location.state } });
+		fireEvent.change(postalCode, { target: { value: location.postalCode } });
 		fireEvent.submit(container.querySelector('form')!);
 
-		await screen.findByText(stateText.invalid);
+		await screen.findByText(postalCodeText.invalid);
 		expect(name.value).toBe(location.name);
-		expect(state.value).toBe('');
-		expect(state.getAttribute('aria-invalid')).toBe('true');
-		expect(state.getAttribute('aria-describedby')).toBe('state-error');
+		expect(state.value).toBe(location.state);
+		expect(postalCode.value).toBe(location.postalCode);
+		expect(postalCode.getAttribute('aria-invalid')).toBe('true');
+		expect(postalCode.getAttribute('aria-describedby')).toBe(
+			'postalCode-error',
+		);
 	});
 
 	it('announces a general save error', async () => {
