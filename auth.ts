@@ -4,7 +4,7 @@ import { prismaAdapter } from '@/lib/auth/prisma-adapter';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
 	adapter: prismaAdapter(),
-	providers: [Google],
+	providers: [Google({ allowDangerousEmailAccountLinking: true })],
 	session: { strategy: 'database' },
 	pages: { signIn: '/signin' },
 });

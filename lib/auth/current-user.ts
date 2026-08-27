@@ -1,13 +1,9 @@
-import { prisma } from '@/lib/prisma';
-import { STUB_CURRENT_USER_EMAIL } from '@/lib/auth/stub-user';
+import { auth } from '@/auth';
 
-// TODO: Replace this development stub with the authenticated session user as
-// soon as Auth.js is in place. Every authorization check depends on this boundary.
 export async function getCurrentUserId(): Promise<string> {
-	const user = await prisma.user.findFirstOrThrow({
-		where: { email: STUB_CURRENT_USER_EMAIL },
-		select: { id: true },
-	});
+	const session = await auth();
 
-	return user.id;
+	if (!session?.user?.id) throw new Error('Not authenticated');
+
+	return session.user.id;
 }
