@@ -29,10 +29,13 @@ model User {
   passwordHash    String?
   phone           String?
   fullName        String
+  avatarUrl       String?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   guardedChildren ChildGuardian[]
   ownedLocations  Location[]
+  accounts        Account[]
+  sessions        Session[]
 }
 
 enum GuardianRelationship {
@@ -44,10 +47,10 @@ enum GuardianRelationship {
 
 model ChildGuardian {
   id                String               @id @default(cuid())
-  child             Child                @relation(fields: [childId], references: [id], onDelete: Cascade)
   childId           String
-  user              User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  child             Child                @relation(fields: [childId], references: [id], onDelete: Cascade)
   userId            String
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
   relationship      GuardianRelationship
   isPrimary         Boolean              @default(false)
   canBook           Boolean              @default(true)
@@ -77,11 +80,50 @@ model Location {
   longitude    Float?
   // TODO: Derive this from coordinates during geocoding before supporting locations outside Central Time.
   timezone     String       @default("America/Chicago")
-  owner        User?        @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   ownerUserId  String?
+  owner        User?        @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   isVerified   Boolean      @default(false)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
   @@index([ownerUserId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken String   @unique
+  expires      DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+  createdAt  DateTime @default(now())
+
+  @@unique([identifier, token])
 }

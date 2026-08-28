@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
 import { GuardianRelationship, LocationType } from '@/generated/prisma/enums';
-import { STUB_CURRENT_USER_EMAIL } from '@/lib/auth/stub-user';
 import { toDbDate } from '@/lib/date';
 
 async function main() {
@@ -10,13 +9,24 @@ async function main() {
 	await prisma.child.deleteMany();
 	await prisma.user.deleteMany();
 
+	const ownerEmail = process.env.SEED_OWNER_EMAIL ?? 'mother@example.com';
 	const mother = await prisma.user.create({
 		data: {
-			email: STUB_CURRENT_USER_EMAIL,
+			email: ownerEmail,
 			fullName: 'Anna Krasinski',
 			passwordHash: null,
 		},
 	});
+	const e2eSessionToken = process.env.E2E_SESSION_TOKEN;
+	if (e2eSessionToken) {
+		await prisma.session.create({
+			data: {
+				userId: mother.id,
+				sessionToken: e2eSessionToken,
+				expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+			},
+		});
+	}
 
 	const father = await prisma.user.create({
 		data: {
