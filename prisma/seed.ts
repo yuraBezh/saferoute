@@ -17,6 +17,16 @@ async function main() {
 			passwordHash: null,
 		},
 	});
+	const e2eSessionToken = process.env.E2E_SESSION_TOKEN;
+	if (e2eSessionToken) {
+		await prisma.session.create({
+			data: {
+				userId: mother.id,
+				sessionToken: e2eSessionToken,
+				expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+			},
+		});
+	}
 
 	const father = await prisma.user.create({
 		data: {

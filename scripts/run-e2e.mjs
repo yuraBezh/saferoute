@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { config } from 'dotenv';
 
 const isUiMode = process.argv.includes('--ui');
@@ -6,6 +7,10 @@ const isUiMode = process.argv.includes('--ui');
 config({ path: '.env.e2e', override: true, quiet: true });
 
 process.env.NEXT_DIST_DIR = '.next-e2e';
+process.env.AUTH_URL = 'http://127.0.0.1:3100';
+process.env.AUTH_SECRET = randomBytes(32).toString('base64url');
+process.env.SEED_OWNER_EMAIL = 'mother@example.com';
+process.env.E2E_SESSION_TOKEN = randomUUID();
 
 const databaseUrl = process.env.DATABASE_URL;
 
