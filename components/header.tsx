@@ -1,5 +1,11 @@
 import Link from 'next/link';
 import { auth, signOut } from '@/auth';
+import { headerText } from '@/lib/content/header-text';
+
+export async function signOutAction() {
+	'use server';
+	await signOut({ redirectTo: '/signin' });
+}
 
 export async function Header() {
 	const session = await auth();
@@ -7,7 +13,7 @@ export async function Header() {
 
 	if (!user) return null;
 
-	const initials = (user.name ?? user.email ?? '?')
+	const initials = (user.name ?? user.email ?? headerText.fallbackInitial)
 		.split(' ')
 		.map((part) => part[0])
 		.slice(0, 2)
@@ -18,15 +24,15 @@ export async function Header() {
 		<header className="border-b border-gray-200 bg-white">
 			<div className="mx-auto flex h-14 max-w-5xl items-center gap-6 px-4 sm:px-6">
 				<Link href="/children" className="text-sm font-semibold text-gray-950">
-					SafeRoute
+					{headerText.brand}
 				</Link>
 
 				<nav className="flex items-center gap-4 text-sm">
 					<Link href="/children" className="text-gray-600 hover:text-gray-950">
-						Children
+						{headerText.navigation.children}
 					</Link>
 					<Link href="/locations" className="text-gray-600 hover:text-gray-950">
-						Locations
+						{headerText.navigation.locations}
 					</Link>
 				</nav>
 
@@ -38,17 +44,12 @@ export async function Header() {
 						{user.name}
 					</span>
 
-					<form
-						action={async () => {
-							'use server';
-							await signOut({ redirectTo: '/signin' });
-						}}
-					>
+					<form action={signOutAction}>
 						<button
 							type="submit"
 							className="rounded-lg px-2.5 py-1.5 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-950"
 						>
-							Sign out
+							{headerText.signOut}
 						</button>
 					</form>
 				</div>
