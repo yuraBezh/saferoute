@@ -5,6 +5,23 @@ import nextTs from 'eslint-config-next/typescript';
 const eslintConfig = defineConfig([
 	...nextVitals,
 	...nextTs,
+	{
+		files: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}'],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					paths: [
+						{
+							name: '@/lib/prisma',
+							message:
+								'Use lib/data/* instead. Direct database access bypasses authorisation.',
+						},
+					],
+				},
+			],
+		},
+	},
 	// Override default ignores of eslint-config-next.
 	globalIgnores([
 		// Default ignores of eslint-config-next:

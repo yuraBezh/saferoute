@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { childSchema } from '@/lib/validation/child';
-import { prisma } from '@/lib/prisma';
 import {
 	childFormText,
 	createChildFormText,
@@ -11,6 +10,11 @@ import {
 } from '@/lib/content/child-form-text';
 import { RECORD_NOT_FOUND_ERROR_CODE } from '@/lib/prisma-error-codes';
 import { z } from 'zod';
+import {
+	createChildForCurrentUser,
+	deleteChildForCurrentUser,
+	updateChildForCurrentUser,
+} from '@/lib/data/children';
 
 export type ChildFormState = {
 	message: string;
@@ -29,14 +33,6 @@ function parseChildForm(formData: FormData) {
 	});
 }
 
-function toChildData(data: z.infer<typeof childSchema>) {
-	return {
-		firstName: data.firstName,
-		lastName: data.lastName,
-		birthDate: new Date(`${data.birthDate}T00:00:00.000Z`),
-	};
-}
-
 export async function createChildAction(
 	_prevState: ChildFormState,
 	formData: FormData,
@@ -51,9 +47,7 @@ export async function createChildAction(
 	}
 
 	try {
-		await prisma.child.create({
-			data: toChildData(parsed.data),
-		});
+		await createChildForCurrentUser(parsed.data);
 	} catch (err: unknown) {
 		console.error('Failed to create child:', err);
 
@@ -82,10 +76,7 @@ export async function editChildAction(
 	}
 
 	try {
-		await prisma.child.update({
-			where: { id },
-			data: toChildData(parsed.data),
-		});
+		await updateChildForCurrentUser(id, parsed.data);
 	} catch (err) {
 		if (
 			err &&
@@ -107,7 +98,7 @@ export async function editChildAction(
 
 export async function deleteChildAction(id: string): Promise<void> {
 	try {
-		await prisma.child.delete({ where: { id } });
+		await deleteChildForCurrentUser(id);
 	} catch (err) {
 		if (
 			!err ||

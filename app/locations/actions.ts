@@ -3,14 +3,17 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { getCurrentUserId } from '@/lib/auth/current-user';
 import {
 	createLocationFormText,
 	editLocationFormText,
 	locationFormText,
 } from '@/lib/content/location-form-text';
-import { prisma } from '@/lib/prisma';
 import { locationSchema } from '@/lib/validation/location';
+import {
+	createLocationForCurrentUser,
+	deleteLocationForCurrentUser,
+	updateLocationForCurrentUser,
+} from '@/lib/data/locations';
 
 export type LocationFormState = {
 	message: string;
@@ -45,11 +48,7 @@ export async function createLocationAction(
 	}
 
 	try {
-		const currentUserId = await getCurrentUserId();
-
-		await prisma.location.create({
-			data: { ...parsed.data, ownerUserId: currentUserId },
-		});
+		await createLocationForCurrentUser(parsed.data);
 	} catch (error) {
 		console.error('Failed to create location', error);
 		return { message: createLocationFormText.saveError, errors: {} };
@@ -74,11 +73,7 @@ export async function editLocationAction(
 	}
 
 	try {
-		const currentUserId = await getCurrentUserId();
-		const result = await prisma.location.updateMany({
-			where: { id, ownerUserId: currentUserId },
-			data: parsed.data,
-		});
+		const result = await updateLocationForCurrentUser(id, parsed.data);
 
 		if (result.count === 0) {
 			return { message: editLocationFormText.notFoundError, errors: {} };
@@ -93,11 +88,11 @@ export async function editLocationAction(
 }
 
 export async function deleteLocationAction(id: string): Promise<void> {
-	const currentUserId = await getCurrentUserId();
+	const result = await deleteLocationForCurrentUser(id);
 
-	await prisma.location.deleteMany({
-		where: { id, ownerUserId: currentUserId },
-	});
+	if (result.count === 0) {
+		throw new Error('Location not found or access denied');
+	}
 
 	revalidatePath('/locations');
 	redirect('/locations');

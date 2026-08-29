@@ -52,3 +52,5 @@ export const childSchema = z.object({
 			{ error: birthDateText.tooYoung },
 		),
 });
+
+export type ChildInput = z.infer<typeof childSchema>;
