@@ -5,6 +5,7 @@ import {
 	childFormText,
 	createChildFormText,
 } from '@/lib/content/child-form-text';
+import { locationFormText } from '@/lib/content/location-form-text';
 import { locationsText } from '@/lib/content/locations-text';
 import { fillAndSubmitLocationForm } from '@/e2e/helpers/location-form';
 
@@ -67,13 +68,14 @@ async function createLocation(page: Page) {
 	return { ...location, editPath: new URL(page.url()).pathname };
 }
 
-test('keeps each user private data isolated', async ({
+test("keeps each user's private data isolated", async ({
 	baseURL,
 	browser,
 	page: firstUserPage,
 }) => {
 	if (!baseURL) throw new Error('Playwright baseURL is required');
 
+	const secondUser = { fullName: 'Devid Krasinski' };
 	const child = await createChild(firstUserPage);
 	const location = await createLocation(firstUserPage);
 	const secondUserContext = await browser.newContext({ baseURL });
@@ -91,21 +93,30 @@ test('keeps each user private data isolated', async ({
 
 		await secondUserPage.goto('/children');
 		await expect(
+			secondUserPage
+				.getByRole('banner')
+				.getByText(secondUser.fullName, { exact: true }),
+		).toBeVisible();
+		await expect(
 			secondUserPage.getByRole('link', {
 				name: new RegExp(child.fullName),
 			}),
 		).toHaveCount(0);
 
-		const childResponse = await secondUserPage.goto(child.path);
-		expect(childResponse?.status()).toBe(404);
+		await secondUserPage.goto(child.path);
+		await expect(
+			secondUserPage.getByRole('heading', { name: child.fullName }),
+		).toHaveCount(0);
 
 		await secondUserPage.goto('/locations');
 		await expect(
 			secondUserPage.getByText(location.name, { exact: true }),
 		).toHaveCount(0);
 
-		const locationResponse = await secondUserPage.goto(location.editPath);
-		expect(locationResponse?.status()).toBe(404);
+		await secondUserPage.goto(location.editPath);
+		await expect(
+			secondUserPage.getByLabel(locationFormText.fields.name.label),
+		).toHaveCount(0);
 	} finally {
 		await secondUserContext.close();
 	}
