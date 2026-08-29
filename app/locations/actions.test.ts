@@ -7,26 +7,17 @@ import {
 } from '@/lib/content/location-form-text';
 
 const mocks = vi.hoisted(() => ({
-	createLocation: vi.fn(),
-	updateLocations: vi.fn(),
-	deleteLocations: vi.fn(),
-	getCurrentUserId: vi.fn(),
+	createLocationForCurrentUser: vi.fn(),
+	updateLocationForCurrentUser: vi.fn(),
+	deleteLocationForCurrentUser: vi.fn(),
 	revalidatePath: vi.fn(),
 	redirect: vi.fn(),
 }));
 
-vi.mock('@/lib/prisma', () => ({
-	prisma: {
-		location: {
-			create: mocks.createLocation,
-			updateMany: mocks.updateLocations,
-			deleteMany: mocks.deleteLocations,
-		},
-	},
-}));
-
-vi.mock('@/lib/auth/current-user', () => ({
-	getCurrentUserId: mocks.getCurrentUserId,
+vi.mock('@/lib/data/locations', () => ({
+	createLocationForCurrentUser: mocks.createLocationForCurrentUser,
+	updateLocationForCurrentUser: mocks.updateLocationForCurrentUser,
+	deleteLocationForCurrentUser: mocks.deleteLocationForCurrentUser,
 }));
 
 vi.mock('next/cache', () => ({
@@ -55,7 +46,6 @@ const location = {
 	state: 'il',
 	postalCode: '60601',
 };
-const currentUser = { id: 'user-1' };
 
 function createFormData(values: Record<string, string>) {
 	const formData = new FormData();
@@ -70,10 +60,9 @@ function createFormData(values: Record<string, string>) {
 describe('createLocationAction', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.getCurrentUserId.mockResolvedValue(currentUser.id);
 	});
 
-	it('returns field errors without authenticating or writing invalid data', async () => {
+	it('returns field errors without writing invalid data', async () => {
 		const result = await createLocationAction(
 			initialState,
 			createFormData({ ...location, state: '' }),
@@ -83,13 +72,12 @@ describe('createLocationAction', () => {
 		expect(result.errors?.state?.[0]).toBe(
 			locationFormText.fields.state.invalid,
 		);
-		expect(mocks.getCurrentUserId).not.toHaveBeenCalled();
-		expect(mocks.createLocation).not.toHaveBeenCalled();
+		expect(mocks.createLocationForCurrentUser).not.toHaveBeenCalled();
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
 
 	it('normalizes values, assigns the current owner, and redirects', async () => {
-		mocks.createLocation.mockResolvedValue({});
+		mocks.createLocationForCurrentUser.mockResolvedValue({});
 
 		await createLocationAction(
 			initialState,
@@ -100,17 +88,14 @@ describe('createLocationAction', () => {
 			}),
 		);
 
-		expect(mocks.createLocation).toHaveBeenCalledWith({
-			data: {
-				type: location.type,
-				name: location.name,
-				addressLine1: location.addressLine1,
-				addressLine2: undefined,
-				city: location.city,
-				state: location.state.toUpperCase(),
-				postalCode: location.postalCode,
-				ownerUserId: currentUser.id,
-			},
+		expect(mocks.createLocationForCurrentUser).toHaveBeenCalledWith({
+			type: location.type,
+			name: location.name,
+			addressLine1: location.addressLine1,
+			addressLine2: undefined,
+			city: location.city,
+			state: location.state.toUpperCase(),
+			postalCode: location.postalCode,
 		});
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/locations');
 		expect(mocks.redirect).toHaveBeenCalledWith('/locations');
@@ -121,7 +106,7 @@ describe('createLocationAction', () => {
 		const consoleError = vi
 			.spyOn(console, 'error')
 			.mockImplementation(() => undefined);
-		mocks.createLocation.mockRejectedValue(error);
+		mocks.createLocationForCurrentUser.mockRejectedValue(error);
 
 		const result = await createLocationAction(
 			initialState,
@@ -144,11 +129,10 @@ describe('createLocationAction', () => {
 describe('editLocationAction', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.getCurrentUserId.mockResolvedValue(currentUser.id);
 	});
 
-	it('updates only a location owned by the current user', async () => {
-		mocks.updateLocations.mockResolvedValue({ count: 1 });
+	it('updates validated location data and redirects', async () => {
+		mocks.updateLocationForCurrentUser.mockResolvedValue({ count: 1 });
 
 		await editLocationAction(
 			location.id,
@@ -156,9 +140,9 @@ describe('editLocationAction', () => {
 			createFormData(location),
 		);
 
-		expect(mocks.updateLocations).toHaveBeenCalledWith({
-			where: { id: location.id, ownerUserId: currentUser.id },
-			data: {
+		expect(mocks.updateLocationForCurrentUser).toHaveBeenCalledWith(
+			location.id,
+			{
 				type: location.type,
 				name: location.name,
 				addressLine1: location.addressLine1,
@@ -167,13 +151,13 @@ describe('editLocationAction', () => {
 				state: location.state.toUpperCase(),
 				postalCode: location.postalCode,
 			},
-		});
+		);
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/locations');
 		expect(mocks.redirect).toHaveBeenCalledWith('/locations');
 	});
 
 	it('returns a not-found message when no owned location is updated', async () => {
-		mocks.updateLocations.mockResolvedValue({ count: 0 });
+		mocks.updateLocationForCurrentUser.mockResolvedValue({ count: 0 });
 
 		const result = await editLocationAction(
 			location.id,
@@ -193,18 +177,25 @@ describe('editLocationAction', () => {
 describe('deleteLocationAction', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.getCurrentUserId.mockResolvedValue(currentUser.id);
 	});
 
-	it('deletes only a location owned by the current user', async () => {
-		mocks.deleteLocations.mockResolvedValue({ count: 1 });
+	it('deletes the location and redirects', async () => {
+		mocks.deleteLocationForCurrentUser.mockResolvedValue({ count: 1 });
 
 		await deleteLocationAction(location.id);
 
-		expect(mocks.deleteLocations).toHaveBeenCalledWith({
-			where: { id: location.id, ownerUserId: currentUser.id },
-		});
+		expect(mocks.deleteLocationForCurrentUser).toHaveBeenCalledWith(
+			location.id,
+		);
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/locations');
 		expect(mocks.redirect).toHaveBeenCalledWith('/locations');
+	});
+
+	it('does not redirect when no owned location was deleted', async () => {
+		mocks.deleteLocationForCurrentUser.mockResolvedValue({ count: 0 });
+
+		await expect(deleteLocationAction(location.id)).rejects.toThrow();
+		expect(mocks.revalidatePath).not.toHaveBeenCalled();
+		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
 });

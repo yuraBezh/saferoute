@@ -13,21 +13,17 @@ const {
 const { saveError } = createChildFormText;
 
 const mocks = vi.hoisted(() => ({
-	createChild: vi.fn(),
-	updateChild: vi.fn(),
-	deleteChild: vi.fn(),
+	createChildForCurrentUser: vi.fn(),
+	updateChildForCurrentUser: vi.fn(),
+	deleteChildForCurrentUser: vi.fn(),
 	revalidatePath: vi.fn(),
 	redirect: vi.fn(),
 }));
 
-vi.mock('@/lib/prisma', () => ({
-	prisma: {
-		child: {
-			create: mocks.createChild,
-			update: mocks.updateChild,
-			delete: mocks.deleteChild,
-		},
-	},
+vi.mock('@/lib/data/children', () => ({
+	createChildForCurrentUser: mocks.createChildForCurrentUser,
+	updateChildForCurrentUser: mocks.updateChildForCurrentUser,
+	deleteChildForCurrentUser: mocks.deleteChildForCurrentUser,
 }));
 
 vi.mock('next/cache', () => ({
@@ -74,12 +70,12 @@ describe('createChildAction', () => {
 
 		expect(result.message).toBe(childFormText.validationError);
 		expect(result.errors?.birthDate?.[0]).toBe(birthDateText.required);
-		expect(mocks.createChild).not.toHaveBeenCalled();
+		expect(mocks.createChildForCurrentUser).not.toHaveBeenCalled();
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
 
 	it('creates a child and redirects to the children list', async () => {
-		mocks.createChild.mockResolvedValue({});
+		mocks.createChildForCurrentUser.mockResolvedValue(undefined);
 		const birthDate = dateFromToday({ years: -6 });
 
 		await createChildAction(
@@ -91,12 +87,10 @@ describe('createChildAction', () => {
 			}),
 		);
 
-		expect(mocks.createChild).toHaveBeenCalledWith({
-			data: {
-				firstName: 'Miles',
-				lastName: 'Davis',
-				birthDate: new Date(`${birthDate}T00:00:00.000Z`),
-			},
+		expect(mocks.createChildForCurrentUser).toHaveBeenCalledWith({
+			firstName: 'Miles',
+			lastName: 'Davis',
+			birthDate,
 		});
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
 		expect(mocks.redirect).toHaveBeenCalledWith('/children');
@@ -106,7 +100,9 @@ describe('createChildAction', () => {
 		const consoleError = vi
 			.spyOn(console, 'error')
 			.mockImplementation(() => undefined);
-		mocks.createChild.mockRejectedValue(new Error('Database unavailable'));
+		mocks.createChildForCurrentUser.mockRejectedValue(
+			new Error('Database unavailable'),
+		);
 		const birthDate = dateFromToday({ years: -6 });
 
 		const result = await createChildAction(
@@ -150,7 +146,7 @@ describe('editChildAction', () => {
 		expect(result.errors?.birthDate?.[0]).toBe(
 			childFormText.fields.birthDate.required,
 		);
-		expect(mocks.updateChild).not.toHaveBeenCalled();
+		expect(mocks.updateChildForCurrentUser).not.toHaveBeenCalled();
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
 
@@ -161,7 +157,7 @@ describe('editChildAction', () => {
 			lastName: 'Davis',
 			birthDate: dateFromToday({ years: -6 }),
 		};
-		mocks.updateChild.mockResolvedValue({});
+		mocks.updateChildForCurrentUser.mockResolvedValue({});
 
 		await editChildAction(
 			child.id,
@@ -173,13 +169,10 @@ describe('editChildAction', () => {
 			}),
 		);
 
-		expect(mocks.updateChild).toHaveBeenCalledWith({
-			where: { id: child.id },
-			data: {
-				firstName: child.firstName,
-				lastName: child.lastName,
-				birthDate: new Date(`${child.birthDate}T00:00:00.000Z`),
-			},
+		expect(mocks.updateChildForCurrentUser).toHaveBeenCalledWith(child.id, {
+			firstName: child.firstName,
+			lastName: child.lastName,
+			birthDate: child.birthDate,
 		});
 		expect(mocks.revalidatePath).toHaveBeenNthCalledWith(1, '/children');
 		expect(mocks.revalidatePath).toHaveBeenNthCalledWith(
@@ -196,7 +189,7 @@ describe('editChildAction', () => {
 			lastName: 'Davis',
 			birthDate: dateFromToday({ years: -6 }),
 		};
-		mocks.updateChild.mockRejectedValue({
+		mocks.updateChildForCurrentUser.mockRejectedValue({
 			code: RECORD_NOT_FOUND_ERROR_CODE,
 		});
 
@@ -222,7 +215,7 @@ describe('editChildAction', () => {
 		const consoleError = vi
 			.spyOn(console, 'error')
 			.mockImplementation(() => undefined);
-		mocks.updateChild.mockRejectedValue(error);
+		mocks.updateChildForCurrentUser.mockRejectedValue(error);
 
 		const result = await editChildAction(
 			child.id,
@@ -245,20 +238,18 @@ describe('deleteChildAction', () => {
 
 	it('deletes the child and check children page revalidation', async () => {
 		const child = { id: 'child-1' };
-		mocks.deleteChild.mockResolvedValue({});
+		mocks.deleteChildForCurrentUser.mockResolvedValue({});
 
 		await deleteChildAction(child.id);
 
-		expect(mocks.deleteChild).toHaveBeenCalledWith({
-			where: { id: child.id },
-		});
+		expect(mocks.deleteChildForCurrentUser).toHaveBeenCalledWith(child.id);
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
 		expect(mocks.redirect).toHaveBeenCalledWith('/children');
 	});
 
 	it('treats an already deleted child as a successful deletion', async () => {
 		const child = { id: 'missing-child' };
-		mocks.deleteChild.mockRejectedValue({
+		mocks.deleteChildForCurrentUser.mockRejectedValue({
 			code: RECORD_NOT_FOUND_ERROR_CODE,
 		});
 
@@ -270,7 +261,7 @@ describe('deleteChildAction', () => {
 	it('throws DB deletion errors', async () => {
 		const child = { id: 'child-1' };
 		const error = new Error('Database unavailable');
-		mocks.deleteChild.mockRejectedValue(error);
+		mocks.deleteChildForCurrentUser.mockRejectedValue(error);
 
 		await expect(deleteChildAction(child.id)).rejects.toBe(error);
 		expect(mocks.revalidatePath).not.toHaveBeenCalled();
