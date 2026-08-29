@@ -9,8 +9,7 @@ import { locationsText } from '@/lib/content/locations-text';
 type LocationFormProps = ComponentProps<typeof LocationForm>;
 
 const mocks = vi.hoisted(() => ({
-	findLocation: vi.fn(),
-	getCurrentUserId: vi.fn(),
+	getOwnedLocation: vi.fn(),
 	editLocationAction: vi.fn(),
 	deleteLocationAction: vi.fn(),
 	locationForm: vi.fn((props: LocationFormProps) => props.footerAction),
@@ -20,12 +19,8 @@ const mocks = vi.hoisted(() => ({
 	}),
 }));
 
-vi.mock('@/lib/prisma', () => ({
-	prisma: { location: { findFirst: mocks.findLocation } },
-}));
-
-vi.mock('@/lib/auth/current-user', () => ({
-	getCurrentUserId: mocks.getCurrentUserId,
+vi.mock('@/lib/data/locations', () => ({
+	getOwnedLocation: mocks.getOwnedLocation,
 }));
 
 vi.mock('next/navigation', () => ({
@@ -71,22 +66,19 @@ function renderPage(id: string) {
 describe('EditLocationPage', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.getCurrentUserId.mockResolvedValue(currentUser.id);
 	});
 
-	it('queries the location by route id and current owner', async () => {
-		mocks.findLocation.mockResolvedValue(location);
+	it('loads the owned location by route id', async () => {
+		mocks.getOwnedLocation.mockResolvedValue(location);
 
 		await renderPage(location.id);
 
-		expect(mocks.findLocation).toHaveBeenCalledWith({
-			where: { id: location.id, ownerUserId: currentUser.id },
-		});
+		expect(mocks.getOwnedLocation).toHaveBeenCalledWith(location.id);
 	});
 
 	it('calls notFound when the location is missing or belongs to another user', async () => {
 		const missingLocation = { id: 'missing-location' };
-		mocks.findLocation.mockResolvedValue(null);
+		mocks.getOwnedLocation.mockResolvedValue(null);
 
 		await expect(renderPage(missingLocation.id)).rejects.toThrow(
 			'NEXT_NOT_FOUND',
@@ -95,7 +87,7 @@ describe('EditLocationPage', () => {
 	});
 
 	it('shows location context and passes editable values and actions to the form', async () => {
-		mocks.findLocation.mockResolvedValue(location);
+		mocks.getOwnedLocation.mockResolvedValue(location);
 
 		render(await renderPage(location.id));
 		const formProps = mocks.locationForm.mock.calls[0][0];

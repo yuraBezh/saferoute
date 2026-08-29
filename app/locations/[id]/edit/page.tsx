@@ -8,19 +8,15 @@ import { LocationForm } from '@/components/location-form';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { ArrowLeftIcon } from '@/components/ui/icons';
 import { PageTitle } from '@/components/ui/page-title';
-import { getCurrentUserId } from '@/lib/auth/current-user';
 import { editLocationFormText } from '@/lib/content/location-form-text';
 import { locationsText } from '@/lib/content/locations-text';
-import { prisma } from '@/lib/prisma';
+import { getOwnedLocation } from '@/lib/data/locations';
 
 export default async function EditLocationPage({
 	params,
 }: PageProps<'/locations/[id]/edit'>) {
 	const { id } = await params;
-	const currentUserId = await getCurrentUserId();
-	const location = await prisma.location.findFirst({
-		where: { id, ownerUserId: currentUserId },
-	});
+	const location = await getOwnedLocation(id);
 
 	if (!location) notFound();
 

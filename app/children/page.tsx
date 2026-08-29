@@ -1,17 +1,13 @@
 import { ChevronRightIcon, PlusIcon } from '@/components/ui/icons';
 import { InitialsAvatar } from '@/components/ui/initials-avatar';
 import { PageTitle } from '@/components/ui/page-title';
-import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { getAge } from '@/lib/children/get-age';
 import { childrenText } from '@/lib/content/children-text';
+import { getChildrenForCurrentUser } from '@/lib/data/children';
 
 export default async function Children() {
-	const children = await prisma.child.findMany({
-		include: {
-			_count: { select: { guardians: true } },
-		},
-	});
+	const children = await getChildrenForCurrentUser();
 	const { title, childCount, addChild, yearsOld, guardianCount } = childrenText;
 
 	return (

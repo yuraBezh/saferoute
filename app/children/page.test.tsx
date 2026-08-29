@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { childrenText } from '@/lib/content/children-text';
 
 const mocks = vi.hoisted(() => ({
-	findManyChildren: vi.fn(),
+	getChildrenForCurrentUser: vi.fn(),
 	getAge: vi.fn(),
 }));
 
-vi.mock('@/lib/prisma', () => ({
-	prisma: { child: { findMany: mocks.findManyChildren } },
+vi.mock('@/lib/data/children', () => ({
+	getChildrenForCurrentUser: mocks.getChildrenForCurrentUser,
 }));
 
 vi.mock('@/lib/children/get-age', () => ({
@@ -32,18 +32,16 @@ describe('Children', () => {
 		mocks.getAge.mockReturnValue(ageFixture);
 	});
 
-	it('queries children with their guardian count', async () => {
-		mocks.findManyChildren.mockResolvedValue([]);
+	it('loads children for the current user', async () => {
+		mocks.getChildrenForCurrentUser.mockResolvedValue([]);
 
 		await Children();
 
-		expect(mocks.findManyChildren).toHaveBeenCalledWith({
-			include: { _count: { select: { guardians: true } } },
-		});
+		expect(mocks.getChildrenForCurrentUser).toHaveBeenCalledOnce();
 	});
 
 	it('shows child details and links to the child page', async () => {
-		mocks.findManyChildren.mockResolvedValue([childFixture]);
+		mocks.getChildrenForCurrentUser.mockResolvedValue([childFixture]);
 
 		render(await Children());
 		const fullName = `${childFixture.firstName} ${childFixture.lastName}`;
@@ -64,7 +62,7 @@ describe('Children', () => {
 	});
 
 	it('uses plural labels for multiple children and guardians', async () => {
-		mocks.findManyChildren.mockResolvedValue([
+		mocks.getChildrenForCurrentUser.mockResolvedValue([
 			{ ...childFixture, _count: { guardians: 2 } },
 			{ ...childFixture, id: 'child-2', firstName: 'Bobby' },
 		]);

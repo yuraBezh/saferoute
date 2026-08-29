@@ -2,12 +2,12 @@ import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { LocationType } from '@/generated/prisma/enums';
 import {
-	createLocationFormText,
 	editLocationFormText,
 	locationFormText,
 } from '@/lib/content/location-form-text';
 import { locationsText } from '@/lib/content/locations-text';
 import { formatAddress } from '@/lib/locations/format-address';
+import { fillAndSubmitLocationForm } from '@/e2e/helpers/location-form';
 
 const {
 	fields: { type, name, addressLine1, addressLine2, city, state, postalCode },
@@ -37,16 +37,7 @@ function createLocationFixture(): LocationFixture {
 
 async function createLocation(page: Page, location: LocationFixture) {
 	await page.goto('/locations/new');
-	await page.getByLabel(type.label).selectOption(location.type);
-	await page.getByLabel(name.label).fill(location.name);
-	await page.getByLabel(addressLine1.label).fill(location.addressLine1);
-	await page.getByLabel(addressLine2.label).fill(location.addressLine2);
-	await page.getByLabel(city.label).fill(location.city);
-	await page.getByLabel(state.label).selectOption(location.state);
-	await page.getByLabel(postalCode.label).fill(location.postalCode);
-	await page
-		.getByRole('button', { name: createLocationFormText.submit })
-		.click();
+	await fillAndSubmitLocationForm(page, location);
 	await expect(page).toHaveURL('/locations');
 }
 

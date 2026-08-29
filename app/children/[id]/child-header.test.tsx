@@ -3,9 +3,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import childDetailsText from '@/lib/content/child-details-text';
 import { childrenText } from '@/lib/content/children-text';
 
-const mocks = vi.hoisted(() => ({ getAge: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+	getAge: vi.fn(),
+	deleteChildAction: vi.fn(),
+}));
 
 vi.mock('@/lib/children/get-age', () => ({ getAge: mocks.getAge }));
+
+vi.mock('@/app/children/actions', () => ({
+	deleteChildAction: mocks.deleteChildAction,
+}));
 
 import { ChildHeader } from './child-header';
 

@@ -10,9 +10,9 @@ import { PageTitle } from '@/components/ui/page-title';
 import { LocationType } from '@/generated/prisma/enums';
 import { locationsText } from '@/lib/content/locations-text';
 import { formatAddress } from '@/lib/locations/format-address';
-import { prisma } from '@/lib/prisma';
 import { LocationsEmptyState } from './locations-empty-state';
 import { getCurrentUserId } from '@/lib/auth/current-user';
+import { getLocationsForCurrentUser } from '@/lib/data/locations';
 
 const LOCATION_TYPE_ORDER = [
 	LocationType.HOME,
@@ -28,12 +28,7 @@ const LOCATION_TYPE_ICONS = {
 
 export default async function LocationsPage() {
 	const currentUserId = await getCurrentUserId();
-	const locations = await prisma.location.findMany({
-		where: {
-			OR: [{ ownerUserId: currentUserId }, { ownerUserId: null }],
-		},
-		orderBy: [{ type: 'asc' }, { name: 'asc' }],
-	});
+	const locations = await getLocationsForCurrentUser();
 	const locationsByType = Object.groupBy(
 		locations,
 		(location) => location.type,

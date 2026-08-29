@@ -64,9 +64,19 @@ For example:
 - Can this user book a trip for the child?
 - Can this user confirm a handoff?
 
-Having these rules in one place makes authorization easier to understand and maintain. However, it also means that mistakes in this model or its permission checks can affect access across the application.
-The database can still contain a child with no guardians.
-The schema itself does not prevent this, so the application must make sure that every child has at least one guardian.
+Having these rules in one place makes authorization easier to understand and maintain. 
+However, it also means that mistakes in this model or its permission checks can affect access across the application.
+
+The DB itself does not prevent a child from existing without a guardian.
+In the application, when a child is created, the code also creates a related ChildGuardian record in the same 
+transaction. So during normal application use, a child should always have a guardian.
+The important part is that this rule is enforced by the application code, not by the database. If someone inserts 
+data directly into the database, or another piece of code creates a child without creating a ChildGuardian record, 
+the database will allow it.
+To guarantee this rule at the database level, we would need something like a deferred constraint or a trigger. 
+This is needed because the child and guardian records are created with two separate SQL statements inside one transaction.
+This database-level protection has not been implemented yet.
+
 Relationship types are stored as an `enum`.
 This prevents invalid values from being saved in the database.
 The downside is that adding a new relationship type requires a database migration.

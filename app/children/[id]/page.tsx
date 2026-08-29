@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma';
 import childDetailsText from '@/lib/content/child-details-text';
 import { childrenText } from '@/lib/content/children-text';
 import Link from 'next/link';
@@ -6,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { ChildHeader } from './child-header';
 import { GuardiansList } from './guardians-list';
 import { ArrowLeftIcon } from '@/components/ui/icons';
+import { getChildForCurrentUser } from '@/lib/data/children';
 
 function formatDate(date: Date) {
 	return new Intl.DateTimeFormat('en-US', {
@@ -20,15 +20,7 @@ export default async function ChildDetailsPage({
 	params,
 }: PageProps<'/children/[id]'>) {
 	const { id } = await params;
-	const child = await prisma.child.findUnique({
-		where: { id },
-		include: {
-			guardians: {
-				include: { user: true },
-				orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }],
-			},
-		},
-	});
+	const child = await getChildForCurrentUser(id);
 
 	if (!child) notFound();
 

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import childDetailsText from '@/lib/content/child-details-text';
 
 const mocks = vi.hoisted(() => ({
-	findUniqueChild: vi.fn(),
+	getChildForCurrentUser: vi.fn(),
 	childHeader: vi.fn((props: unknown) => {
 		void props;
 		return null;
@@ -17,12 +17,8 @@ const mocks = vi.hoisted(() => ({
 	}),
 }));
 
-vi.mock('@/lib/prisma', () => ({
-	prisma: {
-		child: {
-			findUnique: mocks.findUniqueChild,
-		},
-	},
+vi.mock('@/lib/data/children', () => ({
+	getChildForCurrentUser: mocks.getChildForCurrentUser,
 }));
 
 vi.mock('next/navigation', () => ({
@@ -55,31 +51,23 @@ describe('ChildDetailsPage', () => {
 		vi.clearAllMocks();
 	});
 
-	it('queries the child and guardians by route id', async () => {
-		mocks.findUniqueChild.mockResolvedValue(childFixture);
+	it('loads the accessible child by route id', async () => {
+		mocks.getChildForCurrentUser.mockResolvedValue(childFixture);
 
 		await renderPage(childFixture.id);
 
-		expect(mocks.findUniqueChild).toHaveBeenCalledWith({
-			where: { id: childFixture.id },
-			include: {
-				guardians: {
-					include: { user: true },
-					orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }],
-				},
-			},
-		});
+		expect(mocks.getChildForCurrentUser).toHaveBeenCalledWith(childFixture.id);
 	});
 
 	it('calls notFound when the child does not exist', async () => {
-		mocks.findUniqueChild.mockResolvedValue(null);
+		mocks.getChildForCurrentUser.mockResolvedValue(null);
 
 		await expect(renderPage('missing-child')).rejects.toThrow('NEXT_NOT_FOUND');
 		expect(mocks.notFound).toHaveBeenCalledOnce();
 	});
 
 	it('shows formatted dates and passes child data to child components', async () => {
-		mocks.findUniqueChild.mockResolvedValue(childFixture);
+		mocks.getChildForCurrentUser.mockResolvedValue(childFixture);
 
 		render(await renderPage(childFixture.id));
 		const dateFormatter = new Intl.DateTimeFormat('en-US', {

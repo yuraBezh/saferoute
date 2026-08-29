@@ -1,15 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import { LocationType } from '@/generated/prisma/enums';
-import {
-	createLocationFormText,
-	locationFormText,
-} from '@/lib/content/location-form-text';
+import { locationFormText } from '@/lib/content/location-form-text';
 import { locationsText } from '@/lib/content/locations-text';
 import { formatAddress } from '@/lib/locations/format-address';
+import { fillAndSubmitLocationForm } from '@/e2e/helpers/location-form';
 
 const {
-	fields: { type, name, addressLine1, addressLine2, city, state, postalCode },
+	fields: { type, name, addressLine1, city, state, postalCode },
 } = locationFormText;
 
 test('creates a location and shows it in the correct group', async ({
@@ -27,17 +25,7 @@ test('creates a location and shows it in the correct group', async ({
 
 	await page.goto('/locations');
 	await page.getByRole('link', { name: locationsText.addLocation }).click();
-
-	await page.getByLabel(type.label).selectOption(location.type);
-	await page.getByLabel(name.label).fill(location.name);
-	await page.getByLabel(addressLine1.label).fill(location.addressLine1);
-	await page.getByLabel(addressLine2.label).fill(location.addressLine2);
-	await page.getByLabel(city.label).fill(location.city);
-	await page.getByLabel(state.label).selectOption(location.state);
-	await page.getByLabel(postalCode.label).fill(location.postalCode);
-	await page
-		.getByRole('button', { name: createLocationFormText.submit })
-		.click();
+	await fillAndSubmitLocationForm(page, location);
 
 	await expect(page).toHaveURL('/locations');
 	await expect(
@@ -64,15 +52,7 @@ test('shows validation errors and preserves entered location data', async ({
 	};
 
 	await page.goto('/locations/new');
-	await page.getByLabel(type.label).selectOption(location.type);
-	await page.getByLabel(name.label).fill(location.name);
-	await page.getByLabel(addressLine1.label).fill(location.addressLine1);
-	await page.getByLabel(city.label).fill(location.city);
-	await page.getByLabel(state.label).selectOption(location.state);
-	await page.getByLabel(postalCode.label).fill(location.postalCode);
-	await page
-		.getByRole('button', { name: createLocationFormText.submit })
-		.click();
+	await fillAndSubmitLocationForm(page, location);
 
 	await expect(page.getByText(postalCode.invalid)).toBeVisible();
 	await expect(page).toHaveURL('/locations/new');

@@ -1,11 +1,11 @@
 import { ChildForm } from '@/components/child-form';
 import { PageTitle } from '@/components/ui/page-title';
-import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { editChildAction } from '@/app/children/actions';
 import { editChildFormText } from '@/lib/content/child-form-text';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@/components/ui/icons';
+import { getChildForCurrentUser } from '@/lib/data/children';
 
 const { title, description, submit, submitting } = editChildFormText;
 
@@ -14,7 +14,7 @@ export default async function EditChildrenPage({
 }: PageProps<'/children/[id]/edit'>) {
 	const { id } = await params;
 
-	const child = await prisma.child.findUnique({ where: { id } });
+	const child = await getChildForCurrentUser(id);
 	if (!child) notFound();
 
 	const action = editChildAction.bind(null, id);
