@@ -11,6 +11,7 @@ process.env.AUTH_URL = 'http://127.0.0.1:3100';
 process.env.AUTH_SECRET = randomBytes(32).toString('base64url');
 process.env.SEED_OWNER_EMAIL = 'mother@example.com';
 process.env.E2E_SESSION_TOKEN = randomUUID();
+process.env.E2E_SECOND_SESSION_TOKEN = randomUUID();
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -50,7 +51,14 @@ function run(command, args) {
 	}
 }
 
-run('docker', ['compose', '-f', 'docker-compose.e2e.yml', 'up', '-d', '--wait']);
+run('docker', [
+	'compose',
+	'-f',
+	'docker-compose.e2e.yml',
+	'up',
+	'-d',
+	'--wait',
+]);
 run('npm', ['exec', '--', 'prisma', 'migrate', 'reset', '--force']);
 run('npm', ['run', 'db:seed']);
 run('npm', ['exec', '--', 'playwright', 'test', ...(isUiMode ? ['--ui'] : [])]);

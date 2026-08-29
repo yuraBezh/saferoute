@@ -35,6 +35,16 @@ async function main() {
 			passwordHash: null,
 		},
 	});
+	const secondE2eSessionToken = process.env.E2E_SECOND_SESSION_TOKEN;
+	if (secondE2eSessionToken) {
+		await prisma.session.create({
+			data: {
+				userId: father.id,
+				sessionToken: secondE2eSessionToken,
+				expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+			},
+		});
+	}
 
 	await prisma.location.createMany({
 		data: [
