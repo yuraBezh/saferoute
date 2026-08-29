@@ -23,7 +23,7 @@ async function main() {
 			data: {
 				userId: mother.id,
 				sessionToken: e2eSessionToken,
-				expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+				expires: new Date(Date.now() + 60 * 60 * 1000),
 			},
 		});
 	}
@@ -41,7 +41,7 @@ async function main() {
 			data: {
 				userId: father.id,
 				sessionToken: secondE2eSessionToken,
-				expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+				expires: new Date(Date.now() + 60 * 60 * 1000),
 			},
 		});
 	}
