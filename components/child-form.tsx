@@ -3,10 +3,9 @@
 import { useActionState, useState } from 'react';
 import { type ChildFormState } from '@/app/children/actions';
 import { childFormText } from '@/lib/content/child-form-text';
-import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
+import { FormActions } from '@/components/ui/form-actions';
 import { FormError } from '@/components/ui/form-error';
-import Link from 'next/link';
 
 const {
 	cancel,
@@ -93,19 +92,13 @@ export function ChildForm(props: ChildFormProps) {
 						required
 					/>
 					<FormError message={formState.message} />
-					<div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-						{cancelHref && (
-							<Link
-								href={cancelHref}
-								className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
-							>
-								{cancel}
-							</Link>
-						)}
-						<Button type="submit" disabled={isPending}>
-							{isPending ? submittingLabel : submitLabel}
-						</Button>
-					</div>
+					<FormActions
+						cancelHref={cancelHref}
+						cancelLabel={cancel}
+						isPending={isPending}
+						submitLabel={submitLabel}
+						submittingLabel={submittingLabel}
+					/>
 				</div>
 			</form>
 		</div>
