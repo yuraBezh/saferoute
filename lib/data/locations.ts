@@ -21,16 +21,6 @@ export async function getOwnedLocation(id: string) {
 	});
 }
 
-export async function requireOwnedLocation(id: string) {
-	const location = await getOwnedLocation(id);
-
-	if (!location) {
-		throw new Error('Location not found or access denied');
-	}
-
-	return location;
-}
-
 export async function createLocationForCurrentUser(data: LocationInput) {
 	const userId = await getCurrentUserId();
 
@@ -53,8 +43,6 @@ export async function updateLocationForCurrentUser(
 
 export async function deleteLocationForCurrentUser(id: string) {
 	const userId = await getCurrentUserId();
-
-	await requireOwnedLocation(id);
 
 	return prisma.location.deleteMany({
 		where: { id, ownerUserId: userId },

@@ -8,7 +8,6 @@ import {
 	createChildFormText,
 	editChildFormText,
 } from '@/lib/content/child-form-text';
-import { RECORD_NOT_FOUND_ERROR_CODE } from '@/lib/prisma-error-codes';
 import { z } from 'zod';
 import {
 	createChildForCurrentUser,
@@ -76,17 +75,12 @@ export async function editChildAction(
 	}
 
 	try {
-		await updateChildForCurrentUser(id, parsed.data);
-	} catch (err) {
-		if (
-			err &&
-			typeof err === 'object' &&
-			'code' in err &&
-			err.code === RECORD_NOT_FOUND_ERROR_CODE
-		) {
+		const result = await updateChildForCurrentUser(id, parsed.data);
+
+		if (result.count === 0) {
 			return { message: editChildFormText.notFoundError };
 		}
-
+	} catch (err) {
 		console.error('Failed to update child', err);
 		return { message: editChildFormText.saveError };
 	}
@@ -97,18 +91,7 @@ export async function editChildAction(
 }
 
 export async function deleteChildAction(id: string): Promise<void> {
-	try {
-		await deleteChildForCurrentUser(id);
-	} catch (err) {
-		if (
-			!err ||
-			typeof err !== 'object' ||
-			!('code' in err) ||
-			err.code !== RECORD_NOT_FOUND_ERROR_CODE
-		) {
-			throw err;
-		}
-	}
+	await deleteChildForCurrentUser(id);
 
 	revalidatePath('/children');
 	redirect('/children');

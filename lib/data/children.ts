@@ -57,27 +57,19 @@ export async function getChildForCurrentUser(id: string) {
 	});
 }
 
-export async function requireChildAccess(id: string) {
-	const child = await getChildForCurrentUser(id);
-
-	if (!child) {
-		throw new Error('Child not found or access denied');
-	}
-
-	return child;
-}
-
 export async function updateChildForCurrentUser(id: string, data: ChildInput) {
-	await requireChildAccess(id);
+	const userId = await getCurrentUserId();
 
-	return prisma.child.update({
-		where: { id },
+	return prisma.child.updateMany({
+		where: { id, guardians: { some: { userId } } },
 		data: toChildData(data),
 	});
 }
 
 export async function deleteChildForCurrentUser(id: string) {
-	await requireChildAccess(id);
+	const userId = await getCurrentUserId();
 
-	return prisma.child.delete({ where: { id } });
+	return prisma.child.deleteMany({
+		where: { id, guardians: { some: { userId } } },
+	});
 }

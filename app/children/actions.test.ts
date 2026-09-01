@@ -5,7 +5,6 @@ import {
 	createChildFormText,
 	editChildFormText,
 } from '@/lib/content/child-form-text';
-import { RECORD_NOT_FOUND_ERROR_CODE } from '@/lib/prisma-error-codes';
 
 const {
 	fields: { birthDate: birthDateText },
@@ -157,7 +156,7 @@ describe('editChildAction', () => {
 			lastName: 'Davis',
 			birthDate: dateFromToday({ years: -6 }),
 		};
-		mocks.updateChildForCurrentUser.mockResolvedValue({});
+		mocks.updateChildForCurrentUser.mockResolvedValue({ count: 1 });
 
 		await editChildAction(
 			child.id,
@@ -182,16 +181,14 @@ describe('editChildAction', () => {
 		expect(mocks.redirect).toHaveBeenCalledWith(`/children/${child.id}`);
 	});
 
-	it('returns a specific message when the child no longer exists', async () => {
+	it('returns the same message when no authorized child was updated', async () => {
 		const child = {
 			id: 'missing-child',
 			firstName: 'Miles',
 			lastName: 'Davis',
 			birthDate: dateFromToday({ years: -6 }),
 		};
-		mocks.updateChildForCurrentUser.mockRejectedValue({
-			code: RECORD_NOT_FOUND_ERROR_CODE,
-		});
+		mocks.updateChildForCurrentUser.mockResolvedValue({ count: 0 });
 
 		const result = await editChildAction(
 			child.id,
@@ -238,7 +235,7 @@ describe('deleteChildAction', () => {
 
 	it('deletes the child and check children page revalidation', async () => {
 		const child = { id: 'child-1' };
-		mocks.deleteChildForCurrentUser.mockResolvedValue({});
+		mocks.deleteChildForCurrentUser.mockResolvedValue({ count: 1 });
 
 		await deleteChildAction(child.id);
 
@@ -247,11 +244,9 @@ describe('deleteChildAction', () => {
 		expect(mocks.redirect).toHaveBeenCalledWith('/children');
 	});
 
-	it('treats an already deleted child as a successful deletion', async () => {
+	it('does not reveal why no child was deleted', async () => {
 		const child = { id: 'missing-child' };
-		mocks.deleteChildForCurrentUser.mockRejectedValue({
-			code: RECORD_NOT_FOUND_ERROR_CODE,
-		});
+		mocks.deleteChildForCurrentUser.mockResolvedValue({ count: 0 });
 
 		await expect(deleteChildAction(child.id)).resolves.toBeUndefined();
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
