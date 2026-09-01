@@ -1,9 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { startTransition, useActionState, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
+import { FormActions } from '@/components/ui/form-actions';
 import { FormError } from '@/components/ui/form-error';
 import { SelectField } from '@/components/ui/select-field';
 import {
@@ -154,22 +153,13 @@ export function LocationForm({
 						/>
 					</div>
 					<FormError message={formState.message} />
-					<div className="mt-6 flex items-center justify-between gap-3">
-						<div>{footerAction}</div>
-						<div className="flex gap-3">
-							{cancelHref && (
-								<Link
-									href={cancelHref}
-									className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
-								>
-									{cancel}
-								</Link>
-							)}
-							<Button type="submit" disabled={isPending}>
-								{submitLabel}
-							</Button>
-						</div>
-					</div>
+					<FormActions
+						cancelHref={cancelHref}
+						cancelLabel={cancel}
+						isPending={isPending}
+						secondaryAction={footerAction}
+						submitLabel={submitLabel}
+					/>
 				</div>
 			</form>
 		</div>
