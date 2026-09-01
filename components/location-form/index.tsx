@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { startTransition, useActionState, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
+import { FormError } from '@/components/ui/form-error';
 import { SelectField } from '@/components/ui/select-field';
 import {
 	EMPTY_VALUES,
@@ -77,7 +78,6 @@ export function LocationForm({
 							</option>
 						))}
 					</SelectField>
-
 					<Field
 						id="name"
 						label={nameText.label}
@@ -88,7 +88,6 @@ export function LocationForm({
 							setValues({ ...values, name: event.target.value })
 						}
 					/>
-
 					<Field
 						id="addressLine1"
 						label={addressLine1Text.label}
@@ -100,7 +99,6 @@ export function LocationForm({
 						}
 						autoComplete="address-line1"
 					/>
-
 					<Field
 						id="addressLine2"
 						label={addressLine2Text.label}
@@ -113,7 +111,6 @@ export function LocationForm({
 						}
 						autoComplete="address-line2"
 					/>
-
 					<div className="grid grid-cols-[2fr_1fr_1fr] gap-3">
 						<Field
 							id="city"
@@ -126,7 +123,6 @@ export function LocationForm({
 							}
 							autoComplete="address-level2"
 						/>
-
 						<SelectField
 							id="state"
 							label={stateText.label}
@@ -145,7 +141,6 @@ export function LocationForm({
 								</option>
 							))}
 						</SelectField>
-
 						<Field
 							id="postalCode"
 							label={postalCodeText.label}
@@ -158,16 +153,7 @@ export function LocationForm({
 							autoComplete="postal-code"
 						/>
 					</div>
-
-					{formState.message && (
-						<p
-							className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-							aria-live="polite"
-						>
-							{formState.message}
-						</p>
-					)}
-
+					<FormError message={formState.message} />
 					<div className="mt-6 flex items-center justify-between gap-3">
 						<div>{footerAction}</div>
 						<div className="flex gap-3">

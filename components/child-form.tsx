@@ -5,6 +5,7 @@ import { type ChildFormState } from '@/app/children/actions';
 import { childFormText } from '@/lib/content/child-form-text';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
+import { FormError } from '@/components/ui/form-error';
 import Link from 'next/link';
 
 const {
@@ -68,7 +69,6 @@ export function ChildForm(props: ChildFormProps) {
 						}
 						autoComplete="given-name"
 					/>
-
 					<Field
 						id="lastName"
 						label={lastNameText.label}
@@ -80,7 +80,6 @@ export function ChildForm(props: ChildFormProps) {
 						}
 						autoComplete="family-name"
 					/>
-
 					<Field
 						id="birthDate"
 						label={birthDateText.label}
@@ -93,16 +92,7 @@ export function ChildForm(props: ChildFormProps) {
 						}
 						required
 					/>
-
-					{formState.message && (
-						<p
-							className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-							aria-live="polite"
-						>
-							{formState.message}
-						</p>
-					)}
-
+					<FormError message={formState.message} />
 					<div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 						{cancelHref && (
 							<Link
