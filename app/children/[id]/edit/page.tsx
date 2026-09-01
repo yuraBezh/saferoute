@@ -3,8 +3,7 @@ import { PageTitle } from '@/components/ui/page-title';
 import { notFound } from 'next/navigation';
 import { editChildAction } from '@/app/children/actions';
 import { editChildFormText } from '@/lib/content/child-form-text';
-import Link from 'next/link';
-import { ArrowLeftIcon } from '@/components/ui/icons';
+import { BackLink } from '@/components/ui/back-link';
 import { getChildForCurrentUser } from '@/lib/data/children';
 
 const { title, description, submit, submitting } = editChildFormText;
@@ -29,13 +28,9 @@ export default async function EditChildrenPage({
 	return (
 		<main className="min-h-screen bg-white py-6 text-gray-950 sm:py-8">
 			<div className="mx-auto w-full max-w-xl px-4 sm:px-6">
-				<Link
-					href={`/children/${id}`}
-					className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-950"
-				>
-					<ArrowLeftIcon />
+				<BackLink href={`/children/${id}`} className="mb-5">
 					{fullName}
-				</Link>
+				</BackLink>
 
 				<header className="mb-5">
 					<PageTitle>{title}</PageTitle>
