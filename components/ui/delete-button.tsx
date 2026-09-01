@@ -3,6 +3,7 @@
 import { AlertDialog } from 'radix-ui';
 import { useState, useTransition } from 'react';
 import { DeleteIcon } from '@/components/ui/icons';
+import { Button } from '@/components/ui/button';
 
 export type DeleteButtonText = {
 	trigger: string;
@@ -36,13 +37,10 @@ export function DeleteButton({
 	return (
 		<AlertDialog.Root open={isOpen} onOpenChange={setIsOpen}>
 			<AlertDialog.Trigger asChild>
-				<button
-					type="button"
-					className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500"
-				>
+				<Button variant="danger">
 					<DeleteIcon />
 					{text.trigger}
-				</button>
+				</Button>
 			</AlertDialog.Trigger>
 
 			<AlertDialog.Portal>
@@ -56,25 +54,20 @@ export function DeleteButton({
 					</AlertDialog.Description>
 					<div className="mt-6 flex justify-end gap-3">
 						<AlertDialog.Cancel asChild>
-							<button
-								type="button"
-								disabled={isPending}
-								className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-							>
+							<Button disabled={isPending} variant="secondary">
 								{text.cancel}
-							</button>
+							</Button>
 						</AlertDialog.Cancel>
 
 						<AlertDialog.Action asChild>
-							<button
-								type="button"
+							<Button
 								disabled={isPending}
 								aria-busy={isPending}
 								onClick={handleDelete}
-								className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
+								variant="danger"
 							>
 								{isPending ? text.deleting : text.delete}
-							</button>
+							</Button>
 						</AlertDialog.Action>
 					</div>
 				</AlertDialog.Content>

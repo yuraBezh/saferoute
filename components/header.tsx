@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { signOut } from '@/auth';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { headerText } from '@/lib/content/header-text';
+import { Button } from '@/components/ui/button';
 
 export async function signOutAction() {
 	'use server';
@@ -45,12 +46,9 @@ export async function Header() {
 					</span>
 
 					<form action={signOutAction}>
-						<button
-							type="submit"
-							className="rounded-lg px-2.5 py-1.5 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-950"
-						>
+						<Button type="submit" variant="secondary">
 							{headerText.signOut}
-						</button>
+						</Button>
 					</form>
 				</div>
 			</div>
