@@ -1,12 +1,11 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
 	deleteLocationAction,
 	editLocationAction,
 } from '@/app/locations/actions';
 import { LocationForm } from '@/components/location-form';
+import { BackLink } from '@/components/ui/back-link';
 import { DeleteButton } from '@/components/ui/delete-button';
-import { ArrowLeftIcon } from '@/components/ui/icons';
 import { PageTitle } from '@/components/ui/page-title';
 import { editLocationFormText } from '@/lib/content/location-form-text';
 import { locationsText } from '@/lib/content/locations-text';
@@ -34,13 +33,9 @@ export default async function EditLocationPage({
 	return (
 		<main className="min-h-screen bg-white py-8 text-gray-950">
 			<div className="mx-auto w-full max-w-2xl px-6">
-				<Link
-					href="/locations"
-					className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-950"
-				>
-					<ArrowLeftIcon />
+				<BackLink href="/locations" className="mb-5">
 					{locationsText.title}
-				</Link>
+				</BackLink>
 
 				<header className="mb-5">
 					<PageTitle>{editLocationFormText.title}</PageTitle>
