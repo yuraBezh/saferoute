@@ -1,4 +1,5 @@
 import { signIn } from '@/auth';
+import { Button } from '@/components/ui/button';
 
 const signInAction = async () => {
 	'use server';
@@ -17,12 +18,9 @@ export default function SignInPage() {
 				</p>
 
 				<form className="mt-6" action={signInAction}>
-					<button
-						type="submit"
-						className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-800 shadow-sm transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-					>
+					<Button type="submit" variant="secondary" className="w-full">
 						Continue with Google
-					</button>
+					</Button>
 				</form>
 			</div>
 		</main>

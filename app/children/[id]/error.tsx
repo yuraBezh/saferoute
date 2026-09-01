@@ -2,6 +2,7 @@
 
 import childDetailsText from '@/lib/content/child-details-text';
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 
 interface ErrorProps {
 	error: Error & { digest?: string };
@@ -20,13 +21,9 @@ export default function Error({ error, reset }: ErrorProps) {
 					<h1 className="text-lg font-semibold text-red-900">
 						{childDetailsText.error.title}
 					</h1>
-					<button
-						type="button"
-						onClick={reset}
-						className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500"
-					>
+					<Button onClick={reset} variant="danger">
 						{childDetailsText.error.retry}
-					</button>
+					</Button>
 				</section>
 			</div>
 		</main>
