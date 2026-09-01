@@ -39,6 +39,7 @@ async function openChildEditor(page: Page, child: ChildFixture) {
 	const childId = await createOwnedChild(ownerEmail, child);
 
 	await page.goto(`/children/${childId}/edit`);
+	await page.waitForLoadState('networkidle');
 }
 
 test('prefills and updates a child', async ({ page }) => {
