@@ -3,13 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { headerText } from '@/lib/content/header-text';
 
 const mocks = vi.hoisted(() => ({
-	auth: vi.fn(),
+	getCurrentUser: vi.fn(),
 	signOut: vi.fn(),
 }));
 
 vi.mock('@/auth', () => ({
-	auth: mocks.auth,
 	signOut: mocks.signOut,
+}));
+vi.mock('@/lib/auth/current-user', () => ({
+	getCurrentUser: mocks.getCurrentUser,
 }));
 
 import { Header, signOutAction } from './header';
@@ -33,14 +35,14 @@ describe('Header', () => {
 	});
 
 	it('does not render navigation for an unauthenticated visitor', async () => {
-		mocks.auth.mockResolvedValue(null);
+		mocks.getCurrentUser.mockResolvedValue(null);
 
 		expect(await Header()).toBeNull();
-		expect(mocks.auth).toHaveBeenCalledOnce();
+		expect(mocks.getCurrentUser).toHaveBeenCalledOnce();
 	});
 
 	it('shows navigation and account details for the authenticated user', async () => {
-		mocks.auth.mockResolvedValue({ user: userFixture });
+		mocks.getCurrentUser.mockResolvedValue(userFixture);
 
 		render(await Header());
 		const initials = userFixture.name
@@ -72,7 +74,7 @@ describe('Header', () => {
 
 	it('uses the email for initials when the user has no name', async () => {
 		const userWithoutNameFixture = { ...userFixture, name: null };
-		mocks.auth.mockResolvedValue({ user: userWithoutNameFixture });
+		mocks.getCurrentUser.mockResolvedValue(userWithoutNameFixture);
 
 		render(await Header());
 
@@ -87,7 +89,7 @@ describe('Header', () => {
 			name: null,
 			email: null,
 		};
-		mocks.auth.mockResolvedValue({ user: anonymousUserFixture });
+		mocks.getCurrentUser.mockResolvedValue(anonymousUserFixture);
 
 		render(await Header());
 

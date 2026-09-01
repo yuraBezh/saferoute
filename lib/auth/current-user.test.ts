@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({ auth: vi.fn() }));
 
 vi.mock('@/auth', () => ({ auth: mocks.auth }));
 
-import { getCurrentUserId } from './current-user';
+import { getCurrentUser, getCurrentUserId } from './current-user';
 
 const userFixture = {
 	id: 'user-1',
@@ -12,9 +12,21 @@ const userFixture = {
 	email: 'ada@example.com',
 };
 
-describe('getCurrentUserId', () => {
+describe('current user', () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
+		mocks.auth.mockReset();
+	});
+
+	it('returns the authenticated user', async () => {
+		mocks.auth.mockResolvedValue({ user: userFixture });
+
+		await expect(getCurrentUser()).resolves.toBe(userFixture);
+	});
+
+	it('returns null when there is no authenticated user', async () => {
+		mocks.auth.mockResolvedValue(null);
+
+		await expect(getCurrentUser()).resolves.toBeNull();
 	});
 
 	it('returns the authenticated user id', async () => {
