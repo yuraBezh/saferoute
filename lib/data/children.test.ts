@@ -7,8 +7,8 @@ const mocks = vi.hoisted(() => ({
 	findManyChildren: vi.fn(),
 	findFirstChild: vi.fn(),
 	createChild: vi.fn(),
-	updateChild: vi.fn(),
-	deleteChild: vi.fn(),
+	updateChildren: vi.fn(),
+	deleteChildren: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/current-user', () => ({
@@ -21,8 +21,8 @@ vi.mock('@/lib/prisma', () => ({
 			findMany: mocks.findManyChildren,
 			findFirst: mocks.findFirstChild,
 			create: mocks.createChild,
-			update: mocks.updateChild,
-			delete: mocks.deleteChild,
+			updateMany: mocks.updateChildren,
+			deleteMany: mocks.deleteChildren,
 		},
 	},
 }));
@@ -104,14 +104,19 @@ describe('children data access', () => {
 		});
 	});
 
-	it('updates a child after confirming guardian access', async () => {
-		mocks.findFirstChild.mockResolvedValue(child);
-		mocks.updateChild.mockResolvedValue(child);
+	it('updates a child through an atomic guardian filter', async () => {
+		const updateResult = { count: 1 };
+		mocks.updateChildren.mockResolvedValue(updateResult);
 
-		await updateChildForCurrentUser(child.id, childInput);
+		await expect(updateChildForCurrentUser(child.id, childInput)).resolves.toBe(
+			updateResult,
+		);
 
-		expect(mocks.updateChild).toHaveBeenCalledWith({
-			where: { id: child.id },
+		expect(mocks.updateChildren).toHaveBeenCalledWith({
+			where: {
+				id: child.id,
+				guardians: { some: { userId: currentUser.id } },
+			},
 			data: {
 				firstName: childInput.firstName,
 				lastName: childInput.lastName,
@@ -120,23 +125,19 @@ describe('children data access', () => {
 		});
 	});
 
-	it('does not update a child without guardian access', async () => {
-		mocks.findFirstChild.mockResolvedValue(null);
+	it('deletes a child through an atomic guardian filter', async () => {
+		const deleteResult = { count: 1 };
+		mocks.deleteChildren.mockResolvedValue(deleteResult);
 
-		await expect(
-			updateChildForCurrentUser(child.id, childInput),
-		).rejects.toThrow();
-		expect(mocks.updateChild).not.toHaveBeenCalled();
-	});
+		await expect(deleteChildForCurrentUser(child.id)).resolves.toBe(
+			deleteResult,
+		);
 
-	it('deletes a child after confirming guardian access', async () => {
-		mocks.findFirstChild.mockResolvedValue(child);
-		mocks.deleteChild.mockResolvedValue(child);
-
-		await deleteChildForCurrentUser(child.id);
-
-		expect(mocks.deleteChild).toHaveBeenCalledWith({
-			where: { id: child.id },
+		expect(mocks.deleteChildren).toHaveBeenCalledWith({
+			where: {
+				id: child.id,
+				guardians: { some: { userId: currentUser.id } },
+			},
 		});
 	});
 });

@@ -104,24 +104,13 @@ describe('locations data access', () => {
 
 	it('deletes only a location owned by the current user', async () => {
 		const deleteResult = { count: 1 };
-		mocks.findFirstLocation.mockResolvedValue(location);
 		mocks.deleteLocations.mockResolvedValue(deleteResult);
 
 		await expect(deleteLocationForCurrentUser(location.id)).resolves.toBe(
 			deleteResult,
 		);
-		expect(mocks.findFirstLocation).toHaveBeenCalledWith({
-			where: { id: location.id, ownerUserId: currentUser.id },
-		});
 		expect(mocks.deleteLocations).toHaveBeenCalledWith({
 			where: { id: location.id, ownerUserId: currentUser.id },
 		});
-	});
-
-	it('does not delete a location without ownership', async () => {
-		mocks.findFirstLocation.mockResolvedValue(null);
-
-		await expect(deleteLocationForCurrentUser(location.id)).rejects.toThrow();
-		expect(mocks.deleteLocations).not.toHaveBeenCalled();
 	});
 });
