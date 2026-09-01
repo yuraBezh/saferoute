@@ -104,7 +104,8 @@ describe('locationSchema', () => {
 	});
 
 	it('accepts a missing addressLine2', () => {
-		const { addressLine2: _addressLine2, ...location } = validLocation;
+		const location: Partial<typeof validLocation> = { ...validLocation };
+		delete location.addressLine2;
 		const result = locationSchema.safeParse(location);
 
 		expect(result.success).toBe(true);
