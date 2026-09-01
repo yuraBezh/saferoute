@@ -27,8 +27,10 @@ const LOCATION_TYPE_ICONS = {
 } as const;
 
 export default async function LocationsPage() {
-	const currentUserId = await getCurrentUserId();
-	const locations = await getLocationsForCurrentUser();
+	const [currentUserId, locations] = await Promise.all([
+		getCurrentUserId(),
+		getLocationsForCurrentUser(),
+	]);
 	const locationsByType = Object.groupBy(
 		locations,
 		(location) => location.type,

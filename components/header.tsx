@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { auth, signOut } from '@/auth';
+import { signOut } from '@/auth';
+import { getCurrentUser } from '@/lib/auth/current-user';
 import { headerText } from '@/lib/content/header-text';
 
 export async function signOutAction() {
@@ -8,8 +9,7 @@ export async function signOutAction() {
 }
 
 export async function Header() {
-	const session = await auth();
-	const user = session?.user;
+	const user = await getCurrentUser();
 
 	if (!user) return null;
 

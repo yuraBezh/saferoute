@@ -1,9 +1,15 @@
 import { auth } from '@/auth';
+import { cache } from 'react';
+
+export const getCurrentUser = cache(async () => {
+	const session = await auth();
+	return session?.user ?? null;
+});
 
 export async function getCurrentUserId(): Promise<string> {
-	const session = await auth();
+	const user = await getCurrentUser();
 
-	if (!session?.user?.id) throw new Error('Not authenticated');
+	if (!user?.id) throw new Error('Not authenticated');
 
-	return session.user.id;
+	return user.id;
 }
