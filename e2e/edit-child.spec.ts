@@ -2,11 +2,15 @@ import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import {
 	childFormText,
-	createChildFormText,
 	editChildFormText,
 } from '@/lib/content/child-form-text';
-import childDetailsText from '@/lib/content/child-details-text';
 import { dateFromToday } from '@/test/date';
+import {
+	createOwnedChild,
+	requireE2EEnvironmentVariable,
+} from '@/e2e/helpers/database';
+
+const ownerEmail = requireE2EEnvironmentVariable('SEED_OWNER_EMAIL');
 
 const {
 	fields: { firstName, lastName, birthDate },
@@ -31,16 +35,10 @@ function formatDate(date: string) {
 	}).format(new Date(`${date}T00:00:00.000Z`));
 }
 
-async function createChild(page: Page, child: ChildFixture) {
-	await page.goto('/children/new');
-	await page.getByLabel(firstName.label).fill(child.firstName);
-	await page.getByLabel(lastName.label).fill(child.lastName);
-	await page.getByLabel(birthDate.label).fill(child.birthDate);
-	await page.getByRole('button', { name: createChildFormText.submit }).click();
+async function openChildEditor(page: Page, child: ChildFixture) {
+	const childId = await createOwnedChild(ownerEmail, child);
 
-	const fullName = `${child.firstName} ${child.lastName}`;
-	await page.getByRole('link', { name: new RegExp(fullName) }).click();
-	await page.getByRole('link', { name: childDetailsText.actions.edit }).click();
+	await page.goto(`/children/${childId}/edit`);
 }
 
 test('prefills and updates a child', async ({ page }) => {
@@ -54,7 +52,7 @@ test('prefills and updates a child', async ({ page }) => {
 		firstName: uniqueFirstName(),
 	};
 
-	await createChild(page, child);
+	await openChildEditor(page, child);
 
 	await expect(page.getByLabel(firstName.label)).toHaveValue(child.firstName);
 	await expect(page.getByLabel(lastName.label)).toHaveValue(child.lastName);
@@ -82,7 +80,7 @@ test('keeps child data when an edit is invalid', async ({ page }) => {
 	};
 	const invalidBirthDate = dateFromToday({ days: 1 });
 
-	await createChild(page, child);
+	await openChildEditor(page, child);
 	await page.getByLabel(birthDate.label).fill(invalidBirthDate);
 	await page.getByRole('button', { name: editChildFormText.submit }).click();
 

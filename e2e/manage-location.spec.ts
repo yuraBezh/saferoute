@@ -5,9 +5,13 @@ import {
 	editLocationFormText,
 	locationFormText,
 } from '@/lib/content/location-form-text';
-import { locationsText } from '@/lib/content/locations-text';
 import { formatAddress } from '@/lib/locations/format-address';
-import { fillAndSubmitLocationForm } from '@/e2e/helpers/location-form';
+import {
+	createOwnedLocation,
+	requireE2EEnvironmentVariable,
+} from '@/e2e/helpers/database';
+
+const ownerEmail = requireE2EEnvironmentVariable('SEED_OWNER_EMAIL');
 
 const {
 	fields: { type, name, addressLine1, addressLine2, city, state, postalCode },
@@ -35,21 +39,10 @@ function createLocationFixture(): LocationFixture {
 	};
 }
 
-async function createLocation(page: Page, location: LocationFixture) {
-	await page.goto('/locations/new');
-	await fillAndSubmitLocationForm(page, location);
-	await expect(page).toHaveURL('/locations');
-}
+async function openLocationEditor(page: Page, location: LocationFixture) {
+	const locationId = await createOwnedLocation(ownerEmail, location);
 
-async function openLocationEditor(page: Page, locationName: string) {
-	const locationRow = page
-		.getByText(locationName, { exact: true })
-		.locator('..')
-		.locator('..')
-		.locator('..');
-
-	await locationRow.getByRole('link', { name: locationsText.edit }).click();
-	await expect(page).toHaveURL(/\/locations\/[^/]+\/edit$/);
+	await page.goto(`/locations/${locationId}/edit`);
 }
 
 test('prefills and updates an owned location', async ({ page }) => {
@@ -60,8 +53,7 @@ test('prefills and updates an owned location', async ({ page }) => {
 		addressLine2: 'Suite 4',
 	};
 
-	await createLocation(page, location);
-	await openLocationEditor(page, location.name);
+	await openLocationEditor(page, location);
 
 	for (const [label, value] of [
 		[type.label, location.type],
@@ -93,8 +85,7 @@ test('deletes an owned location after confirmation', async ({ page }) => {
 	const location = createLocationFixture();
 	const { delete: deleteText } = editLocationFormText;
 
-	await createLocation(page, location);
-	await openLocationEditor(page, location.name);
+	await openLocationEditor(page, location);
 	await page.getByRole('button', { name: deleteText.trigger }).click();
 
 	const dialog = page.getByRole('alertdialog');

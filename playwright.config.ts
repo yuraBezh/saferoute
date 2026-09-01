@@ -10,7 +10,7 @@ if (!sessionToken) {
 export default defineConfig({
 	testDir: './e2e',
 	fullyParallel: false,
-	workers: 1,
+	workers: 2,
 	retries: 0,
 	reporter: 'list',
 	use: {

@@ -1,14 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
-import {
-	childFormText,
-	createChildFormText,
-} from '@/lib/content/child-form-text';
 import childDetailsText from '@/lib/content/child-details-text';
+import {
+	createOwnedChild,
+	requireE2EEnvironmentVariable,
+} from '@/e2e/helpers/database';
 
-const {
-	fields: { firstName, lastName, birthDate },
-} = childFormText;
+const ownerEmail = requireE2EEnvironmentVariable('SEED_OWNER_EMAIL');
 
 test('deletes a child after confirmation', async ({ page }) => {
 	const child = {
@@ -21,16 +19,10 @@ test('deletes a child after confirmation', async ({ page }) => {
 		message: 'This page could not be found.',
 	};
 	const fullName = `${child.firstName} ${child.lastName}`;
+	const childId = await createOwnedChild(ownerEmail, child);
+	const childPath = `/children/${childId}`;
 
-	await page.goto('/children/new');
-	await page.getByLabel(firstName.label).fill(child.firstName);
-	await page.getByLabel(lastName.label).fill(child.lastName);
-	await page.getByLabel(birthDate.label).fill(child.birthDate);
-	await page.getByRole('button', { name: createChildFormText.submit }).click();
-
-	await page.getByRole('link', { name: new RegExp(fullName) }).click();
-	await expect(page).toHaveURL(/\/children\/[^/]+$/);
-	const childUrl = page.url();
+	await page.goto(childPath);
 
 	await page
 		.getByRole('button', { name: childDetailsText.actions.delete })
@@ -53,7 +45,7 @@ test('deletes a child after confirmation', async ({ page }) => {
 		page.getByRole('link', { name: new RegExp(fullName) }),
 	).toHaveCount(0);
 
-	await page.goto(childUrl);
+	await page.goto(childPath);
 	await expect(
 		page.getByRole('heading', { name: notFoundPage.statusCode }),
 	).toBeVisible();
