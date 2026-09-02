@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { GuardianRelationship } from '@/generated/prisma/enums';
 import { childFormText } from '@/lib/content/child-form-text';
 
 const getTodayAsISO = () => new Date().toISOString().slice(0, 10);
@@ -54,3 +55,11 @@ export const childSchema = z.object({
 });
 
 export type ChildInput = z.infer<typeof childSchema>;
+
+export const createChildSchema = childSchema.extend({
+	relationship: z.enum(GuardianRelationship, {
+		error: childFormText.fields.relationship.invalid,
+	}),
+});
+
+export type CreateChildInput = z.infer<typeof createChildSchema>;

@@ -20,7 +20,18 @@ export const childFormText = {
 			tooYoung: 'Child must be at least 3 years old',
 			tooOld: 'Child must be younger than 18 years old',
 		},
+		relationship: {
+			label: 'Your relationship to the child',
+			invalid: 'Select your relationship to the child',
+		},
 	},
+} as const;
+
+export const guardianRelationshipLabels = {
+	MOTHER: 'Mother',
+	FATHER: 'Father',
+	GUARDIAN: 'Legal guardian',
+	OTHER: 'Other',
 } as const;
 
 export const createChildFormText = {

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { childSchema } from '@/lib/validation/child';
+import { childSchema, createChildSchema } from '@/lib/validation/child';
+import { GuardianRelationship } from '@/generated/prisma/enums';
 import { dateFromToday } from '@/test/date';
 import { childFormText } from '@/lib/content/child-form-text';
 
@@ -13,6 +14,31 @@ const validChild = () => ({
 	firstName: 'Miles',
 	lastName: 'Davis',
 	birthDate: dateFromToday({ years: -6 }),
+});
+
+describe('createChildSchema', () => {
+	it('accepts a supported guardian relationship', () => {
+		const child = {
+			...validChild(),
+			relationship: GuardianRelationship.FATHER,
+		};
+
+		expect(createChildSchema.safeParse(child)).toMatchObject({
+			success: true,
+			data: child,
+		});
+	});
+
+	it('rejects a missing guardian relationship', () => {
+		const result = createChildSchema.safeParse(validChild());
+
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.flatten().fieldErrors.relationship).toContain(
+				childFormText.fields.relationship.invalid,
+			);
+		}
+	});
 });
 
 describe('childSchema', () => {

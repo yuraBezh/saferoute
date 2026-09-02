@@ -6,12 +6,15 @@ import {
 	createChildFormText,
 } from '@/lib/content/child-form-text';
 import { ChildForm } from '@/components/child-form';
+import { GuardianRelationship } from '@/generated/prisma/enums';
+import { guardianRelationshipLabels } from '@/lib/content/child-form-text';
 
 const {
 	fields: {
 		firstName: firstNameText,
 		lastName: lastNameText,
 		birthDate: birthDateText,
+		relationship: relationshipText,
 	},
 } = childFormText;
 const { saveError, submit, submitting } = createChildFormText;
@@ -42,6 +45,35 @@ describe('ChildForm', () => {
 		).toBeDefined();
 		expect(screen.getByLabelText(birthDateText.label)).toBeDefined();
 		expect(screen.getByRole('button', { name: submit })).toBeDefined();
+		expect(
+			screen.queryByRole('combobox', { name: relationshipText.label }),
+		).toBeNull();
+	});
+
+	it('shows relationship options and its validation error when requested', async () => {
+		mocks.childFormAction.mockResolvedValue({
+			message: childFormText.validationError,
+			errors: { relationship: [relationshipText.invalid] },
+		});
+		const { container } = render(
+			<ChildForm {...childFormProps} showRelationship />,
+		);
+		const relationship = screen.getByRole('combobox', {
+			name: relationshipText.label,
+		});
+
+		for (const value of Object.values(GuardianRelationship)) {
+			expect(
+				screen.getByRole('option', {
+					name: guardianRelationshipLabels[value],
+				}),
+			).toBeDefined();
+		}
+
+		fireEvent.submit(container.querySelector('form')!);
+
+		expect(await screen.findByText(relationshipText.invalid)).toBeDefined();
+		expect(relationship.getAttribute('aria-invalid')).toBe('true');
 	});
 
 	it('prefills editable values and links cancel to the provided page', () => {

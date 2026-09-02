@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dateFromToday } from '@/test/date';
+import { GuardianRelationship } from '@/generated/prisma/enums';
 import {
 	childFormText,
 	createChildFormText,
@@ -7,7 +8,7 @@ import {
 } from '@/lib/content/child-form-text';
 
 const {
-	fields: { birthDate: birthDateText },
+	fields: { birthDate: birthDateText, relationship: relationshipText },
 } = childFormText;
 const { saveError } = createChildFormText;
 
@@ -73,6 +74,20 @@ describe('createChildAction', () => {
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
 
+	it('requires a relationship when creating a child', async () => {
+		const result = await createChildAction(
+			initialState,
+			createFormData({
+				firstName: 'Miles',
+				lastName: 'Davis',
+				birthDate: dateFromToday({ years: -6 }),
+			}),
+		);
+
+		expect(result.errors?.relationship?.[0]).toBe(relationshipText.invalid);
+		expect(mocks.createChildForCurrentUser).not.toHaveBeenCalled();
+	});
+
 	it('creates a child and redirects to the children list', async () => {
 		mocks.createChildForCurrentUser.mockResolvedValue(undefined);
 		const birthDate = dateFromToday({ years: -6 });
@@ -83,6 +98,7 @@ describe('createChildAction', () => {
 				firstName: '  Miles  ',
 				lastName: '  Davis  ',
 				birthDate,
+				relationship: GuardianRelationship.MOTHER,
 			}),
 		);
 
@@ -90,6 +106,7 @@ describe('createChildAction', () => {
 			firstName: 'Miles',
 			lastName: 'Davis',
 			birthDate,
+			relationship: GuardianRelationship.MOTHER,
 		});
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
 		expect(mocks.redirect).toHaveBeenCalledWith('/children');
@@ -110,6 +127,7 @@ describe('createChildAction', () => {
 				firstName: 'Miles',
 				lastName: 'Davis',
 				birthDate,
+				relationship: GuardianRelationship.GUARDIAN,
 			}),
 		);
 
