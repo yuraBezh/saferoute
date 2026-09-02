@@ -1,20 +1,33 @@
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
-import { GuardianRelationship, LocationType } from '@/generated/prisma/enums';
+import {
+	CaregiverStatus,
+	GuardianRelationship,
+	LocationType,
+	UserRole,
+	VerificationDocumentStatus,
+	VerificationDocumentType,
+} from '@/generated/prisma/enums';
 import { toDbDate } from '@/lib/date';
 
 async function main() {
-	await prisma.location.deleteMany();
-	await prisma.childGuardian.deleteMany();
-	await prisma.child.deleteMany();
-	await prisma.user.deleteMany();
+	await prisma.$transaction([
+		prisma.verificationDocument.deleteMany(),
+		prisma.caregiverProfile.deleteMany(),
+		prisma.session.deleteMany(),
+		prisma.account.deleteMany(),
+		prisma.location.deleteMany(),
+		prisma.childGuardian.deleteMany(),
+		prisma.child.deleteMany(),
+		prisma.user.deleteMany(),
+		prisma.verificationToken.deleteMany(),
+	]);
 
 	const ownerEmail = process.env.SEED_OWNER_EMAIL ?? 'mother@example.com';
 	const mother = await prisma.user.create({
 		data: {
 			email: ownerEmail,
 			fullName: 'Anna Krasinski',
-			passwordHash: null,
 		},
 	});
 	const e2eSessionToken = process.env.E2E_SESSION_TOKEN;
@@ -32,7 +45,6 @@ async function main() {
 		data: {
 			email: 'father@example.com',
 			fullName: 'Devid Krasinski',
-			passwordHash: null,
 		},
 	});
 	const secondE2eSessionToken = process.env.E2E_SECOND_SESSION_TOKEN;
@@ -45,6 +57,74 @@ async function main() {
 			},
 		});
 	}
+
+	const admin = await prisma.user.create({
+		data: {
+			email: 'admin@example.com',
+			fullName: 'Alex Morgan',
+			roles: [UserRole.ADMIN],
+		},
+	});
+
+	await prisma.user.create({
+		data: {
+			email: 'caregiver@example.com',
+			fullName: 'Maria Garcia',
+			roles: [UserRole.CAREGIVER],
+			caregiverProfile: {
+				create: {
+					bio: 'Experienced caregiver and safe driver.',
+					hourlyRateCents: 2800,
+					vehicleMake: 'Toyota',
+					vehicleModel: 'Sienna',
+					vehicleYear: 2022,
+					vehicleColor: 'Silver',
+					licensePlate: 'SR-CARE',
+					status: CaregiverStatus.VERIFIED,
+					verificationDocuments: {
+						create: [
+							{
+								type: VerificationDocumentType.DRIVERS_LICENSE,
+								storageKey: 'caregivers/maria/drivers-license.pdf',
+								status: VerificationDocumentStatus.APPROVED,
+								reviewedBy: { connect: { id: admin.id } },
+								reviewedAt: new Date('2026-08-15T14:00:00.000Z'),
+								expiresAt: new Date('2029-05-31T23:59:59.999Z'),
+							},
+							{
+								type: VerificationDocumentType.INSURANCE,
+								storageKey: 'caregivers/maria/insurance.pdf',
+								status: VerificationDocumentStatus.APPROVED,
+								reviewedBy: { connect: { id: admin.id } },
+								reviewedAt: new Date('2026-08-16T14:00:00.000Z'),
+								expiresAt: new Date('2027-08-31T23:59:59.999Z'),
+							},
+						],
+					},
+				},
+			},
+		},
+	});
+
+	await prisma.user.create({
+		data: {
+			email: 'parent-caregiver@example.com',
+			fullName: 'Jordan Lee',
+			roles: [UserRole.PARENT, UserRole.CAREGIVER],
+			caregiverProfile: {
+				create: {
+					bio: 'Parent and part-time caregiver.',
+					hourlyRateCents: 2400,
+					vehicleMake: 'Honda',
+					vehicleModel: 'Odyssey',
+					vehicleYear: 2021,
+					vehicleColor: 'Blue',
+					licensePlate: 'SR-DUAL',
+					status: CaregiverStatus.VERIFIED,
+				},
+			},
+		},
+	});
 
 	await prisma.location.createMany({
 		data: [
@@ -101,7 +181,7 @@ async function main() {
 		data: {
 			firstName: 'Bobby',
 			lastName: 'White',
-			birthDate: toDbDate('2010-01-01'),
+			birthDate: toDbDate('2012-12-31'),
 		},
 	});
 
@@ -109,7 +189,7 @@ async function main() {
 		data: {
 			firstName: 'Nick',
 			lastName: 'Johnson',
-			birthDate: toDbDate('2010-01-01'),
+			birthDate: toDbDate('2009-03-17'),
 		},
 	});
 
