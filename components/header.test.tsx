@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { headerText } from '@/lib/content/header-text';
+import { UserRole } from '@/generated/prisma/enums';
 
 const mocks = vi.hoisted(() => ({
 	getCurrentUser: vi.fn(),
@@ -21,9 +22,11 @@ const userFixture = {
 	name: 'Ada Lovelace',
 	email: 'ada@example.com',
 	image: null,
+	roles: [UserRole.PARENT],
 };
 
 const routesFixture = {
+	home: '/',
 	children: '/children',
 	locations: '/locations',
 	signIn: '/signin',
@@ -54,22 +57,16 @@ describe('Header', () => {
 
 		expect(screen.getByText(initials)).toBeDefined();
 		expect(screen.getByText(userFixture.name)).toBeDefined();
+		expect(screen.getByRole('link', { name: headerText.brand }).getAttribute('href')).toBe(
+			routesFixture.home,
+		);
 		expect(
-			screen.getByRole('link', { name: headerText.brand }).getAttribute('href'),
+			screen.getByRole('link', { name: headerText.navigation.children }).getAttribute('href'),
 		).toBe(routesFixture.children);
 		expect(
-			screen
-				.getByRole('link', { name: headerText.navigation.children })
-				.getAttribute('href'),
-		).toBe(routesFixture.children);
-		expect(
-			screen
-				.getByRole('link', { name: headerText.navigation.locations })
-				.getAttribute('href'),
+			screen.getByRole('link', { name: headerText.navigation.locations }).getAttribute('href'),
 		).toBe(routesFixture.locations);
-		expect(
-			screen.getByRole('button', { name: headerText.signOut }),
-		).toBeDefined();
+		expect(screen.getByRole('button', { name: headerText.signOut })).toBeDefined();
 	});
 
 	it('uses the email for initials when the user has no name', async () => {
@@ -78,9 +75,34 @@ describe('Header', () => {
 
 		render(await Header());
 
-		expect(
-			screen.getByText(userWithoutNameFixture.email[0].toUpperCase()),
-		).toBeDefined();
+		expect(screen.getByText(userWithoutNameFixture.email[0].toUpperCase())).toBeDefined();
+	});
+
+	it('shows only caregiver navigation to a caregiver-only user', async () => {
+		mocks.getCurrentUser.mockResolvedValue({
+			...userFixture,
+			roles: [UserRole.CAREGIVER],
+		});
+
+		render(await Header());
+
+		expect(screen.getByRole('link', { name: headerText.navigation.assignments })).toBeDefined();
+		expect(screen.getByRole('link', { name: headerText.navigation.profile })).toBeDefined();
+		expect(screen.queryByRole('link', { name: headerText.navigation.children })).toBeNull();
+		expect(screen.queryByRole('link', { name: headerText.navigation.locations })).toBeNull();
+	});
+
+	it('shows parent and caregiver navigation to a dual-role user', async () => {
+		mocks.getCurrentUser.mockResolvedValue({
+			...userFixture,
+			roles: [UserRole.PARENT, UserRole.CAREGIVER],
+		});
+
+		render(await Header());
+
+		for (const label of Object.values(headerText.navigation)) {
+			expect(screen.getByRole('link', { name: label })).toBeDefined();
+		}
 	});
 
 	it('uses a fallback initial when the user has no name or email', async () => {

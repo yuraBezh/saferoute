@@ -50,10 +50,9 @@ function getE2EDatabaseUrl() {
 }
 
 async function getOwnerId(client: Client, ownerEmail: string) {
-	const result = await client.query<{ id: string }>(
-		'SELECT "id" FROM "User" WHERE "email" = $1',
-		[ownerEmail],
-	);
+	const result = await client.query<{ id: string }>('SELECT "id" FROM "User" WHERE "email" = $1', [
+		ownerEmail,
+	]);
 
 	if (result.rowCount !== 1) {
 		throw new Error(`E2E owner not found: ${ownerEmail}`);
@@ -62,10 +61,7 @@ async function getOwnerId(client: Client, ownerEmail: string) {
 	return result.rows[0].id;
 }
 
-export async function createOwnedChild(
-	ownerEmail: string,
-	child: ChildFixture,
-) {
+export async function createOwnedChild(ownerEmail: string, child: ChildFixture) {
 	const client = new Client({ connectionString: getE2EDatabaseUrl() });
 	const childId = randomUUID();
 
@@ -98,10 +94,7 @@ export async function createOwnedChild(
 	}
 }
 
-export async function createOwnedLocation(
-	ownerEmail: string,
-	location: LocationFixture,
-) {
+export async function createOwnedLocation(ownerEmail: string, location: LocationFixture) {
 	const client = new Client({ connectionString: getE2EDatabaseUrl() });
 	const locationId = randomUUID();
 

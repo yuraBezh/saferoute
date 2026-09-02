@@ -23,19 +23,28 @@ model Child {
 }
 
 model User {
-  id              String          @id @default(cuid())
-  email           String          @unique
-  emailVerifiedAt DateTime?
-  passwordHash    String?
-  phone           String?
-  fullName        String
-  avatarUrl       String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  guardedChildren ChildGuardian[]
-  ownedLocations  Location[]
-  accounts        Account[]
-  sessions        Session[]
+  id                            String                 @id @default(cuid())
+  email                         String                 @unique
+  emailVerifiedAt               DateTime?
+  passwordHash                  String?
+  phone                         String?
+  fullName                      String
+  avatarUrl                     String?
+  roles                         UserRole[]             @default([PARENT])
+  createdAt                     DateTime               @default(now())
+  updatedAt                     DateTime               @updatedAt
+  guardedChildren               ChildGuardian[]
+  ownedLocations                Location[]
+  accounts                      Account[]
+  sessions                      Session[]
+  caregiverProfile              CaregiverProfile?
+  reviewedVerificationDocuments VerificationDocument[] @relation("VerificationDocumentReviewer")
+}
+
+enum UserRole {
+  PARENT
+  CAREGIVER
+  ADMIN
 }
 
 enum GuardianRelationship {
@@ -126,4 +135,58 @@ model VerificationToken {
   createdAt  DateTime @default(now())
 
   @@unique([identifier, token])
+}
+
+enum CaregiverStatus {
+  PENDING_VERIFICATION
+  VERIFIED
+  SUSPENDED
+}
+
+model CaregiverProfile {
+  id                    String                 @id @default(cuid())
+  userId                String                 @unique
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio                   String?
+  hourlyRateCents       Int
+  vehicleMake           String?
+  vehicleModel          String?
+  vehicleYear           Int?
+  vehicleColor          String?
+  licensePlate          String?
+  status                CaregiverStatus        @default(PENDING_VERIFICATION)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  verificationDocuments VerificationDocument[]
+
+  @@index([status])
+}
+
+enum VerificationDocumentType {
+  DRIVERS_LICENSE
+  BACKGROUND_CHECK
+  INSURANCE
+}
+
+enum VerificationDocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model VerificationDocument {
+  id                 String                     @id @default(cuid())
+  caregiverProfileId String
+  caregiverProfile   CaregiverProfile           @relation(fields: [caregiverProfileId], references: [id], onDelete: Cascade)
+  type               VerificationDocumentType
+  storageKey         String
+  status             VerificationDocumentStatus @default(PENDING)
+  reviewedByUserId   String?
+  reviewedBy         User?                      @relation("VerificationDocumentReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  reviewedAt         DateTime?
+  expiresAt          DateTime?
+  createdAt          DateTime                   @default(now())
+
+  @@index([caregiverProfileId])
+  @@index([reviewedByUserId])
 }
