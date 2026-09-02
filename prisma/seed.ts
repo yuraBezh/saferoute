@@ -10,6 +10,20 @@ import {
 } from '@/generated/prisma/enums';
 import { toDbDate } from '@/lib/date';
 
+async function createE2ESession(userId: string, environmentVariable: string) {
+	const sessionToken = process.env[environmentVariable];
+
+	if (!sessionToken) return;
+
+	await prisma.session.create({
+		data: {
+			userId,
+			sessionToken,
+			expires: new Date(Date.now() + 60 * 60 * 1000),
+		},
+	});
+}
+
 async function main() {
 	await prisma.$transaction([
 		prisma.verificationDocument.deleteMany(),
@@ -30,16 +44,7 @@ async function main() {
 			fullName: 'Anna Krasinski',
 		},
 	});
-	const e2eSessionToken = process.env.E2E_SESSION_TOKEN;
-	if (e2eSessionToken) {
-		await prisma.session.create({
-			data: {
-				userId: mother.id,
-				sessionToken: e2eSessionToken,
-				expires: new Date(Date.now() + 60 * 60 * 1000),
-			},
-		});
-	}
+	await createE2ESession(mother.id, 'E2E_SESSION_TOKEN');
 
 	const father = await prisma.user.create({
 		data: {
@@ -47,16 +52,15 @@ async function main() {
 			fullName: 'Devid Krasinski',
 		},
 	});
-	const secondE2eSessionToken = process.env.E2E_SECOND_SESSION_TOKEN;
-	if (secondE2eSessionToken) {
-		await prisma.session.create({
-			data: {
-				userId: father.id,
-				sessionToken: secondE2eSessionToken,
-				expires: new Date(Date.now() + 60 * 60 * 1000),
-			},
-		});
-	}
+	await createE2ESession(father.id, 'E2E_SECOND_SESSION_TOKEN');
+
+	const onboardingUser = await prisma.user.create({
+		data: {
+			email: 'caregiver-onboarding@example.com',
+			fullName: 'Taylor Brooks',
+		},
+	});
+	await createE2ESession(onboardingUser.id, 'E2E_ONBOARDING_SESSION_TOKEN');
 
 	const admin = await prisma.user.create({
 		data: {
@@ -105,8 +109,22 @@ async function main() {
 			},
 		},
 	});
+	const suspendedCaregiver = await prisma.user.create({
+		data: {
+			email: 'suspended-caregiver@example.com',
+			fullName: 'Sam Rivera',
+			roles: [UserRole.CAREGIVER],
+			caregiverProfile: {
+				create: {
+					hourlyRateCents: 2600,
+					status: CaregiverStatus.SUSPENDED,
+				},
+			},
+		},
+	});
+	await createE2ESession(suspendedCaregiver.id, 'E2E_SUSPENDED_CAREGIVER_SESSION_TOKEN');
 
-	await prisma.user.create({
+	const dualRoleUser = await prisma.user.create({
 		data: {
 			email: 'parent-caregiver@example.com',
 			fullName: 'Jordan Lee',
@@ -125,6 +143,7 @@ async function main() {
 			},
 		},
 	});
+	await createE2ESession(dualRoleUser.id, 'E2E_DUAL_ROLE_SESSION_TOKEN');
 
 	await prisma.location.createMany({
 		data: [

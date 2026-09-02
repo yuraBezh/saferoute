@@ -70,3 +70,5 @@ export const caregiverText = {
 		},
 	},
 } as const;
+
+export const formatHourlyRate = (hourlyRate: string) => `$${hourlyRate}/hr`;

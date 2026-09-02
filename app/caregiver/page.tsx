@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { UserRole } from '@/generated/prisma/enums';
 import { PageTitle } from '@/components/ui/page-title';
 import { PageContainer } from '@/components/ui/page-container';
-import { caregiverText } from '@/lib/content/caregiver-text';
+import { caregiverText, formatHourlyRate } from '@/lib/content/caregiver-text';
 import { hasRole } from '@/lib/auth/roles';
 import { getCaregiverProfileForCurrentUser } from '@/lib/data/caregivers';
 import { fromCents } from '@/lib/money';
@@ -64,7 +64,9 @@ export default async function CaregiverPage() {
 				<dl className="grid gap-5 sm:grid-cols-2">
 					<div>
 						<dt className="text-sm text-gray-500">{rate}</dt>
-						<dd className="font-semibold text-gray-950">${fromCents(hourlyRateCents)}/hr</dd>
+						<dd className="font-semibold text-gray-950">
+							{formatHourlyRate(fromCents(hourlyRateCents))}
+						</dd>
 					</div>
 					<div>
 						<dt className="text-sm text-gray-500">{vehicle}</dt>
