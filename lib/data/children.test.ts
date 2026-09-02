@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GuardianRelationship } from '@/generated/prisma/enums';
-import type { ChildInput } from '@/lib/validation/child';
+import type { ChildInput, CreateChildInput } from '@/lib/validation/child';
 
 const mocks = vi.hoisted(() => ({
 	getCurrentUserId: vi.fn(),
@@ -41,6 +41,10 @@ const childInput: ChildInput = {
 	lastName: 'Davis',
 	birthDate: '2019-08-29',
 };
+const createChildInput: CreateChildInput = {
+	...childInput,
+	relationship: GuardianRelationship.MOTHER,
+};
 const child = {
 	id: 'child-1',
 	...childInput,
@@ -68,17 +72,17 @@ describe('children data access', () => {
 	it('creates the child and current user guardian together', async () => {
 		mocks.createChild.mockResolvedValue(child);
 
-		await createChildForCurrentUser(childInput);
+		await createChildForCurrentUser(createChildInput);
 
 		expect(mocks.createChild).toHaveBeenCalledWith({
 			data: {
-				firstName: childInput.firstName,
-				lastName: childInput.lastName,
+				firstName: createChildInput.firstName,
+				lastName: createChildInput.lastName,
 				birthDate: child.birthDate,
 				guardians: {
 					create: {
 						userId: currentUser.id,
-						relationship: GuardianRelationship.GUARDIAN,
+						relationship: createChildInput.relationship,
 						isPrimary: true,
 					},
 				},
