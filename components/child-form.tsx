@@ -6,6 +6,7 @@ import { childFormText } from '@/lib/content/child-form-text';
 import { Field } from '@/components/ui/field';
 import { FormActions } from '@/components/ui/form-actions';
 import { FormError } from '@/components/ui/form-error';
+import { RelationshipField } from '@/components/relationship-field';
 
 const {
 	cancel,
@@ -16,7 +17,7 @@ const {
 	},
 } = childFormText;
 
-type ChildFormProps = {
+export type ChildFormProps = {
 	formAction: (
 		state: ChildFormState,
 		formData: FormData,
@@ -25,6 +26,7 @@ type ChildFormProps = {
 	submitLabel: string;
 	submittingLabel: string;
 	cancelHref?: string;
+	showRelationship?: boolean;
 };
 
 export function ChildForm(props: ChildFormProps) {
@@ -34,6 +36,7 @@ export function ChildForm(props: ChildFormProps) {
 		submitLabel,
 		submittingLabel,
 		cancelHref,
+		showRelationship = false,
 	} = props;
 
 	const initialState: ChildFormState = { message: '', errors: {} };
@@ -91,6 +94,9 @@ export function ChildForm(props: ChildFormProps) {
 						}
 						required
 					/>
+					{showRelationship ? (
+						<RelationshipField error={formState.errors?.relationship?.[0]} />
+					) : null}
 					<FormError message={formState.message} />
 					<FormActions
 						cancelHref={cancelHref}

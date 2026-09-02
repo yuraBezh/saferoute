@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { childSchema } from '@/lib/validation/child';
+import { childSchema, createChildSchema } from '@/lib/validation/child';
 import {
 	childFormText,
 	createChildFormText,
@@ -21,22 +21,20 @@ export type ChildFormState = {
 		firstName?: string[];
 		lastName?: string[];
 		birthDate?: string[];
+		relationship?: string[];
 	};
 };
-
-function parseChildForm(formData: FormData) {
-	return childSchema.safeParse({
-		firstName: formData.get('firstName'),
-		lastName: formData.get('lastName'),
-		birthDate: formData.get('birthDate'),
-	});
-}
 
 export async function createChildAction(
 	_prevState: ChildFormState,
 	formData: FormData,
 ): Promise<ChildFormState> {
-	const parsed = parseChildForm(formData);
+	const parsed = createChildSchema.safeParse({
+		firstName: formData.get('firstName'),
+		lastName: formData.get('lastName'),
+		birthDate: formData.get('birthDate'),
+		relationship: formData.get('relationship'),
+	});
 
 	if (!parsed.success) {
 		return {
@@ -65,7 +63,11 @@ export async function editChildAction(
 	_prevState: ChildFormState,
 	formData: FormData,
 ): Promise<ChildFormState> {
-	const parsed = parseChildForm(formData);
+	const parsed = childSchema.safeParse({
+		firstName: formData.get('firstName'),
+		lastName: formData.get('lastName'),
+		birthDate: formData.get('birthDate'),
+	});
 
 	if (!parsed.success) {
 		return {

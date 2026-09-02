@@ -27,6 +27,7 @@ export default function AddNewChildrenPage() {
 					submittingLabel={submitting}
 					defaultValues={defaultValues}
 					cancelHref="/children"
+					showRelationship
 				/>
 			</div>
 		</main>

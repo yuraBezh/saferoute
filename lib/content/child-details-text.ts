@@ -1,3 +1,5 @@
+import { guardianRelationshipLabels } from '@/lib/content/child-form-text';
+
 const childDetailsText = {
 	actions: {
 		edit: 'Edit',
@@ -27,12 +29,7 @@ const childDetailsText = {
 		viewOnly: 'View only',
 		details: (relationship: string, email: string) =>
 			`${relationship} · ${email}`,
-		relationships: {
-			MOTHER: 'Mother',
-			FATHER: 'Father',
-			GUARDIAN: 'Guardian',
-			OTHER: 'Other',
-		},
+		relationships: guardianRelationshipLabels,
 	},
 } as const;
 export default childDetailsText;

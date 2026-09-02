@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/auth/current-user';
-import { type ChildInput } from '@/lib/validation/child';
+import { type ChildInput, type CreateChildInput } from '@/lib/validation/child';
 
 export async function getChildrenForCurrentUser() {
 	const userId = await getCurrentUserId();
@@ -23,16 +23,17 @@ function toChildData(data: ChildInput) {
 	};
 }
 
-export async function createChildForCurrentUser(data: ChildInput) {
+export async function createChildForCurrentUser(data: CreateChildInput) {
 	const userId = await getCurrentUserId();
+	const { relationship, ...childData } = data;
 
 	await prisma.child.create({
 		data: {
-			...toChildData(data),
+			...toChildData(childData),
 			guardians: {
 				create: {
 					userId,
-					relationship: 'GUARDIAN',
+					relationship,
 					isPrimary: true,
 				},
 			},
