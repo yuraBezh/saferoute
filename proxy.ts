@@ -9,5 +9,5 @@ export default auth((request) => {
 });
 
 export const config = {
-	matcher: ['/children/:path*', '/locations/:path*'],
+	matcher: ['/children/:path*', '/locations/:path*', '/caregiver/:path*'],
 };

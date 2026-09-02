@@ -3,6 +3,8 @@ export const headerText = {
 	navigation: {
 		children: 'Children',
 		locations: 'Locations',
+		assignments: 'Assignments',
+		profile: 'Profile',
 	},
 	fallbackInitial: '?',
 	signOut: 'Sign out',

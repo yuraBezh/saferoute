@@ -1,18 +1,15 @@
-import Link from 'next/link';
-import {
-	HomeIcon,
-	MapPinIcon,
-	PlusIcon,
-	SchoolIcon,
-} from '@/components/ui/icons';
+import { HomeIcon, MapPinIcon, SchoolIcon } from '@/components/ui/icons';
+import { AddLink } from '@/components/ui/add-link';
 import { EditLink } from '@/components/ui/edit-link';
 import { PageTitle } from '@/components/ui/page-title';
+import { PageContainer } from '@/components/ui/page-container';
+import { PageDescription } from '@/components/ui/page-description';
 import { LocationType } from '@/generated/prisma/enums';
 import { locationsText } from '@/lib/content/locations-text';
 import { formatAddress } from '@/lib/locations/format-address';
-import { LocationsEmptyState } from './locations-empty-state';
 import { getCurrentUserId } from '@/lib/auth/current-user';
 import { getLocationsForCurrentUser } from '@/lib/data/locations';
+import { LocationsEmptyState } from './locations-empty-state';
 
 const LOCATION_TYPE_ORDER = [
 	LocationType.HOME,
@@ -31,28 +28,17 @@ export default async function LocationsPage() {
 		getCurrentUserId(),
 		getLocationsForCurrentUser(),
 	]);
-	const locationsByType = Object.groupBy(
-		locations,
-		(location) => location.type,
-	);
+	const locationsByType = Object.groupBy(locations, (location) => location.type);
 
 	return (
-		<main className="mx-auto w-full max-w-4xl px-6 py-10">
+		<PageContainer>
 			<div className="mb-8 flex items-start justify-between gap-4">
 				<div>
 					<PageTitle>{locationsText.title}</PageTitle>
-					<p className="mt-1 text-sm text-gray-500">
-						{locationsText.description}
-					</p>
+					<PageDescription>{locationsText.description}</PageDescription>
 				</div>
 				{locations.length > 0 && (
-					<Link
-						href="/locations/new"
-						className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50"
-					>
-						<PlusIcon />
-						{locationsText.addLocation}
-					</Link>
+					<AddLink href="/locations/new">{locationsText.addLocation}</AddLink>
 				)}
 			</div>
 
@@ -72,35 +58,26 @@ export default async function LocationsPage() {
 									{locationsText.groupTitles[type]}
 								</h2>
 								<div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-									{groupedLocations.map((location) => (
-										<div
-											key={location.id}
-											className="flex items-center gap-4 px-5 py-4"
-										>
+									{groupedLocations.map(({ id, name, ownerUserId, isVerified, ...address }) => (
+										<div key={id} className="flex items-center gap-4 px-5 py-4">
 											<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
 												<LocationIcon />
 											</div>
 											<div className="min-w-0 flex-1">
 												<div className="flex items-center gap-2">
-													<p className="truncate font-semibold text-gray-950">
-														{location.name}
-													</p>
-													{location.ownerUserId === null &&
-														location.isVerified && (
-															<span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-																{locationsText.verified}
-															</span>
-														)}
+													<p className="truncate font-semibold text-gray-950">{name}</p>
+													{ownerUserId === null && isVerified && (
+														<span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+															{locationsText.verified}
+														</span>
+													)}
 												</div>
 												<p className="mt-0.5 truncate text-sm text-gray-500">
-													{formatAddress(location)}
+													{formatAddress(address)}
 												</p>
 											</div>
-											{location.ownerUserId === currentUserId && (
-												<EditLink
-													href={`/locations/${location.id}/edit`}
-													label={locationsText.edit}
-												/>
+											{ownerUserId === currentUserId && (
+												<EditLink href={`/locations/${id}/edit`} label={locationsText.edit} />
 											)}
 										</div>
 									))}
@@ -110,6 +87,6 @@ export default async function LocationsPage() {
 					})}
 				</div>
 			)}
-		</main>
+		</PageContainer>
 	);
 }

@@ -1,5 +1,7 @@
 import { ChildForm } from '@/components/child-form';
 import { PageTitle } from '@/components/ui/page-title';
+import { PageDescription } from '@/components/ui/page-description';
+import { PageContainer } from '@/components/ui/page-container';
 import { notFound } from 'next/navigation';
 import { editChildAction } from '@/app/children/actions';
 import { editChildFormText } from '@/lib/content/child-form-text';
@@ -8,9 +10,7 @@ import { getChildForCurrentUser } from '@/lib/data/children';
 
 const { title, description, submit, submitting } = editChildFormText;
 
-export default async function EditChildrenPage({
-	params,
-}: PageProps<'/children/[id]/edit'>) {
+export default async function EditChildrenPage({ params }: PageProps<'/children/[id]/edit'>) {
 	const { id } = await params;
 
 	const child = await getChildForCurrentUser(id);
@@ -26,27 +26,23 @@ export default async function EditChildrenPage({
 	};
 
 	return (
-		<main className="min-h-screen bg-white py-6 text-gray-950 sm:py-8">
-			<div className="mx-auto w-full max-w-xl px-4 sm:px-6">
-				<BackLink href={`/children/${id}`} className="mb-5">
-					{fullName}
-				</BackLink>
+		<PageContainer size="form">
+			<BackLink href={`/children/${id}`} className="mb-5">
+				{fullName}
+			</BackLink>
 
-				<header className="mb-5">
-					<PageTitle>{title}</PageTitle>
-					<p className="mt-1 text-sm leading-6 text-gray-600">
-						{description(fullName)}
-					</p>
-				</header>
+			<header className="mb-5">
+				<PageTitle>{title}</PageTitle>
+				<PageDescription>{description(fullName)}</PageDescription>
+			</header>
 
-				<ChildForm
-					formAction={action}
-					defaultValues={defaultValues}
-					submitLabel={submit}
-					submittingLabel={submitting}
-					cancelHref={`/children/${id}`}
-				/>
-			</div>
-		</main>
+			<ChildForm
+				formAction={action}
+				defaultValues={defaultValues}
+				submitLabel={submit}
+				submittingLabel={submitting}
+				cancelHref={`/children/${id}`}
+			/>
+		</PageContainer>
 	);
 }

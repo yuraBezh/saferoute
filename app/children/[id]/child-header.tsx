@@ -5,6 +5,7 @@ import { InitialsAvatar } from '@/components/ui/initials-avatar';
 import { getAge } from '@/lib/children/get-age';
 import childDetailsText from '@/lib/content/child-details-text';
 import { childrenText } from '@/lib/content/children-text';
+import { getPersonInitials } from '@/lib/person';
 
 export function ChildHeader({
 	id,
@@ -17,7 +18,7 @@ export function ChildHeader({
 	lastName: string;
 	birthDate: Date;
 }) {
-	const initials = `${firstName[0]}${lastName[0]}`.toUpperCase();
+	const initials = getPersonInitials(firstName, lastName);
 	const { actions, deleteModal } = childDetailsText;
 
 	return (
