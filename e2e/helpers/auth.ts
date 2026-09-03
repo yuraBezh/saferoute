@@ -20,11 +20,12 @@ export const startGoogleSignIn = async (
 	page: Page,
 	buttonName: string,
 ) => {
-	await context.route('https://accounts.google.com/**', (route) => route.abort());
-	const googleRequest = page.waitForRequest(
-		(request) => new URL(request.url()).hostname === 'accounts.google.com',
+	await context.route('https://accounts.google.com/**', (route) =>
+		route.fulfill({ status: 200, contentType: 'text/html', body: '' }),
 	);
+	const googlePageLoaded = page.waitForURL((url) => url.hostname === 'accounts.google.com', {
+		waitUntil: 'domcontentloaded',
+	});
 
-	await page.getByRole('button', { name: buttonName }).click();
-	await googleRequest;
+	await Promise.all([googlePageLoaded, page.getByRole('button', { name: buttonName }).click()]);
 };
