@@ -1,10 +1,8 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { UserRole } from '@/generated/prisma/enums';
+import { CaregiverInvitation } from '@/app/caregiver/caregiver-invitation';
 import { PageTitle } from '@/components/ui/page-title';
 import { PageContainer } from '@/components/ui/page-container';
 import { caregiverText, formatHourlyRate } from '@/lib/content/caregiver-text';
-import { hasRole } from '@/lib/auth/roles';
 import { getCaregiverProfileForCurrentUser } from '@/lib/data/caregivers';
 import { fromCents } from '@/lib/money';
 
@@ -35,9 +33,8 @@ const formatVehicle = (vehicle: Vehicle) =>
 		.join(' ');
 
 export default async function CaregiverPage() {
-	if (!(await hasRole(UserRole.CAREGIVER))) redirect('/caregiver/onboarding');
 	const profile = await getCaregiverProfileForCurrentUser();
-	if (!profile) redirect('/caregiver/onboarding');
+	if (!profile) return <CaregiverInvitation />;
 
 	const { status: caregiverStatus, bio, hourlyRateCents, verificationDocuments } = profile;
 	const vehicleDescription = formatVehicle(profile);
