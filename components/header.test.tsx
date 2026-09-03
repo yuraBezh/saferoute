@@ -3,6 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { headerText } from '@/lib/content/header-text';
 import { UserRole } from '@/generated/prisma/enums';
 
+const {
+	brand,
+	signIn,
+	signOut,
+	fallbackInitial,
+	navigation: { children, locations, assignments, profile, becomeCaregiver },
+} = headerText;
+
 const mocks = vi.hoisted(() => ({
 	getCurrentUser: vi.fn(),
 	signOut: vi.fn(),
@@ -29,7 +37,8 @@ const routesFixture = {
 	home: '/',
 	children: '/children',
 	locations: '/locations',
-	signIn: '/signin',
+	signInForParent: '/signin?callbackUrl=/children',
+	caregiverOnboarding: '/caregiver/onboarding',
 };
 
 describe('Header', () => {
@@ -37,10 +46,15 @@ describe('Header', () => {
 		vi.clearAllMocks();
 	});
 
-	it('does not render navigation for an unauthenticated visitor', async () => {
+	it('shows the public header to an unauthenticated visitor', async () => {
 		mocks.getCurrentUser.mockResolvedValue(null);
 
-		expect(await Header()).toBeNull();
+		render(await Header());
+
+		expect(screen.getByRole('link', { name: brand })).toBeDefined();
+		expect(screen.getByRole('link', { name: signIn }).getAttribute('href')).toBe(
+			routesFixture.signInForParent,
+		);
 		expect(mocks.getCurrentUser).toHaveBeenCalledOnce();
 	});
 
@@ -57,16 +71,17 @@ describe('Header', () => {
 
 		expect(screen.getByText(initials)).toBeDefined();
 		expect(screen.getByText(userFixture.name)).toBeDefined();
-		expect(screen.getByRole('link', { name: headerText.brand }).getAttribute('href')).toBe(
-			routesFixture.home,
+		expect(screen.getByRole('link', { name: brand }).getAttribute('href')).toBe(routesFixture.home);
+		expect(screen.getByRole('link', { name: children }).getAttribute('href')).toBe(
+			routesFixture.children,
 		);
-		expect(
-			screen.getByRole('link', { name: headerText.navigation.children }).getAttribute('href'),
-		).toBe(routesFixture.children);
-		expect(
-			screen.getByRole('link', { name: headerText.navigation.locations }).getAttribute('href'),
-		).toBe(routesFixture.locations);
-		expect(screen.getByRole('button', { name: headerText.signOut })).toBeDefined();
+		expect(screen.getByRole('link', { name: locations }).getAttribute('href')).toBe(
+			routesFixture.locations,
+		);
+		expect(screen.getByRole('button', { name: signOut })).toBeDefined();
+		expect(screen.getByRole('link', { name: becomeCaregiver }).getAttribute('href')).toBe(
+			routesFixture.caregiverOnboarding,
+		);
 	});
 
 	it('uses the email for initials when the user has no name', async () => {
@@ -86,10 +101,11 @@ describe('Header', () => {
 
 		render(await Header());
 
-		expect(screen.getByRole('link', { name: headerText.navigation.assignments })).toBeDefined();
-		expect(screen.getByRole('link', { name: headerText.navigation.profile })).toBeDefined();
-		expect(screen.queryByRole('link', { name: headerText.navigation.children })).toBeNull();
-		expect(screen.queryByRole('link', { name: headerText.navigation.locations })).toBeNull();
+		expect(screen.getByRole('link', { name: assignments })).toBeDefined();
+		expect(screen.getByRole('link', { name: profile })).toBeDefined();
+		expect(screen.queryByRole('link', { name: children })).toBeNull();
+		expect(screen.queryByRole('link', { name: locations })).toBeNull();
+		expect(screen.queryByRole('link', { name: becomeCaregiver })).toBeNull();
 	});
 
 	it('shows parent and caregiver navigation to a dual-role user', async () => {
@@ -100,9 +116,10 @@ describe('Header', () => {
 
 		render(await Header());
 
-		for (const label of Object.values(headerText.navigation)) {
+		for (const label of [children, locations, assignments, profile]) {
 			expect(screen.getByRole('link', { name: label })).toBeDefined();
 		}
+		expect(screen.queryByRole('link', { name: becomeCaregiver })).toBeNull();
 	});
 
 	it('uses a fallback initial when the user has no name or email', async () => {
@@ -115,16 +132,16 @@ describe('Header', () => {
 
 		render(await Header());
 
-		expect(screen.getByText(headerText.fallbackInitial)).toBeDefined();
+		expect(screen.getByText(fallbackInitial)).toBeDefined();
 	});
 
-	it('signs the user out and redirects to the sign-in page', async () => {
+	it('signs the user out and redirects to the landing page', async () => {
 		mocks.signOut.mockResolvedValue(undefined);
 
 		await signOutAction();
 
 		expect(mocks.signOut).toHaveBeenCalledWith({
-			redirectTo: routesFixture.signIn,
+			redirectTo: routesFixture.home,
 		});
 	});
 });

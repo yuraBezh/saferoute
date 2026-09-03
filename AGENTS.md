@@ -25,6 +25,23 @@ export const BOOKING = { confirmCta: 'Confirm pickup' } as const;
 
 String literals elsewhere in tests are a review blocker.
 
+## Destructuring
+
+- Destructure repeated property access when the same object path is used more than once.
+- Prefer module-level destructuring for static content objects.
+- Prefer function-level destructuring for props and request-specific values.
+- Do not destructure a property that is used only once unless it improves readability.
+
+```ts
+// ❌
+caregiverText.invitation.title;
+caregiverText.invitation.description;
+caregiverText.invitation.cta;
+
+// ✅
+const { title, description, cta } = caregiverText.invitation;
+```
+
 ## Test fixtures
 
 - Fixtures stay local to the test file.

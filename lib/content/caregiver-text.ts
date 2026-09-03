@@ -35,6 +35,12 @@ export const caregiverText = {
 			REJECTED: 'Rejected',
 		},
 	},
+	invitation: {
+		title: 'Become a SafeRoute caregiver',
+		description:
+			'Create your caregiver profile to share your experience, vehicle details, and availability with families.',
+		cta: 'Start caregiver onboarding',
+	},
 	edit: {
 		title: 'Edit caregiver profile',
 		submit: 'Save changes',

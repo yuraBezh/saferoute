@@ -7,13 +7,11 @@ import {
 } from '@/generated/prisma/enums';
 import { caregiverText } from '@/lib/content/caregiver-text';
 
-const mocks = vi.hoisted(() => ({ hasRole: vi.fn(), getProfile: vi.fn(), redirect: vi.fn() }));
+const mocks = vi.hoisted(() => ({ getProfile: vi.fn() }));
 
-vi.mock('@/lib/auth/roles', () => ({ hasRole: mocks.hasRole }));
 vi.mock('@/lib/data/caregivers', () => ({
 	getCaregiverProfileForCurrentUser: mocks.getProfile,
 }));
-vi.mock('next/navigation', () => ({ redirect: mocks.redirect }));
 
 import CaregiverPage from './page';
 
@@ -34,16 +32,16 @@ const profileFixture = {
 	],
 };
 
+const routesFixture = {
+	caregiverOnboarding: '/caregiver/onboarding',
+};
+
 describe('CaregiverPage', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.redirect.mockImplementation(() => {
-			throw new Error('NEXT_REDIRECT');
-		});
 	});
 
 	it('shows the caregiver profile, vehicle, rate, and verification documents', async () => {
-		mocks.hasRole.mockResolvedValue(true);
 		mocks.getProfile.mockResolvedValue(profileFixture);
 
 		render(await CaregiverPage());
@@ -64,7 +62,6 @@ describe('CaregiverPage', () => {
 	});
 
 	it('shows empty profile states', async () => {
-		mocks.hasRole.mockResolvedValue(true);
 		mocks.getProfile.mockResolvedValue({
 			...profileFixture,
 			bio: null,
@@ -81,21 +78,14 @@ describe('CaregiverPage', () => {
 		expect(screen.getByText(caregiverText.profile.noDocuments)).toBeDefined();
 	});
 
-	it('redirects a user without the caregiver role to onboarding', async () => {
-		mocks.hasRole.mockResolvedValue(false);
+	it('invites a user without a profile to start caregiver onboarding', async () => {
 		mocks.getProfile.mockResolvedValue(null);
 
-		await expect(CaregiverPage()).rejects.toThrow();
+		render(await CaregiverPage());
 
-		expect(mocks.redirect).toHaveBeenCalledWith('/caregiver/onboarding');
-	});
-
-	it('redirects a caregiver without a profile to onboarding', async () => {
-		mocks.hasRole.mockResolvedValue(true);
-		mocks.getProfile.mockResolvedValue(null);
-
-		await expect(CaregiverPage()).rejects.toThrow();
-
-		expect(mocks.redirect).toHaveBeenCalledWith('/caregiver/onboarding');
+		expect(screen.getByRole('heading', { name: caregiverText.invitation.title })).toBeDefined();
+		expect(
+			screen.getByRole('link', { name: caregiverText.invitation.cta }).getAttribute('href'),
+		).toBe(routesFixture.caregiverOnboarding);
 	});
 });
