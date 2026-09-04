@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
-import type { LocationType } from '@/generated/prisma/enums';
+import type { BookingStatus, LocationType } from '@/generated/prisma/enums';
 
 type ChildFixture = {
 	firstName: string;
@@ -17,6 +17,20 @@ type LocationFixture = {
 	state: string;
 	postalCode: string;
 };
+
+type BookingFixture = {
+	childId: string;
+	pickupLocationId: string;
+	activityLocationId?: string;
+	dropoffLocationId: string;
+	status: BookingStatus;
+	scheduledPickupAt: Date;
+	estimatedDurationMin: number;
+	expiresAt: Date;
+	notes?: string;
+};
+
+const createFixtureId = () => `e2e_${randomUUID().replaceAll('-', '').slice(0, 21)}`;
 
 export function requireE2EEnvironmentVariable(name: string) {
 	const value = process.env[name];
@@ -63,7 +77,7 @@ async function getOwnerId(client: Client, ownerEmail: string) {
 
 export async function createOwnedChild(ownerEmail: string, child: ChildFixture) {
 	const client = new Client({ connectionString: getE2EDatabaseUrl() });
-	const childId = randomUUID();
+	const childId = createFixtureId();
 
 	await client.connect();
 
@@ -81,7 +95,7 @@ export async function createOwnedChild(ownerEmail: string, child: ChildFixture) 
 			`INSERT INTO "ChildGuardian"
 				("id", "childId", "userId", "relationship", "isPrimary")
 			VALUES ($1, $2, $3, 'GUARDIAN', true)`,
-			[randomUUID(), childId, ownerId],
+			[createFixtureId(), childId, ownerId],
 		);
 
 		await client.query('COMMIT');
@@ -96,7 +110,7 @@ export async function createOwnedChild(ownerEmail: string, child: ChildFixture) 
 
 export async function createOwnedLocation(ownerEmail: string, location: LocationFixture) {
 	const client = new Client({ connectionString: getE2EDatabaseUrl() });
-	const locationId = randomUUID();
+	const locationId = createFixtureId();
 
 	await client.connect();
 
@@ -121,6 +135,42 @@ export async function createOwnedLocation(ownerEmail: string, location: Location
 		);
 
 		return locationId;
+	} finally {
+		await client.end();
+	}
+}
+
+export async function createOwnedBooking(ownerEmail: string, booking: BookingFixture) {
+	const client = new Client({ connectionString: getE2EDatabaseUrl() });
+	const bookingId = createFixtureId();
+
+	await client.connect();
+
+	try {
+		const ownerId = await getOwnerId(client, ownerEmail);
+
+		await client.query(
+			`INSERT INTO "Booking"
+				("id", "childId", "requestedByUserId", "status", "scheduledPickupAt",
+				 "pickupLocationId", "activityLocationId", "dropoffLocationId",
+				 "estimatedDurationMin", "notes", "expiresAt", "updatedAt")
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP)`,
+			[
+				bookingId,
+				booking.childId,
+				ownerId,
+				booking.status,
+				booking.scheduledPickupAt,
+				booking.pickupLocationId,
+				booking.activityLocationId ?? null,
+				booking.dropoffLocationId,
+				booking.estimatedDurationMin,
+				booking.notes ?? null,
+				booking.expiresAt,
+			],
+		);
+
+		return bookingId;
 	} finally {
 		await client.end();
 	}
