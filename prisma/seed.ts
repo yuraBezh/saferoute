@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
 import {
+	BookingStatus,
 	CaregiverStatus,
 	GuardianRelationship,
 	LocationType,
@@ -8,7 +9,8 @@ import {
 	VerificationDocumentStatus,
 	VerificationDocumentType,
 } from '@/generated/prisma/enums';
-import { toDbDate } from '@/lib/date';
+import { fromUtc, shiftDateByDays, toDbDate, toUtc } from '@/lib/date';
+import { getBookingExpiresAt } from '@/lib/bookings/time';
 
 async function createE2ESession(userId: string, environmentVariable: string) {
 	const sessionToken = process.env[environmentVariable];
@@ -26,6 +28,7 @@ async function createE2ESession(userId: string, environmentVariable: string) {
 
 async function main() {
 	await prisma.$transaction([
+		prisma.booking.deleteMany(),
 		prisma.verificationDocument.deleteMany(),
 		prisma.caregiverProfile.deleteMany(),
 		prisma.session.deleteMany(),
@@ -70,7 +73,7 @@ async function main() {
 		},
 	});
 
-	await prisma.user.create({
+	const maria = await prisma.user.create({
 		data: {
 			email: 'caregiver@example.com',
 			fullName: 'Maria Garcia',
@@ -145,9 +148,9 @@ async function main() {
 	});
 	await createE2ESession(dualRoleUser.id, 'E2E_DUAL_ROLE_SESSION_TOKEN');
 
-	await prisma.location.createMany({
-		data: [
-			{
+	const [school, motherHome, , activity] = await prisma.$transaction([
+		prisma.location.create({
+			data: {
 				type: LocationType.SCHOOL,
 				name: 'Lamar High School',
 				addressLine1: '3325 Westheimer Rd',
@@ -157,7 +160,9 @@ async function main() {
 				ownerUserId: null,
 				isVerified: true,
 			},
-			{
+		}),
+		prisma.location.create({
+			data: {
 				type: LocationType.HOME,
 				name: "Anna's Home",
 				addressLine1: '1515 Austin St',
@@ -166,7 +171,9 @@ async function main() {
 				postalCode: '77002',
 				ownerUserId: mother.id,
 			},
-			{
+		}),
+		prisma.location.create({
+			data: {
 				type: LocationType.HOME,
 				name: "Devid's Home",
 				addressLine1: '404 Oxford St',
@@ -175,7 +182,9 @@ async function main() {
 				postalCode: '77007',
 				ownerUserId: father.id,
 			},
-			{
+		}),
+		prisma.location.create({
+			data: {
 				type: LocationType.ACTIVITY,
 				name: 'Houston Ballet Academy',
 				addressLine1: '601 Preston St',
@@ -185,8 +194,8 @@ async function main() {
 				ownerUserId: null,
 				isVerified: true,
 			},
-		],
-	});
+		}),
+	]);
 
 	const john = await prisma.child.create({
 		data: {
@@ -248,6 +257,54 @@ async function main() {
 				isPrimary: true,
 				canBook: true,
 				canApproveHandoff: true,
+			},
+		],
+	});
+
+	const todayAtPickupLocation = fromUtc(new Date(), school.timezone).date;
+	const bookingTimes = [
+		toUtc(shiftDateByDays(todayAtPickupLocation, 1), '15:30', school.timezone),
+		toUtc(shiftDateByDays(todayAtPickupLocation, 2), '14:30', school.timezone),
+		toUtc(shiftDateByDays(todayAtPickupLocation, 3), '16:00', school.timezone),
+	];
+	const [pendingPickupAt, acceptedPickupAt, declinedPickupAt] = bookingTimes;
+
+	await prisma.booking.createMany({
+		data: [
+			{
+				childId: john.id,
+				requestedByUserId: mother.id,
+				status: BookingStatus.PENDING,
+				scheduledPickupAt: pendingPickupAt,
+				pickupLocationId: school.id,
+				activityLocationId: activity.id,
+				dropoffLocationId: motherHome.id,
+				estimatedDurationMin: 90,
+				notes: 'Pickup at the main entrance.',
+				expiresAt: getBookingExpiresAt(pendingPickupAt),
+			},
+			{
+				childId: bobby.id,
+				requestedByUserId: mother.id,
+				caregiverUserId: maria.id,
+				status: BookingStatus.ACCEPTED,
+				scheduledPickupAt: acceptedPickupAt,
+				pickupLocationId: school.id,
+				dropoffLocationId: motherHome.id,
+				estimatedDurationMin: 45,
+				expiresAt: getBookingExpiresAt(acceptedPickupAt),
+			},
+			{
+				childId: john.id,
+				requestedByUserId: mother.id,
+				caregiverUserId: maria.id,
+				status: BookingStatus.DECLINED,
+				scheduledPickupAt: declinedPickupAt,
+				pickupLocationId: school.id,
+				activityLocationId: activity.id,
+				dropoffLocationId: motherHome.id,
+				estimatedDurationMin: 75,
+				expiresAt: getBookingExpiresAt(declinedPickupAt),
 			},
 		],
 	});

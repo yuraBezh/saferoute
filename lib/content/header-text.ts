@@ -1,6 +1,7 @@
 export const headerText = {
 	brand: 'SafeRoute',
 	navigation: {
+		bookings: 'Bookings',
 		children: 'Children',
 		locations: 'Locations',
 		assignments: 'Assignments',

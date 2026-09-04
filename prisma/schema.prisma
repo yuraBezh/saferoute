@@ -20,6 +20,7 @@ model Child {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   guardians ChildGuardian[]
+  bookings  Booking[]
 }
 
 model User {
@@ -39,6 +40,8 @@ model User {
   sessions                      Session[]
   caregiverProfile              CaregiverProfile?
   reviewedVerificationDocuments VerificationDocument[] @relation("VerificationDocumentReviewer")
+  requestedBookings             Booking[]              @relation("BookingRequester")
+  caregiverBookings             Booking[]              @relation("BookingCaregiver")
 }
 
 enum UserRole {
@@ -77,25 +80,67 @@ enum LocationType {
 }
 
 model Location {
-  id           String       @id @default(cuid())
-  type         LocationType
-  name         String
-  addressLine1 String
-  addressLine2 String?
-  city         String
-  state        String
-  postalCode   String
-  latitude     Float?
-  longitude    Float?
+  id               String       @id @default(cuid())
+  type             LocationType
+  name             String
+  addressLine1     String
+  addressLine2     String?
+  city             String
+  state            String
+  postalCode       String
+  latitude         Float?
+  longitude        Float?
   // TODO: Derive this from coordinates during geocoding before supporting locations outside Central Time.
-  timezone     String       @default("America/Chicago")
-  ownerUserId  String?
-  owner        User?        @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
-  isVerified   Boolean      @default(false)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  timezone         String       @default("America/Chicago")
+  ownerUserId      String?
+  owner            User?        @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  isVerified       Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?
+  pickupBookings   Booking[]    @relation("BookingPickupLocation")
+  activityBookings Booking[]    @relation("BookingActivityLocation")
+  dropoffBookings  Booking[]    @relation("BookingDropoffLocation")
 
   @@index([ownerUserId])
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  EXPIRED
+}
+
+model Booking {
+  id                   String        @id @default(cuid())
+  childId              String
+  child                Child         @relation(fields: [childId], references: [id], onDelete: Restrict)
+  requestedByUserId    String
+  requestedBy          User          @relation("BookingRequester", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  caregiverUserId      String?
+  caregiver            User?         @relation("BookingCaregiver", fields: [caregiverUserId], references: [id], onDelete: Restrict)
+  status               BookingStatus @default(PENDING)
+  scheduledPickupAt    DateTime      @db.Timestamptz(3)
+  pickupLocationId     String
+  pickupLocation       Location      @relation("BookingPickupLocation", fields: [pickupLocationId], references: [id], onDelete: Restrict)
+  activityLocationId   String?
+  activityLocation     Location?     @relation("BookingActivityLocation", fields: [activityLocationId], references: [id], onDelete: Restrict)
+  dropoffLocationId    String
+  dropoffLocation      Location      @relation("BookingDropoffLocation", fields: [dropoffLocationId], references: [id], onDelete: Restrict)
+  estimatedDurationMin Int
+  notes                String?
+  expiresAt            DateTime      @db.Timestamptz(3)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@index([status, scheduledPickupAt])
+  @@index([requestedByUserId, createdAt])
+  @@index([childId, scheduledPickupAt])
+  @@index([pickupLocationId])
+  @@index([activityLocationId])
+  @@index([dropoffLocationId])
 }
 
 model Account {

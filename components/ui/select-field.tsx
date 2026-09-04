@@ -5,12 +5,14 @@ import { ChevronDownIcon } from '@/components/ui/icons';
 type SelectFieldProps = Omit<ComponentProps<'select'>, 'className'> & {
 	id: string;
 	label: string;
+	optionalLabel?: string;
 	error?: string;
 };
 
 export function SelectField({
 	id,
 	label,
+	optionalLabel,
 	error,
 	children,
 	...selectProps
@@ -19,11 +21,9 @@ export function SelectField({
 
 	return (
 		<div>
-			<label
-				className="mb-1.5 block text-sm font-medium text-gray-800"
-				htmlFor={id}
-			>
+			<label className="mb-1.5 block text-sm font-medium text-gray-800" htmlFor={id}>
 				{label}
+				{optionalLabel && <span className="ml-1 font-normal text-gray-500">{optionalLabel}</span>}
 			</label>
 			<div className="relative">
 				<select

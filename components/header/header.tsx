@@ -11,7 +11,7 @@ const {
 	signOut: signOutLabel,
 	fallbackInitial,
 	signIn,
-	navigation: { children, locations, assignments, profile, becomeCaregiver },
+	navigation: { bookings, children, locations, assignments, profile, becomeCaregiver },
 } = headerText;
 
 export async function signOutAction() {
@@ -55,6 +55,7 @@ export async function Header() {
 			<nav className="flex items-center gap-4 text-sm">
 				{isParent && (
 					<>
+						<HeaderLink href="/bookings">{bookings}</HeaderLink>
 						<HeaderLink href="/children">{children}</HeaderLink>
 						<HeaderLink href="/locations">{locations}</HeaderLink>
 					</>
