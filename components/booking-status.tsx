@@ -9,12 +9,14 @@ const statusClasses = {
 	[BookingStatus.EXPIRED]: 'bg-gray-100 text-gray-600 ring-gray-500/20',
 } as const;
 
+const { status: statusLabels } = bookingsText;
+
 export function BookingStatusBadge({ status }: { status: BookingStatus }) {
 	return (
 		<span
 			className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClasses[status]}`}
 		>
-			{bookingsText.status[status]}
+			{statusLabels[status]}
 		</span>
 	);
 }

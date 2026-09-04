@@ -10,18 +10,19 @@ import { formatBookingPickup } from '@/lib/bookings/format';
 import { bookingsText } from '@/lib/content/bookings-text';
 import { getBookingForCurrentUser } from '@/lib/data/bookings';
 
+const { title, cancel, details } = bookingsText;
+
 export default async function BookingDetailsPage({ params }: PageProps<'/bookings/[id]'>) {
 	const { id } = await params;
 	const booking = await getBookingForCurrentUser(id);
 	if (!booking) notFound();
 
 	const { child, pickupLocation, activityLocation, dropoffLocation, caregiver } = booking;
-	const details = bookingsText.details;
 
 	return (
 		<PageContainer>
 			<BackLink href="/bookings" className="mb-5">
-				{bookingsText.title}
+				{title}
 			</BackLink>
 			<section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 				<header className="flex flex-col gap-4 border-b border-gray-200 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
@@ -37,11 +38,7 @@ export default async function BookingDetailsPage({ params }: PageProps<'/booking
 						</p>
 					</div>
 					{booking.status === BookingStatus.PENDING ? (
-						<DeleteButton
-							itemId={booking.id}
-							deleteAction={cancelBookingAction}
-							text={bookingsText.cancel}
-						/>
+						<DeleteButton itemId={booking.id} deleteAction={cancelBookingAction} text={cancel} />
 					) : null}
 				</header>
 

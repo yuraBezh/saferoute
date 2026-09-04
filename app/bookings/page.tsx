@@ -1,18 +1,24 @@
 import Link from 'next/link';
 import { AddLink } from '@/components/ui/add-link';
-import { BookingRoute } from '@/components/booking-route';
 import { BookingStatusBadge } from '@/components/booking-status';
-import { ChevronRightIcon } from '@/components/ui/icons';
 import { PageContainer } from '@/components/ui/page-container';
 import { PageDescription } from '@/components/ui/page-description';
 import { PageTitle } from '@/components/ui/page-title';
 import { formatBookingPickup } from '@/lib/bookings/format';
+import { displayStatus } from '@/lib/bookings/status';
 import { bookingsText } from '@/lib/content/bookings-text';
 import { getBookingsForCurrentUser } from '@/lib/data/bookings';
 
+const {
+	title,
+	description,
+	newBooking,
+	bookingCount,
+	empty: { title: emptyTitle, description: emptyDescription, cta: emptyCta },
+} = bookingsText;
+
 export default async function BookingsPage() {
 	const bookings = await getBookingsForCurrentUser();
-	const { title, description, newBooking, bookingCount, empty } = bookingsText;
 
 	return (
 		<PageContainer>
@@ -27,57 +33,51 @@ export default async function BookingsPage() {
 
 			{bookings.length === 0 ? (
 				<section className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-6 py-12 text-center">
-					<h2 className="font-semibold text-gray-950">{empty.title}</h2>
-					<p className="mt-1 text-sm text-gray-600">{empty.description}</p>
+					<h2 className="font-semibold text-gray-950">{emptyTitle}</h2>
+					<p className="mt-1 text-sm text-gray-600">{emptyDescription}</p>
 					<Link
 						className="mt-5 inline-flex rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
 						href="/bookings/new"
 					>
-						{empty.cta}
+						{emptyCta}
 					</Link>
 				</section>
 			) : (
-				<div className="grid gap-4 sm:grid-cols-2">
+				<div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 					{bookings.map(
 						({
 							id,
-							child,
+							child: { firstName, lastName },
 							status,
+							expiresAt,
 							scheduledPickupAt,
-							estimatedDurationMin,
-							pickupLocation,
+							pickupLocation: { name: pickupLocationName, timezone },
 							activityLocation,
 							dropoffLocation,
-						}) => (
-							<Link
-								key={id}
-								href={`/bookings/${id}`}
-								className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-							>
-								<div className="flex items-start justify-between gap-3">
-									<div className="min-w-0">
-										<p className="truncate font-semibold text-gray-950">
-											{child.firstName} {child.lastName}
-										</p>
-										<p className="mt-1 text-sm text-gray-600">
-											{formatBookingPickup(scheduledPickupAt, pickupLocation.timezone)}
-										</p>
+						}) => {
+							const route = [pickupLocationName, activityLocation?.name, dropoffLocation.name]
+								.filter((name): name is string => Boolean(name))
+								.join(' → ');
+
+							return (
+								<Link
+									key={id}
+									href={`/bookings/${id}`}
+									className="grid gap-3 px-5 py-4 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-600 sm:grid-cols-[minmax(9rem,0.8fr)_minmax(13rem,1fr)_minmax(0,1.5fr)_auto] sm:items-center"
+								>
+									<p className="truncate font-semibold text-gray-950">
+										{firstName} {lastName}
+									</p>
+									<p className="text-sm text-gray-600">
+										{formatBookingPickup(scheduledPickupAt, timezone)}
+									</p>
+									<p className="truncate text-sm font-medium text-gray-800">{route}</p>
+									<div className="justify-self-start sm:justify-self-end">
+										<BookingStatusBadge status={displayStatus({ status, expiresAt })} />
 									</div>
-									<BookingStatusBadge status={status} />
-								</div>
-								<div className="mt-5 border-t border-gray-100 pt-4">
-									<BookingRoute
-										pickup={pickupLocation.name}
-										activity={activityLocation?.name}
-										dropoff={dropoffLocation.name}
-									/>
-								</div>
-								<div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3 text-xs font-medium text-gray-500">
-									<span>{bookingsText.details.minutes(estimatedDurationMin)}</span>
-									<ChevronRightIcon />
-								</div>
-							</Link>
-						),
+								</Link>
+							);
+						},
 					)}
 				</div>
 			)}

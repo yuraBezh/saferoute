@@ -9,6 +9,9 @@ import { bookingsText } from '@/lib/content/bookings-text';
 import { getBookableChildrenForCurrentUser } from '@/lib/data/bookings';
 import { getLocationsForCurrentUser } from '@/lib/data/locations';
 
+const { title, description } = bookingFormText;
+const { title: bookingsTitle } = bookingsText;
+
 export default async function NewBookingPage() {
 	const [children, locations] = await Promise.all([
 		getBookableChildrenForCurrentUser(),
@@ -18,11 +21,11 @@ export default async function NewBookingPage() {
 	return (
 		<PageContainer size="form">
 			<BackLink href="/bookings" className="mb-5">
-				{bookingsText.title}
+				{bookingsTitle}
 			</BackLink>
 			<header className="mb-5">
-				<PageTitle>{bookingFormText.title}</PageTitle>
-				<PageDescription>{bookingFormText.description}</PageDescription>
+				<PageTitle>{title}</PageTitle>
+				<PageDescription>{description}</PageDescription>
 			</header>
 			<BookingForm
 				action={createBookingAction}

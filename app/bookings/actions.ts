@@ -13,6 +13,15 @@ import {
 import { fromUtc } from '@/lib/date';
 import { createBookingSchema } from '@/lib/validation/booking';
 
+const {
+	validationError,
+	saveError,
+	childNotBookableError,
+	pickupInPastError,
+	overlappingBookingError,
+	fields: { pickupLocationId: pickupLocationText },
+} = bookingFormText;
+
 export type BookingFormState = {
 	message: string;
 	errors?: {
@@ -28,7 +37,7 @@ export type BookingFormState = {
 };
 
 const pickupLocationError = (error: string): BookingFormState => ({
-	message: bookingFormText.validationError,
+	message: validationError,
 	errors: { pickupLocationId: [error] },
 });
 
@@ -36,16 +45,16 @@ const createErrorState = (error: unknown): BookingFormState => {
 	if (error instanceof Error) {
 		switch (error.message) {
 			case BOOKING_DATA_ERRORS.childNotBookable:
-				return { message: bookingFormText.childNotBookableError };
+				return { message: childNotBookableError };
 			case BOOKING_DATA_ERRORS.pickupInPast:
-				return { message: bookingFormText.pickupInPastError };
+				return { message: pickupInPastError };
 			case BOOKING_DATA_ERRORS.overlappingBooking:
-				return { message: bookingFormText.overlappingBookingError };
+				return { message: overlappingBookingError };
 		}
 	}
 
 	console.error('Failed to create booking', error);
-	return { message: bookingFormText.saveError };
+	return { message: saveError };
 };
 
 export async function createBookingAction(
@@ -54,7 +63,7 @@ export async function createBookingAction(
 ): Promise<BookingFormState> {
 	const pickupLocationValue = formData.get('pickupLocationId');
 	if (typeof pickupLocationValue !== 'string' || !pickupLocationValue.trim()) {
-		return pickupLocationError(bookingFormText.fields.pickupLocationId.required);
+		return pickupLocationError(pickupLocationText.required);
 	}
 
 	const pickupLocationId = pickupLocationValue.trim();
@@ -66,7 +75,7 @@ export async function createBookingAction(
 	}
 
 	if (!pickupLocation) {
-		return pickupLocationError(bookingFormText.fields.pickupLocationId.invalid);
+		return pickupLocationError(pickupLocationText.invalid);
 	}
 
 	const todayAtPickupLocation = fromUtc(new Date(), pickupLocation.timezone).date;
@@ -83,7 +92,7 @@ export async function createBookingAction(
 
 	if (!parsed.success) {
 		return {
-			message: bookingFormText.validationError,
+			message: validationError,
 			errors: z.flattenError(parsed.error).fieldErrors,
 		};
 	}

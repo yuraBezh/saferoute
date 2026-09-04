@@ -46,6 +46,10 @@ export const bookingFormText = {
 		},
 		estimatedDurationMin: {
 			label: 'Estimated duration (minutes)',
+			options: [30, 45, 60, 90, 120, 180].map((minutes) => ({
+				value: String(minutes),
+				label: `${minutes} minutes`,
+			})),
 			invalid: 'Duration must be a whole number between 15 and 480 minutes',
 		},
 		notes: {
