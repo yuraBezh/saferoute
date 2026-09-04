@@ -1,5 +1,6 @@
 import { getCurrentUserId } from '@/lib/auth/current-user';
 import { getBookingExpiresAt } from '@/lib/bookings/time';
+import { BOOKING_DATA_ERRORS } from '@/lib/bookings/errors';
 import { toUtc } from '@/lib/date';
 import { prisma } from '@/lib/prisma';
 import type { BookingInput } from '@/lib/validation/booking';
@@ -89,7 +90,7 @@ export async function createBookingForCurrentUser(data: BookingInput) {
 		where: { id: childId, guardians: { some: { userId, canBook: true } } },
 		select: { id: true },
 	});
-	if (!child) throw new Error('Child not found or booking not allowed');
+	if (!child) throw new Error(BOOKING_DATA_ERRORS.childNotBookable);
 
 	const locationIds = [pickupLocationId, dropoffLocationId, activityLocationId].filter(
 		(id): id is string => Boolean(id),
@@ -103,19 +104,19 @@ export async function createBookingForCurrentUser(data: BookingInput) {
 	});
 
 	if (locations.length !== new Set(locationIds).size) {
-		throw new Error('Location not found or access denied');
+		throw new Error(BOOKING_DATA_ERRORS.locationUnavailable);
 	}
 
 	const pickup = locations.find((location) => location.id === pickupLocationId);
-	if (!pickup) throw new Error('Pickup location not found or access denied');
+	if (!pickup) throw new Error(BOOKING_DATA_ERRORS.pickupLocationUnavailable);
 
 	const scheduledPickupAt = toUtc(date, time, pickup.timezone);
 	if (scheduledPickupAt <= new Date()) {
-		throw new Error('Pickup time is in the past');
+		throw new Error(BOOKING_DATA_ERRORS.pickupInPast);
 	}
 
 	if (await hasOverlappingAcceptedBooking(childId, scheduledPickupAt, estimatedDurationMin)) {
-		throw new Error('This child already has an accepted booking at that time');
+		throw new Error(BOOKING_DATA_ERRORS.overlappingBooking);
 	}
 
 	return prisma.booking.create({
@@ -141,6 +142,6 @@ export async function cancelBookingForCurrentUser(id: string) {
 	});
 
 	if (result.count === 0) {
-		throw new Error('Booking cannot be cancelled');
+		throw new Error(BOOKING_DATA_ERRORS.cannotCancel);
 	}
 }

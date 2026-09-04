@@ -1,4 +1,9 @@
 export const bookingFormText = {
+	validationError: 'Please correct the highlighted fields.',
+	saveError: 'Unable to save the booking. Please try again.',
+	childNotBookableError: 'You no longer have permission to book for this child.',
+	pickupInPastError: 'Pickup time must be in the future.',
+	overlappingBookingError: 'This child already has an accepted booking at that time.',
 	fields: {
 		childId: {
 			required: 'Select a child',
