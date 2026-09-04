@@ -23,6 +23,10 @@ All `Booking` foreign keys use `onDelete: Restrict` so booking history keeps its
 
 Store `scheduledPickupAt` and `expiresAt` as `timestamptz`. Convert input and output using the pickup location's timezone in `lib/date.ts` with `date-fns-tz`.
 
+Form validation rejects calendar dates before the pickup location's current date, but it does not decide whether a time
+earlier on that same date has already passed. After the data layer loads the pickup location and combines the submitted
+date, time, and timezone into a UTC instant, it must reject `scheduledPickupAt <= now` before creating the booking.
+
 A booking expires two hours before pickup:
 
 `expiresAt = scheduledPickupAt - 2 hours`

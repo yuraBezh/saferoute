@@ -2,6 +2,13 @@ import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 export const toDbDate = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 
+export const shiftDateByDays = (iso: string, days: number) => {
+	const date = toDbDate(iso);
+	date.setUTCDate(date.getUTCDate() + days);
+
+	return date.toISOString().slice(0, 10);
+};
+
 export const toUtc = (date: string, time: string, timeZone: string) =>
 	fromZonedTime(`${date}T${time}:00`, timeZone);
 

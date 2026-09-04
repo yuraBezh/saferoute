@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fromUtc, toUtc } from '@/lib/date';
+import { fromUtc, shiftDateByDays, toUtc } from '@/lib/date';
 
 const timeZoneFixture = 'America/Chicago';
 
@@ -20,5 +20,11 @@ describe('zoned date and time conversion', () => {
 			date: '2026-09-15',
 			time: '15:30',
 		});
+	});
+});
+
+describe('calendar date arithmetic', () => {
+	it('shifts a date across the end of the year', () => {
+		expect(shiftDateByDays('2026-12-31', 30)).toBe('2027-01-30');
 	});
 });
