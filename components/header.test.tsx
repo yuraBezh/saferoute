@@ -8,7 +8,7 @@ const {
 	signIn,
 	signOut,
 	fallbackInitial,
-	navigation: { children, locations, assignments, profile, becomeCaregiver },
+	navigation: { bookings, children, locations, assignments, profile, becomeCaregiver },
 } = headerText;
 
 const mocks = vi.hoisted(() => ({
@@ -36,6 +36,7 @@ const userFixture = {
 const routesFixture = {
 	home: '/',
 	children: '/children',
+	bookings: '/bookings',
 	locations: '/locations',
 	signInForParent: '/signin?callbackUrl=/children',
 	caregiverOnboarding: '/caregiver/onboarding',
@@ -75,6 +76,9 @@ describe('Header', () => {
 		expect(screen.getByRole('link', { name: children }).getAttribute('href')).toBe(
 			routesFixture.children,
 		);
+		expect(screen.getByRole('link', { name: bookings }).getAttribute('href')).toBe(
+			routesFixture.bookings,
+		);
 		expect(screen.getByRole('link', { name: locations }).getAttribute('href')).toBe(
 			routesFixture.locations,
 		);
@@ -104,6 +108,7 @@ describe('Header', () => {
 		expect(screen.getByRole('link', { name: assignments })).toBeDefined();
 		expect(screen.getByRole('link', { name: profile })).toBeDefined();
 		expect(screen.queryByRole('link', { name: children })).toBeNull();
+		expect(screen.queryByRole('link', { name: bookings })).toBeNull();
 		expect(screen.queryByRole('link', { name: locations })).toBeNull();
 		expect(screen.queryByRole('link', { name: becomeCaregiver })).toBeNull();
 	});
@@ -116,7 +121,7 @@ describe('Header', () => {
 
 		render(await Header());
 
-		for (const label of [children, locations, assignments, profile]) {
+		for (const label of [bookings, children, locations, assignments, profile]) {
 			expect(screen.getByRole('link', { name: label })).toBeDefined();
 		}
 		expect(screen.queryByRole('link', { name: becomeCaregiver })).toBeNull();
