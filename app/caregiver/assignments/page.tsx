@@ -1,5 +1,6 @@
 import { CaregiverStatus, UserRole } from '@/generated/prisma/enums';
 import { AcceptedBookingCard } from '@/app/caregiver/assignments/accepted-booking-card';
+import { AssignmentsSection } from '@/app/caregiver/assignments/assignments-section';
 import { AvailableBookingCard } from '@/app/caregiver/assignments/available-booking-card';
 import { PageContainer } from '@/components/ui/page-container';
 import { PageDescription } from '@/components/ui/page-description';
@@ -55,39 +56,27 @@ export default async function AssignmentsPage() {
 		<PageContainer>
 			{assignmentsHeader}
 			<div className="space-y-10">
-				<section aria-labelledby="available-bookings-title">
-					<h2 id="available-bookings-title" className="text-lg font-semibold text-gray-950">
-						{availableTitle}
-					</h2>
-					{availableBookings.length === 0 ? (
-						<p className="mt-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center text-sm text-gray-600">
-							{availableEmpty}
-						</p>
-					) : (
-						<ul className="mt-3 space-y-3">
-							{availableBookings.map((booking) => (
-								<AvailableBookingCard key={booking.id} booking={booking} />
-							))}
-						</ul>
-					)}
-				</section>
+				<AssignmentsSection
+					id="available-bookings-title"
+					title={availableTitle}
+					emptyMessage={availableEmpty}
+					isEmpty={availableBookings.length === 0}
+				>
+					{availableBookings.map((booking) => (
+						<AvailableBookingCard key={booking.id} booking={booking} />
+					))}
+				</AssignmentsSection>
 
-				<section aria-labelledby="accepted-bookings-title">
-					<h2 id="accepted-bookings-title" className="text-lg font-semibold text-gray-950">
-						{acceptedTitle}
-					</h2>
-					{acceptedBookings.length === 0 ? (
-						<p className="mt-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center text-sm text-gray-600">
-							{acceptedEmpty}
-						</p>
-					) : (
-						<ul className="mt-3 space-y-4">
-							{acceptedBookings.map((booking) => (
-								<AcceptedBookingCard key={booking.id} booking={booking} />
-							))}
-						</ul>
-					)}
-				</section>
+				<AssignmentsSection
+					id="accepted-bookings-title"
+					title={acceptedTitle}
+					emptyMessage={acceptedEmpty}
+					isEmpty={acceptedBookings.length === 0}
+				>
+					{acceptedBookings.map((booking) => (
+						<AcceptedBookingCard key={booking.id} booking={booking} />
+					))}
+				</AssignmentsSection>
 			</div>
 		</PageContainer>
 	);
