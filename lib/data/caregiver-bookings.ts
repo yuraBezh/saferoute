@@ -72,6 +72,7 @@ export async function getAvailableBookingsForCurrentCaregiver() {
 		where: {
 			status: 'PENDING',
 			caregiverUserId: null,
+			requestedByUserId: { not: userId },
 			expiresAt: { gt: new Date() },
 		},
 		include: AVAILABLE_INCLUDE,
@@ -153,6 +154,7 @@ async function acceptBookingInTransaction(
 		WHERE "id" = ${bookingId}
 			AND "status" = 'PENDING'
 			AND "caregiverUserId" IS NULL
+			AND "requestedByUserId" <> ${caregiverUserId}
 			AND "expiresAt" > CURRENT_TIMESTAMP
 			AND EXISTS (
 				SELECT 1 FROM "CaregiverProfile"

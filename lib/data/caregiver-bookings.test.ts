@@ -97,6 +97,18 @@ describe('caregiver booking data access', () => {
 		expect(consoleWarn).toHaveBeenCalledOnce();
 	});
 
+	it('excludes bookings requested by the current caregiver', async () => {
+		await getAvailableBookingsForCurrentCaregiver();
+
+		expect(mocks.findBookings).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: expect.objectContaining({
+					requestedByUserId: { not: caregiver.userId },
+				}),
+			}),
+		);
+	});
+
 	it('requires the caregiver role before accepting a booking', async () => {
 		mocks.requireRole.mockRejectedValue(new Error('Forbidden'));
 
@@ -108,10 +120,17 @@ describe('caregiver booking data access', () => {
 	it('checks caregiver role and verification in the statement that accepts a booking', async () => {
 		await acceptBookingForCurrentCaregiver(booking.id);
 
-		const [, assignedCaregiverId, bookingId, verifiedCaregiverId, caregiverRoleUserId] =
-			mocks.executeRaw.mock.calls[0];
+		const [
+			,
+			assignedCaregiverId,
+			bookingId,
+			requesterExclusionUserId,
+			verifiedCaregiverId,
+			caregiverRoleUserId,
+		] = mocks.executeRaw.mock.calls[0];
 		expect(assignedCaregiverId).toBe(caregiver.userId);
 		expect(bookingId).toBe(booking.id);
+		expect(requesterExclusionUserId).toBe(caregiver.userId);
 		expect(verifiedCaregiverId).toBe(caregiver.userId);
 		expect(caregiverRoleUserId).toBe(caregiver.userId);
 	});
