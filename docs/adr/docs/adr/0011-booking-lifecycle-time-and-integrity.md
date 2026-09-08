@@ -13,7 +13,7 @@ Pickup time is entered in the pickup location's timezone but stored as an exact 
 
 A child may have multiple overlapping `PENDING` bookings, but `ACCEPTED` bookings must not overlap.
 
-Prisma cannot express the PostgreSQL exclusion constraint needed to enforce this rule directly in the schema.
+Prisma cannot express the PostgreSQL exclusion constraints needed to enforce this rule directly in the schema.
 
 ## Decision
 
@@ -37,7 +37,12 @@ For now, expired bookings may still be stored as `PENDING`; the UI derives `EXPI
 
 Overlap is not enforced yet because acceptance is not implemented.
 
-When a booking changes from `PENDING` to `ACCEPTED`, the overlap check and update must run in one Prisma `$transaction` with PostgreSQL `Serializable` isolation and limited retries.
+When a booking changes from `PENDING` to `ACCEPTED`, the overlap check and update must run in one Prisma `$transaction` 
+with PostgreSQL `Serializable` isolation and limited retries.
+
+A manual SQL migration adds partial PostgreSQL exclusion constraints for accepted bookings. 
+One prevents overlapping bookings for the same child and the other prevents overlapping bookings for the same caregiver. 
+Prisma does not model these constraints, so `schema.prisma` documents that they are maintained by SQL migrations.
 
 Two bookings overlap if:
 
@@ -53,12 +58,14 @@ A creation-time overlap check may be added for UX, but it must not block overlap
 
 Referenced children, users, and locations cannot be deleted accidentally.
 
-Serializable transactions protect concurrent acceptance, but PostgreSQL may abort one transaction when two conflicting bookings are accepted at the same time.
+Serializable transactions protect concurrent acceptance, but PostgreSQL may abort one transaction when two conflicting 
+bookings are accepted at the same time. 
+The exclusion constraints remain the final database-level guarantee if an acceptance path omits the friendly pre-check.
 
-A future migration may replace this with a PostgreSQL exclusion constraint for a stronger database-level guarantee.
+An exclusion violation uses PostgreSQL code `23P01`. The data layer converts it to the corresponding child or caregiver conflict error.
 
 ## Open questions
 
-* When should a job persist `EXPIRED` and send notifications?
-* When should overlap enforcement move to a PostgreSQL exclusion constraint?
-* How should recurring bookings create bookings and trips without duplicating scheduling logic?
+- When should a job persist `EXPIRED` and send notifications?
+- When should overlap enforcement move to a PostgreSQL exclusion constraint?
+- How should recurring bookings create bookings and trips without duplicating scheduling logic?
