@@ -146,24 +146,22 @@ async function acceptBookingInTransaction(
 	const { childId, scheduledPickupAt, estimatedDurationMin } = booking;
 
 	if (
-		await hasOverlappingChildBooking(
-			tx,
+		await hasOverlappingChildBooking(tx, {
 			childId,
-			scheduledPickupAt,
-			estimatedDurationMin,
-			bookingId,
-		)
+			startsAt: scheduledPickupAt,
+			durationMin: estimatedDurationMin,
+			excludeBookingId: bookingId,
+		})
 	) {
 		throw new Error(childConflict);
 	}
 
 	if (
-		await hasOverlappingCaregiverBooking(
-			tx,
+		await hasOverlappingCaregiverBooking(tx, {
 			caregiverUserId,
-			scheduledPickupAt,
-			estimatedDurationMin,
-		)
+			startsAt: scheduledPickupAt,
+			durationMin: estimatedDurationMin,
+		})
 	) {
 		throw new Error(caregiverConflict);
 	}

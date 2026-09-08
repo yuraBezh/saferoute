@@ -93,7 +93,13 @@ export async function createBookingForCurrentUser(data: BookingInput) {
 		throw new Error(BOOKING_DATA_ERRORS.pickupInPast);
 	}
 
-	if (await hasOverlappingChildBooking(prisma, childId, scheduledPickupAt, estimatedDurationMin)) {
+	if (
+		await hasOverlappingChildBooking(prisma, {
+			childId,
+			startsAt: scheduledPickupAt,
+			durationMin: estimatedDurationMin,
+		})
+	) {
 		throw new Error(BOOKING_DATA_ERRORS.overlappingBooking);
 	}
 

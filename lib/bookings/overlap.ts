@@ -7,6 +7,19 @@ type BookingInterval = {
 	estimatedDurationMin: number;
 };
 
+type ChildOverlapInput = {
+	childId: string;
+	startsAt: Date;
+	durationMin: number;
+	excludeBookingId?: string;
+};
+
+type CaregiverOverlapInput = {
+	caregiverUserId: string;
+	startsAt: Date;
+	durationMin: number;
+};
+
 export function bookingIntervalsOverlap(first: BookingInterval, second: BookingInterval) {
 	const firstStart = first.scheduledPickupAt.getTime();
 	const secondStart = second.scheduledPickupAt.getTime();
@@ -18,10 +31,7 @@ export function bookingIntervalsOverlap(first: BookingInterval, second: BookingI
 
 export async function hasOverlappingChildBooking(
 	client: TransactionClient,
-	childId: string,
-	startsAt: Date,
-	durationMin: number,
-	excludeBookingId?: string,
+	{ childId, startsAt, durationMin, excludeBookingId }: ChildOverlapInput,
 ) {
 	const endsAt = new Date(startsAt.getTime() + durationMin * MS_PER_MINUTE);
 	const excludedId = excludeBookingId ?? null;
@@ -40,9 +50,7 @@ export async function hasOverlappingChildBooking(
 
 export async function hasOverlappingCaregiverBooking(
 	client: TransactionClient,
-	caregiverUserId: string,
-	startsAt: Date,
-	durationMin: number,
+	{ caregiverUserId, startsAt, durationMin }: CaregiverOverlapInput,
 ) {
 	const endsAt = new Date(startsAt.getTime() + durationMin * MS_PER_MINUTE);
 	const conflicts = await client.$queryRaw<{ id: string }[]>`

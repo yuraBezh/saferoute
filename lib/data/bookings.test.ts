@@ -127,12 +127,11 @@ describe('booking mutations', () => {
 	});
 
 	it('passes typed nulls when no booking is excluded from the overlap check', async () => {
-		await hasOverlappingChildBooking(
-			prisma,
-			input.childId,
-			timing.pickup,
-			input.estimatedDurationMin,
-		);
+		await hasOverlappingChildBooking(prisma, {
+			childId: input.childId,
+			startsAt: timing.pickup,
+			durationMin: input.estimatedDurationMin,
+		});
 
 		const [, childId, firstExcludedId, secondExcludedId] = mocks.queryRaw.mock.calls[0];
 		expect(childId).toBe(input.childId);
@@ -141,13 +140,12 @@ describe('booking mutations', () => {
 	});
 
 	it('passes the same booking id to both exclusion predicates', async () => {
-		await hasOverlappingChildBooking(
-			prisma,
-			input.childId,
-			timing.pickup,
-			input.estimatedDurationMin,
-			booking.id,
-		);
+		await hasOverlappingChildBooking(prisma, {
+			childId: input.childId,
+			startsAt: timing.pickup,
+			durationMin: input.estimatedDurationMin,
+			excludeBookingId: booking.id,
+		});
 
 		const [, , firstExcludedId, secondExcludedId] = mocks.queryRaw.mock.calls[0];
 		expect(firstExcludedId).toBe(booking.id);
