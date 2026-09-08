@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { Button } from '@/components/ui/button';
 import { assignmentsText } from '@/lib/content/assignments-text';
 import { acceptBookingAction, type AcceptBookingState } from './actions';
 
@@ -27,14 +28,14 @@ export function AcceptBookingForm({
 
 	return (
 		<form action={formAction} className="sm:w-64 sm:text-right">
-			<button
+			<Button
 				type="submit"
 				disabled={isDisabled}
 				aria-busy={isPending}
-				className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+				className="w-full sm:w-auto"
 			>
 				{isPending ? acceptPendingLabel : acceptLabel}
-			</button>
+			</Button>
 			{hasError && (
 				<p role="alert" className="mt-2 max-w-64 text-sm text-red-700">
 					{state.error}
