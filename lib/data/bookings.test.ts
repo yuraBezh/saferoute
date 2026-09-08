@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BookingInput } from '@/lib/validation/booking';
+import { hasOverlappingChildBooking } from '@/lib/bookings/overlap';
+import { prisma } from '@/lib/prisma';
 
 const mocks = vi.hoisted(() => ({
 	getCurrentUserId: vi.fn(),
@@ -20,11 +22,7 @@ vi.mock('@/lib/prisma', () => ({
 	},
 }));
 
-import {
-	cancelBookingForCurrentUser,
-	createBookingForCurrentUser,
-	hasOverlappingAcceptedBooking,
-} from './bookings';
+import { cancelBookingForCurrentUser, createBookingForCurrentUser } from './bookings';
 
 const user = { id: 'parent-1' };
 const pickup = { id: 'pickup-1', timezone: 'America/Chicago' };
@@ -129,7 +127,11 @@ describe('booking mutations', () => {
 	});
 
 	it('passes typed nulls when no booking is excluded from the overlap check', async () => {
-		await hasOverlappingAcceptedBooking(input.childId, timing.pickup, input.estimatedDurationMin);
+		await hasOverlappingChildBooking(prisma, {
+			childId: input.childId,
+			startsAt: timing.pickup,
+			durationMin: input.estimatedDurationMin,
+		});
 
 		const [, childId, firstExcludedId, secondExcludedId] = mocks.queryRaw.mock.calls[0];
 		expect(childId).toBe(input.childId);
@@ -138,12 +140,12 @@ describe('booking mutations', () => {
 	});
 
 	it('passes the same booking id to both exclusion predicates', async () => {
-		await hasOverlappingAcceptedBooking(
-			input.childId,
-			timing.pickup,
-			input.estimatedDurationMin,
-			booking.id,
-		);
+		await hasOverlappingChildBooking(prisma, {
+			childId: input.childId,
+			startsAt: timing.pickup,
+			durationMin: input.estimatedDurationMin,
+			excludeBookingId: booking.id,
+		});
 
 		const [, , firstExcludedId, secondExcludedId] = mocks.queryRaw.mock.calls[0];
 		expect(firstExcludedId).toBe(booking.id);

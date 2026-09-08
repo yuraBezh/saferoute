@@ -1,0 +1,28 @@
+export const assignmentsText = {
+	title: 'Assignments',
+	description: 'Choose an available ride and review the details of trips you have accepted.',
+	availableTitle: 'Available bookings',
+	availableEmpty: 'No bookings available right now.',
+	acceptedTitle: 'My assignments',
+	acceptedEmpty: 'You have not accepted any bookings yet.',
+	acceptLabel: 'Accept',
+	acceptPendingLabel: 'Accepting…',
+	scheduleConflict: 'Conflicts with your schedule.',
+	duration: (minutes: number) => `${minutes} min`,
+	parentContact: 'Parent contact',
+	phoneUnavailable: 'Phone number not provided',
+	notes: 'Notes',
+	noNotes: 'No notes provided.',
+
+	verificationRequiredTitle: 'Verification required',
+	notVerifiedError: 'Your profile is not verified yet.',
+	notAvailableError: 'This booking is no longer available.',
+	childConflictError: 'This child already has a booking at that time.',
+	caregiverConflictError: 'You already have a booking at that time.',
+	saveError: 'Something went wrong. Please try again.',
+	error: {
+		title: 'Assignments could not be loaded',
+		description: 'The problem may be temporary. Try loading your assignments again.',
+		retry: 'Try again',
+	},
+} as const;

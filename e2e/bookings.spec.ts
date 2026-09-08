@@ -8,7 +8,7 @@ import {
 	createOwnedLocation,
 	requireE2EEnvironmentVariable,
 } from '@/e2e/helpers/database';
-import { shiftDateByDays } from '@/lib/date';
+import { MS_PER_HOUR, MS_PER_MINUTE, shiftDateByDays } from '@/lib/date';
 import { bookingFormText } from '@/lib/content/booking-form-text';
 import { bookingsText } from '@/lib/content/bookings-text';
 import { headerText } from '@/lib/content/header-text';
@@ -156,8 +156,8 @@ test('creates a booking through the form', async ({ page }) => {
 test('displays an expired pending booking as expired', async ({ page }) => {
 	const now = Date.now();
 	const booking = await createBookingFixture({
-		scheduledPickupAt: new Date(now + 60 * 60_000),
-		expiresAt: new Date(now - 60_000),
+		scheduledPickupAt: new Date(now + MS_PER_HOUR),
+		expiresAt: new Date(now - MS_PER_MINUTE),
 	});
 
 	await page.goto(routes.bookings);

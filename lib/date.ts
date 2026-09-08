@@ -1,5 +1,8 @@
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 
+export const MS_PER_MINUTE = 60000;
+export const MS_PER_HOUR = 60 * MS_PER_MINUTE;
+
 export const toDbDate = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 
 export const shiftDateByDays = (iso: string, days: number) => {

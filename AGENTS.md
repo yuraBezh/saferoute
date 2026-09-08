@@ -25,6 +25,13 @@ export const BOOKING = { confirmCta: 'Confirm pickup' } as const;
 
 String literals elsewhere in tests are a review blocker.
 
+## UI components
+
+- Before creating raw interactive elements or duplicating UI styles, check `components/ui` and existing application components.
+- Reuse a shared component whenever it supports the required behavior.
+- Use raw `<button>`, `<input>`, `<select>`, and `<textarea>` elements only when no suitable shared component exists.
+- When a shared component is unsuitable, explain why before adding a local implementation.
+
 ## Destructuring
 
 - Destructure repeated property access when the same object path is used more than once.

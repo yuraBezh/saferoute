@@ -113,6 +113,8 @@ enum BookingStatus {
   EXPIRED
 }
 
+/// Accepted-booking overlap constraints are managed by a manual SQL migration because Prisma
+/// does not represent PostgreSQL exclusion constraints in the schema language.
 model Booking {
   id                   String        @id @default(cuid())
   childId              String

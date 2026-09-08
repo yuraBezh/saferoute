@@ -9,7 +9,7 @@ import {
 	VerificationDocumentStatus,
 	VerificationDocumentType,
 } from '@/generated/prisma/enums';
-import { fromUtc, shiftDateByDays, toDbDate, toUtc } from '@/lib/date';
+import { fromUtc, MS_PER_HOUR, shiftDateByDays, toDbDate, toUtc } from '@/lib/date';
 import { getBookingExpiresAt } from '@/lib/bookings/time';
 
 async function createE2ESession(userId: string, environmentVariable: string) {
@@ -21,7 +21,7 @@ async function createE2ESession(userId: string, environmentVariable: string) {
 		data: {
 			userId,
 			sessionToken,
-			expires: new Date(Date.now() + 60 * 60 * 1000),
+			expires: new Date(Date.now() + MS_PER_HOUR),
 		},
 	});
 }
