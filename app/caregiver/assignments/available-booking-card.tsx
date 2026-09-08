@@ -1,13 +1,12 @@
 import { formatBookingPickup } from '@/lib/bookings/format';
 import { assignmentsText } from '@/lib/content/assignments-text';
 import type { getAvailableBookingsForCurrentCaregiver } from '@/lib/data/caregiver-bookings';
-import { acceptBookingAction } from './actions';
+import { AcceptBookingForm } from './accept-booking-form';
 import { AssignmentRoute, type AssignmentRoutePoint } from './assignment-route';
 
-const { acceptLabel, duration } = assignmentsText;
+const { duration } = assignmentsText;
 
 type AvailableBooking = Awaited<ReturnType<typeof getAvailableBookingsForCurrentCaregiver>>[number];
-type FormAction = (formData: FormData) => Promise<void>;
 
 const toCityRoutePoint = ({
 	name,
@@ -29,9 +28,9 @@ export function AvailableBookingCard({ booking }: { booking: AvailableBooking })
 		pickupLocation,
 		activityLocation,
 		dropoffLocation,
+		hasCaregiverConflict,
 	} = booking;
 	const { timezone } = pickupLocation;
-	const acceptAction: FormAction = acceptBookingAction.bind(null, id);
 
 	return (
 		<li className="grid gap-5 rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(15rem,1.15fr)_auto] sm:items-start">
@@ -47,14 +46,7 @@ export function AvailableBookingCard({ booking }: { booking: AvailableBooking })
 				activity={activityLocation ? toCityRoutePoint(activityLocation) : null}
 				dropoff={toCityRoutePoint(dropoffLocation)}
 			/>
-			<form action={acceptAction}>
-				<button
-					type="submit"
-					className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:w-auto"
-				>
-					{acceptLabel}
-				</button>
-			</form>
+			<AcceptBookingForm bookingId={id} hasCaregiverConflict={hasCaregiverConflict} />
 		</li>
 	);
 }

@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
 	findBooking: vi.fn(),
 	hasChildOverlap: vi.fn(),
 	hasCaregiverOverlap: vi.fn(),
+	bookingIntervalsOverlap: vi.fn(),
 	executeRaw: vi.fn(),
 	transaction: vi.fn(),
 }));
@@ -24,6 +25,7 @@ vi.mock('@/lib/data/caregivers', () => ({ getCaregiverStatus: mocks.getCaregiver
 vi.mock('@/lib/bookings/overlap', () => ({
 	hasOverlappingChildBooking: mocks.hasChildOverlap,
 	hasOverlappingCaregiverBooking: mocks.hasCaregiverOverlap,
+	bookingIntervalsOverlap: mocks.bookingIntervalsOverlap,
 }));
 vi.mock('@/lib/prisma', () => ({
 	prisma: {
@@ -67,6 +69,7 @@ describe('caregiver booking data access', () => {
 		mocks.findBooking.mockResolvedValue(booking);
 		mocks.hasChildOverlap.mockResolvedValue(false);
 		mocks.hasCaregiverOverlap.mockResolvedValue(false);
+		mocks.bookingIntervalsOverlap.mockReturnValue(false);
 		mocks.executeRaw.mockResolvedValue(1);
 		mocks.transaction.mockImplementation((operation) =>
 			operation({
@@ -107,6 +110,15 @@ describe('caregiver booking data access', () => {
 				}),
 			}),
 		);
+	});
+
+	it('marks a booking that conflicts with the caregiver schedule', async () => {
+		mocks.bookingIntervalsOverlap.mockReturnValue(true);
+
+		await expect(getAvailableBookingsForCurrentCaregiver()).resolves.toEqual([
+			{ ...booking, hasCaregiverConflict: true },
+		]);
+		expect(mocks.bookingIntervalsOverlap).toHaveBeenCalledWith(booking, booking);
 	});
 
 	it('requires the caregiver role before accepting a booking', async () => {

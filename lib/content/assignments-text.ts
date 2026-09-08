@@ -7,6 +7,7 @@ export const assignmentsText = {
 	acceptedEmpty: 'You have not accepted any bookings yet.',
 	acceptLabel: 'Accept',
 	acceptPendingLabel: 'Accepting…',
+	scheduleConflict: 'Conflicts with your schedule.',
 	duration: (minutes: number) => `${minutes} min`,
 	parentContact: 'Parent contact',
 	phoneUnavailable: 'Phone number not provided',

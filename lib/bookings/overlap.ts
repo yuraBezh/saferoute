@@ -2,6 +2,19 @@ import type { Prisma } from '@/generated/prisma/client';
 import { MS_PER_MINUTE } from '@/lib/date';
 
 type TransactionClient = Prisma.TransactionClient;
+type BookingInterval = {
+	scheduledPickupAt: Date;
+	estimatedDurationMin: number;
+};
+
+export function bookingIntervalsOverlap(first: BookingInterval, second: BookingInterval) {
+	const firstStart = first.scheduledPickupAt.getTime();
+	const secondStart = second.scheduledPickupAt.getTime();
+	const firstEnd = firstStart + first.estimatedDurationMin * MS_PER_MINUTE;
+	const secondEnd = secondStart + second.estimatedDurationMin * MS_PER_MINUTE;
+
+	return firstStart < secondEnd && secondStart < firstEnd;
+}
 
 export async function hasOverlappingChildBooking(
 	client: TransactionClient,

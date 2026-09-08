@@ -15,7 +15,15 @@ const {
 	saveError,
 } = assignmentsText;
 
-const getAcceptErrorMessage = (error: unknown): string => {
+export type AcceptBookingState = { error: string | null };
+
+type AcceptBookingAction = (
+	bookingId: string,
+	previousState: AcceptBookingState,
+	formData: FormData,
+) => Promise<AcceptBookingState>;
+
+const getExpectedAcceptErrorMessage = (error: unknown): string | null => {
 	if (error instanceof Error) {
 		switch (error.message) {
 			case notVerified:
@@ -29,17 +37,20 @@ const getAcceptErrorMessage = (error: unknown): string => {
 		}
 	}
 
-	console.error('Failed to accept booking', error);
-	return saveError;
+	return null;
 };
 
-export async function acceptBookingAction(bookingId: string): Promise<void> {
+export const acceptBookingAction: AcceptBookingAction = async (bookingId) => {
 	try {
 		await acceptBookingForCurrentCaregiver(bookingId);
 	} catch (error) {
-		throw new Error(getAcceptErrorMessage(error), { cause: error });
+		const message = getExpectedAcceptErrorMessage(error);
+		if (message) return { error: message };
+
+		console.error('Failed to accept booking', error);
+		throw new Error(saveError, { cause: error });
 	}
 
 	revalidatePath('/caregiver/assignments');
 	redirect('/caregiver/assignments');
-}
+};

@@ -2,7 +2,11 @@ import type { Prisma } from '@/generated/prisma/client';
 import { CaregiverStatus, UserRole } from '@/generated/prisma/enums';
 import { getCurrentUserId } from '@/lib/auth/current-user';
 import { hasRole, requireRole } from '@/lib/auth/roles';
-import { hasOverlappingCaregiverBooking, hasOverlappingChildBooking } from '@/lib/bookings/overlap';
+import {
+	bookingIntervalsOverlap,
+	hasOverlappingCaregiverBooking,
+	hasOverlappingChildBooking,
+} from '@/lib/bookings/overlap';
 import { CAREGIVER_ERRORS } from '@/lib/caregiver/errors';
 import { getCaregiverStatus } from '@/lib/data/caregivers';
 import { hasDatabaseErrorCode, withSerializableRetry } from '@/lib/db/retry';
@@ -68,16 +72,34 @@ export async function getAvailableBookingsForCurrentCaregiver() {
 	const userId = await getVerifiedCaregiverUserIdForRead();
 	if (!userId) return [];
 
-	return prisma.booking.findMany({
-		where: {
-			status: 'PENDING',
-			caregiverUserId: null,
-			requestedByUserId: { not: userId },
-			expiresAt: { gt: new Date() },
-		},
-		include: AVAILABLE_INCLUDE,
-		orderBy: { scheduledPickupAt: 'asc' },
+	const [availableBookings, acceptedBookings] = await Promise.all([
+		prisma.booking.findMany({
+			where: {
+				status: 'PENDING',
+				caregiverUserId: null,
+				requestedByUserId: { not: userId },
+				expiresAt: { gt: new Date() },
+			},
+			include: AVAILABLE_INCLUDE,
+			orderBy: { scheduledPickupAt: 'asc' },
+		}),
+		prisma.booking.findMany({
+			where: { caregiverUserId: userId, status: 'ACCEPTED' },
+			select: { scheduledPickupAt: true, estimatedDurationMin: true },
+		}),
+	]);
+
+	type AvailableBooking = (typeof availableBookings)[number];
+
+	const hasCaregiverConflict = (booking: AvailableBooking) =>
+		acceptedBookings.some((acceptedBooking) => bookingIntervalsOverlap(booking, acceptedBooking));
+
+	const addCaregiverConflict = (booking: AvailableBooking) => ({
+		...booking,
+		hasCaregiverConflict: hasCaregiverConflict(booking),
 	});
+
+	return availableBookings.map(addCaregiverConflict);
 }
 
 const ACCEPTED_INCLUDE = {
