@@ -28,6 +28,7 @@ vi.mock('@/lib/prisma', () => ({
 import {
 	createCaregiverProfileForCurrentUser,
 	getCaregiverProfileForCurrentUser,
+	getCaregiverStatus,
 	updateCaregiverProfileForCurrentUser,
 } from './caregivers';
 
@@ -80,6 +81,17 @@ describe('caregiver data access', () => {
 					include: { reviewedBy: { select: { fullName: true } } },
 				},
 			},
+		});
+	});
+
+	it('returns the current caregiver status without requiring verification', async () => {
+		const { findProfile } = mocks;
+		findProfile.mockResolvedValue({ status: CaregiverStatus.PENDING_VERIFICATION });
+
+		await expect(getCaregiverStatus()).resolves.toBe(CaregiverStatus.PENDING_VERIFICATION);
+		expect(findProfile).toHaveBeenCalledWith({
+			where: { userId: currentUserFixture.id },
+			select: { status: true },
 		});
 	});
 
