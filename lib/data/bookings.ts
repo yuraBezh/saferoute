@@ -1,6 +1,7 @@
 import { getCurrentUserId } from '@/lib/auth/current-user';
 import { getBookingExpiresAt } from '@/lib/bookings/time';
 import { BOOKING_DATA_ERRORS } from '@/lib/bookings/errors';
+import { hasOverlappingChildBooking } from '@/lib/bookings/overlap';
 import { toUtc } from '@/lib/date';
 import { prisma } from '@/lib/prisma';
 import type { BookingInput } from '@/lib/validation/booking';
@@ -50,29 +51,6 @@ export async function getBookableChildrenForCurrentUser() {
 	});
 }
 
-export async function hasOverlappingAcceptedBooking(
-	childId: string,
-	startsAt: Date,
-	durationMin: number,
-	excludeBookingId?: string,
-) {
-	const endsAt = new Date(startsAt.getTime() + durationMin * 60_000);
-	const excludedId = excludeBookingId ?? null;
-
-	// The existing interval's end depends on another column, requiring SQL.
-	const conflicts = await prisma.$queryRaw<{ id: string }[]>`
-		SELECT id FROM "Booking"
-		WHERE "childId" = ${childId}
-			AND "status" = 'ACCEPTED'
-			AND (${excludedId}::text IS NULL OR id <> ${excludedId}::text)
-			AND "scheduledPickupAt" < ${endsAt}
-			AND "scheduledPickupAt" + ("estimatedDurationMin" || ' minutes')::interval > ${startsAt}
-		LIMIT 1
-	`;
-
-	return conflicts.length > 0;
-}
-
 export async function createBookingForCurrentUser(data: BookingInput) {
 	const userId = await getCurrentUserId();
 	const {
@@ -115,7 +93,7 @@ export async function createBookingForCurrentUser(data: BookingInput) {
 		throw new Error(BOOKING_DATA_ERRORS.pickupInPast);
 	}
 
-	if (await hasOverlappingAcceptedBooking(childId, scheduledPickupAt, estimatedDurationMin)) {
+	if (await hasOverlappingChildBooking(prisma, childId, scheduledPickupAt, estimatedDurationMin)) {
 		throw new Error(BOOKING_DATA_ERRORS.overlappingBooking);
 	}
 
