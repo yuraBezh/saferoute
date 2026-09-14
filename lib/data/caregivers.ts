@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { CaregiverStatus, UserRole } from '@/generated/prisma/enums';
 import { getCurrentUserId } from '@/lib/auth/current-user';
 import { requireRole } from '@/lib/auth/roles';
+import { CAREGIVER_ERRORS } from '@/lib/caregiver/errors';
 import { toCents } from '@/lib/money';
 import { prisma } from '@/lib/prisma';
 import type { CaregiverProfileInput } from '@/lib/validation/caregiver';
@@ -72,4 +73,15 @@ export async function updateCaregiverProfileForCurrentUser(data: CaregiverProfil
 		where: { userId, status: { not: CaregiverStatus.SUSPENDED } },
 		data: toProfileData(data),
 	});
+}
+
+export async function selfVerifyCaregiverProfile() {
+	const userId = await getCurrentUserId();
+
+	const result = await prisma.caregiverProfile.updateMany({
+		where: { userId, status: CaregiverStatus.PENDING_VERIFICATION },
+		data: { status: CaregiverStatus.VERIFIED },
+	});
+
+	if (result.count === 0) throw new Error(CAREGIVER_ERRORS.cannotSelfVerify);
 }

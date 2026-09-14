@@ -14,7 +14,6 @@ export const assignmentsText = {
 	notes: 'Notes',
 	noNotes: 'No notes provided.',
 
-	verificationRequiredTitle: 'Verification required',
 	notVerifiedError: 'Your profile is not verified yet.',
 	notAvailableError: 'This booking is no longer available.',
 	childConflictError: 'This child already has a booking at that time.',

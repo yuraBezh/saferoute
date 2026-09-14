@@ -3,4 +3,5 @@ export const CAREGIVER_ERRORS = {
 	notAvailable: 'booking/not-available',
 	childConflict: 'booking/child-conflict',
 	caregiverConflict: 'booking/caregiver-conflict',
+	cannotSelfVerify: 'caregiver/cannot-self-verify',
 } as const;

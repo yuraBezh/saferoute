@@ -3,9 +3,11 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { CAREGIVER_ERRORS } from '@/lib/caregiver/errors';
 import { caregiverText } from '@/lib/content/caregiver-text';
 import {
 	createCaregiverProfileForCurrentUser,
+	selfVerifyCaregiverProfile,
 	updateCaregiverProfileForCurrentUser,
 } from '@/lib/data/caregivers';
 import { caregiverProfileSchema } from '@/lib/validation/caregiver';
@@ -73,4 +75,25 @@ export async function updateCaregiverProfileAction(
 
 	revalidatePath('/caregiver');
 	redirect('/caregiver');
+}
+
+export type SelfVerifyState = { message: string };
+
+export async function selfVerifyAction(_prevState: SelfVerifyState): Promise<SelfVerifyState> {
+	void _prevState;
+
+	try {
+		await selfVerifyCaregiverProfile();
+	} catch (error) {
+		if (error instanceof Error && error.message === CAREGIVER_ERRORS.cannotSelfVerify) {
+			return { message: caregiverText.cannotSelfVerifyError };
+		}
+
+		console.error('Failed to self-verify caregiver profile', error);
+		return { message: caregiverText.saveError };
+	}
+
+	revalidatePath('/caregiver/assignments');
+	revalidatePath('/caregiver');
+	return { message: '' };
 }

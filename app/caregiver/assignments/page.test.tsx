@@ -1,26 +1,27 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CaregiverStatus, UserRole } from '@/generated/prisma/enums';
 import { formatBookingPickup } from '@/lib/bookings/format';
 import { assignmentsText } from '@/lib/content/assignments-text';
+import { caregiverText } from '@/lib/content/caregiver-text';
 import { formatAddress } from '@/lib/locations/format-address';
 
+const { availableTitle, acceptedTitle, acceptLabel, availableEmpty, acceptedEmpty, duration } =
+	assignmentsText;
 const {
-	availableTitle,
-	acceptedTitle,
-	acceptLabel,
-	availableEmpty,
-	acceptedEmpty,
-	verificationRequiredTitle,
-	notVerifiedError,
-	duration,
-} = assignmentsText;
+	pendingVerificationTitle,
+	verificationPrototypeExplanation,
+	verifyLabel,
+	unavailableTitle,
+	unavailableDescription,
+} = caregiverText;
 
 const mocks = vi.hoisted(() => ({
 	requireRole: vi.fn(),
 	getCaregiverStatus: vi.fn(),
 	getAvailableBookings: vi.fn(),
 	getAcceptedBookings: vi.fn(),
+	selfVerifyAction: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/roles', () => ({ requireRole: mocks.requireRole }));
@@ -28,6 +29,9 @@ vi.mock('@/lib/data/caregivers', () => ({ getCaregiverStatus: mocks.getCaregiver
 vi.mock('@/lib/data/caregiver-bookings', () => ({
 	getAvailableBookingsForCurrentCaregiver: mocks.getAvailableBookings,
 	getAcceptedBookingsForCurrentCaregiver: mocks.getAcceptedBookings,
+}));
+vi.mock('@/app/caregiver/actions', () => ({
+	selfVerifyAction: mocks.selfVerifyAction,
 }));
 
 import AssignmentsPage from './page';
@@ -76,6 +80,7 @@ describe('AssignmentsPage', () => {
 		mocks.getCaregiverStatus.mockResolvedValue(CaregiverStatus.VERIFIED);
 		mocks.getAvailableBookings.mockResolvedValue([availableBooking]);
 		mocks.getAcceptedBookings.mockResolvedValue([acceptedBooking]);
+		mocks.selfVerifyAction.mockResolvedValue({ message: '' });
 	});
 
 	it('shows available bookings and accepted assignment details to a caregiver', async () => {
@@ -131,14 +136,40 @@ describe('AssignmentsPage', () => {
 		expect(screen.getByText(acceptedEmpty)).toBeDefined();
 	});
 
-	it('shows verification status without loading bookings for an unverified caregiver', async () => {
+	it('offers demo verification without loading bookings for a pending caregiver', async () => {
 		mocks.getCaregiverStatus.mockResolvedValue(CaregiverStatus.PENDING_VERIFICATION);
 
 		render(await AssignmentsPage());
 
-		expect(screen.getByText(verificationRequiredTitle)).toBeDefined();
-		expect(screen.getByText(notVerifiedError)).toBeDefined();
+		expect(screen.getByText(pendingVerificationTitle)).toBeDefined();
+		expect(screen.getByText(verificationPrototypeExplanation)).toBeDefined();
+		expect(screen.getByRole('button', { name: verifyLabel })).toBeDefined();
 		expect(mocks.getAvailableBookings).not.toHaveBeenCalled();
 		expect(mocks.getAcceptedBookings).not.toHaveBeenCalled();
+	});
+
+	it('does not load bookings when the caregiver profile is missing', async () => {
+		mocks.getCaregiverStatus.mockResolvedValue(null);
+
+		render(await AssignmentsPage());
+
+		expect(screen.getByText(unavailableTitle)).toBeDefined();
+		expect(screen.getByText(unavailableDescription)).toBeDefined();
+		expect(screen.queryByRole('button')).toBeNull();
+		expect(mocks.getAvailableBookings).not.toHaveBeenCalled();
+		expect(mocks.getAcceptedBookings).not.toHaveBeenCalled();
+	});
+
+	it('disables the verification button while verification is pending', async () => {
+		mocks.getCaregiverStatus.mockResolvedValue(CaregiverStatus.PENDING_VERIFICATION);
+		mocks.selfVerifyAction.mockImplementationOnce(() => new Promise(() => undefined));
+		render(await AssignmentsPage());
+
+		fireEvent.click(screen.getByRole('button', { name: verifyLabel }));
+
+		await waitFor(() => {
+			const button = screen.getByRole('button', { name: caregiverText.verifyingLabel });
+			expect((button as HTMLButtonElement).disabled).toBe(true);
+		});
 	});
 });

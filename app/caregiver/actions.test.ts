@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CAREGIVER_ERRORS } from '@/lib/caregiver/errors';
 import { caregiverText } from '@/lib/content/caregiver-text';
 
 const mocks = vi.hoisted(() => ({
 	createProfile: vi.fn(),
+	selfVerifyProfile: vi.fn(),
 	updateProfile: vi.fn(),
 	revalidatePath: vi.fn(),
 	redirect: vi.fn(),
@@ -10,6 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/data/caregivers', () => ({
 	createCaregiverProfileForCurrentUser: mocks.createProfile,
+	selfVerifyCaregiverProfile: mocks.selfVerifyProfile,
 	updateCaregiverProfileForCurrentUser: mocks.updateProfile,
 }));
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
@@ -17,11 +20,13 @@ vi.mock('next/navigation', () => ({ redirect: mocks.redirect }));
 
 import {
 	createCaregiverProfileAction,
+	selfVerifyAction,
 	type CaregiverFormState,
 	updateCaregiverProfileAction,
 } from './actions';
 
 const initialState: CaregiverFormState = { message: '', errors: {} };
+const selfVerifyInitialState = { message: '' };
 const profileFixture = {
 	bio: '  Experienced caregiver  ',
 	hourlyRate: '25.50',
@@ -103,6 +108,39 @@ describe('caregiver profile actions', () => {
 		await expect(
 			updateCaregiverProfileAction(initialState, createFormData(profileFixture)),
 		).resolves.toEqual({ message: caregiverText.edit.saveError, errors: {} });
+		consoleError.mockRestore();
+	});
+
+	it('self-verifies the current profile and revalidates caregiver pages', async () => {
+		await expect(selfVerifyAction(selfVerifyInitialState)).resolves.toEqual({ message: '' });
+
+		expect(mocks.selfVerifyProfile).toHaveBeenCalledOnce();
+		expect(mocks.revalidatePath).toHaveBeenCalledWith('/caregiver/assignments');
+		expect(mocks.revalidatePath).toHaveBeenCalledWith('/caregiver');
+		expect(mocks.redirect).not.toHaveBeenCalled();
+	});
+
+	it('returns the expected message when the profile cannot self-verify', async () => {
+		mocks.selfVerifyProfile.mockRejectedValue(new Error(CAREGIVER_ERRORS.cannotSelfVerify));
+
+		await expect(selfVerifyAction(selfVerifyInitialState)).resolves.toEqual({
+			message: caregiverText.cannotSelfVerifyError,
+		});
+		expect(mocks.revalidatePath).not.toHaveBeenCalled();
+	});
+
+	it('returns a general message when self-verification fails', async () => {
+		const errorFixture = new Error('Database unavailable');
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		mocks.selfVerifyProfile.mockRejectedValue(errorFixture);
+
+		await expect(selfVerifyAction(selfVerifyInitialState)).resolves.toEqual({
+			message: caregiverText.saveError,
+		});
+		expect(consoleError).toHaveBeenCalledWith(
+			'Failed to self-verify caregiver profile',
+			errorFixture,
+		);
 		consoleError.mockRestore();
 	});
 });
