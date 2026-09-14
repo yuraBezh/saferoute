@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CaregiverStatus, UserRole } from '@/generated/prisma/enums';
+import { CAREGIVER_ERRORS } from '@/lib/caregiver/errors';
 import type { CaregiverProfileInput } from '@/lib/validation/caregiver';
 
 const mocks = vi.hoisted(() => ({
@@ -29,6 +30,7 @@ import {
 	createCaregiverProfileForCurrentUser,
 	getCaregiverProfileForCurrentUser,
 	getCaregiverStatus,
+	selfVerifyCaregiverProfile,
 	updateCaregiverProfileForCurrentUser,
 } from './caregivers';
 
@@ -153,5 +155,25 @@ describe('caregiver data access', () => {
 		mocks.updateProfiles.mockResolvedValue(resultFixture);
 
 		await expect(updateCaregiverProfileForCurrentUser(inputFixture)).resolves.toBe(resultFixture);
+	});
+
+	it('self-verifies only the current pending caregiver profile', async () => {
+		mocks.updateProfiles.mockResolvedValue({ count: 1 });
+
+		await selfVerifyCaregiverProfile();
+
+		expect(mocks.updateProfiles).toHaveBeenCalledWith({
+			where: {
+				userId: currentUserFixture.id,
+				status: CaregiverStatus.PENDING_VERIFICATION,
+			},
+			data: { status: CaregiverStatus.VERIFIED },
+		});
+	});
+
+	it('rejects self-verification when no pending profile is updated', async () => {
+		mocks.updateProfiles.mockResolvedValue({ count: 0 });
+
+		await expect(selfVerifyCaregiverProfile()).rejects.toThrow(CAREGIVER_ERRORS.cannotSelfVerify);
 	});
 });
