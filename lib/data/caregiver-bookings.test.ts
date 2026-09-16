@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CaregiverStatus, UserRole } from '@/generated/prisma/enums';
+import { CaregiverStatus, TripStatus, UserRole } from '@/generated/prisma/enums';
 import { CAREGIVER_ERRORS } from '@/lib/caregiver/errors';
+import { TRIP_EVENT_TYPES } from '@/lib/trips/event-types';
 
 const mocks = vi.hoisted(() => ({
 	getCurrentUserId: vi.fn(),
@@ -14,6 +15,9 @@ const mocks = vi.hoisted(() => ({
 	bookingIntervalsOverlap: vi.fn(),
 	executeRaw: vi.fn(),
 	transaction: vi.fn(),
+	createTrip: vi.fn(),
+	createTripEvent: vi.fn(),
+	generatePickupPin: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/current-user', () => ({ getCurrentUserId: mocks.getCurrentUserId }));
@@ -27,6 +31,7 @@ vi.mock('@/lib/bookings/overlap', () => ({
 	hasOverlappingCaregiverBooking: mocks.hasCaregiverOverlap,
 	bookingIntervalsOverlap: mocks.bookingIntervalsOverlap,
 }));
+vi.mock('@/lib/trips/pin', () => ({ generatePickupPin: mocks.generatePickupPin }));
 vi.mock('@/lib/prisma', () => ({
 	prisma: {
 		booking: {
@@ -51,6 +56,8 @@ const booking = {
 	scheduledPickupAt: new Date('2026-09-15T20:30:00.000Z'),
 	estimatedDurationMin: 45,
 };
+const trip = { id: 'trip-1' };
+const pickupPin = '012345';
 const childConstraintError = {
 	meta: {
 		code: '23P01',
@@ -71,9 +78,14 @@ describe('caregiver booking data access', () => {
 		mocks.hasCaregiverOverlap.mockResolvedValue(false);
 		mocks.bookingIntervalsOverlap.mockReturnValue(false);
 		mocks.executeRaw.mockResolvedValue(1);
+		mocks.createTrip.mockResolvedValue(trip);
+		mocks.createTripEvent.mockResolvedValue(undefined);
+		mocks.generatePickupPin.mockReturnValue(pickupPin);
 		mocks.transaction.mockImplementation((operation) =>
 			operation({
 				booking: { findFirst: mocks.findBooking },
+				trip: { create: mocks.createTrip },
+				tripEvent: { create: mocks.createTripEvent },
 				$queryRaw: vi.fn(),
 				$executeRaw: mocks.executeRaw,
 			}),
@@ -145,6 +157,29 @@ describe('caregiver booking data access', () => {
 		expect(requesterExclusionUserId).toBe(caregiver.userId);
 		expect(verifiedCaregiverId).toBe(caregiver.userId);
 		expect(caregiverRoleUserId).toBe(caregiver.userId);
+	});
+
+	it('creates a trip and its initial event in the acceptance transaction', async () => {
+		await expect(acceptBookingForCurrentCaregiver(booking.id)).resolves.toBe(trip);
+		expect(mocks.createTrip).toHaveBeenCalledWith({
+			data: {
+				bookingId: booking.id,
+				caregiverUserId: caregiver.userId,
+				childId: booking.childId,
+				pickupPin,
+			},
+			select: { id: true },
+		});
+		expect(mocks.createTripEvent).toHaveBeenCalledWith({
+			data: {
+				tripId: trip.id,
+				type: TRIP_EVENT_TYPES.statusChanged,
+				toStatus: TripStatus.SCHEDULED,
+				actorUserId: caregiver.userId,
+				occurredAt: expect.any(Date),
+				idempotencyKey: `trip-created:${trip.id}`,
+			},
+		});
 	});
 
 	it('diagnoses a verification change after an atomic update matches nothing', async () => {

@@ -21,6 +21,7 @@ model Child {
   updatedAt DateTime        @updatedAt
   guardians ChildGuardian[]
   bookings  Booking[]
+  trips     Trip[]
 }
 
 model User {
@@ -42,6 +43,8 @@ model User {
   reviewedVerificationDocuments VerificationDocument[] @relation("VerificationDocumentReviewer")
   requestedBookings             Booking[]              @relation("BookingRequester")
   caregiverBookings             Booking[]              @relation("BookingCaregiver")
+  caregiverTrips                Trip[]                 @relation("TripCaregiver")
+  tripEvents                    TripEvent[]            @relation("TripEventActor")
 }
 
 enum UserRole {
@@ -136,6 +139,7 @@ model Booking {
   expiresAt            DateTime      @db.Timestamptz(3)
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
+  trip                 Trip?
 
   @@index([status, scheduledPickupAt])
   @@index([requestedByUserId, createdAt])
@@ -236,4 +240,55 @@ model VerificationDocument {
 
   @@index([caregiverProfileId])
   @@index([reviewedByUserId])
+}
+
+enum TripStatus {
+  SCHEDULED
+  EN_ROUTE_TO_SCHOOL
+  CHILD_PICKED_UP
+  AT_ACTIVITY
+  EN_ROUTE_HOME
+  COMPLETED
+  CANCELLED
+}
+
+/// The one-in-progress-trip-per-child constraint is maintained by a partial unique index in a manual
+/// SQL migration because Prisma does not represent partial indexes in the schema language.
+model Trip {
+  id              String      @id @default(cuid())
+  bookingId       String      @unique
+  booking         Booking     @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  caregiverUserId String
+  caregiver       User        @relation("TripCaregiver", fields: [caregiverUserId], references: [id], onDelete: Restrict)
+  childId         String
+  child           Child       @relation(fields: [childId], references: [id], onDelete: Restrict)
+  status          TripStatus  @default(SCHEDULED)
+  pickupPin       String
+  startedAt       DateTime?   @db.Timestamptz(3)
+  completedAt     DateTime?   @db.Timestamptz(3)
+  cancelledAt     DateTime?   @db.Timestamptz(3)
+  version         Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  events          TripEvent[]
+
+  @@index([caregiverUserId, status])
+  @@index([childId, status])
+}
+
+model TripEvent {
+  id             String      @id @default(cuid())
+  tripId         String
+  trip           Trip        @relation(fields: [tripId], references: [id], onDelete: Restrict)
+  type           String
+  fromStatus     TripStatus?
+  toStatus       TripStatus?
+  actorUserId    String?
+  actor          User?       @relation("TripEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  payload        Json?
+  occurredAt     DateTime    @db.Timestamptz(3)
+  recordedAt     DateTime    @default(now()) @db.Timestamptz(3)
+  idempotencyKey String      @unique
+
+  @@index([tripId, occurredAt])
 }

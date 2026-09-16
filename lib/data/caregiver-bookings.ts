@@ -1,4 +1,4 @@
-import type { Prisma } from '@/generated/prisma/client';
+import { Prisma, TripStatus } from '@/generated/prisma/client';
 import { CaregiverStatus, UserRole } from '@/generated/prisma/enums';
 import { getCurrentUserId } from '@/lib/auth/current-user';
 import { hasRole, requireRole } from '@/lib/auth/roles';
@@ -11,6 +11,8 @@ import { CAREGIVER_ERRORS } from '@/lib/caregiver/errors';
 import { getCaregiverStatus } from '@/lib/data/caregivers';
 import { hasDatabaseErrorCode, withSerializableRetry } from '@/lib/db/retry';
 import { prisma } from '@/lib/prisma';
+import { generatePickupPin } from '@/lib/trips/pin';
+import { TRIP_EVENT_TYPES } from '@/lib/trips/event-types';
 
 const { notVerified, notAvailable, childConflict, caregiverConflict } = CAREGIVER_ERRORS;
 const EXCLUSION_VIOLATION = '23P01';
@@ -189,6 +191,29 @@ async function acceptBookingInTransaction(
 	`;
 
 	if (count === 0) throw new AcceptancePreconditionFailed();
+
+	const trip = await tx.trip.create({
+		data: {
+			bookingId,
+			caregiverUserId,
+			childId,
+			pickupPin: generatePickupPin(),
+		},
+		select: { id: true },
+	});
+
+	await tx.tripEvent.create({
+		data: {
+			tripId: trip.id,
+			type: TRIP_EVENT_TYPES.statusChanged,
+			toStatus: TripStatus.SCHEDULED,
+			actorUserId: caregiverUserId,
+			occurredAt: new Date(),
+			idempotencyKey: `trip-created:${trip.id}`,
+		},
+	});
+
+	return trip;
 }
 
 export async function acceptBookingForCurrentCaregiver(bookingId: string) {
