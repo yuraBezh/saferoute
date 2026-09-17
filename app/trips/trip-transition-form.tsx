@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useActionState } from 'react';
-import type { TripStatus } from '@/generated/prisma/enums';
+import { TripStatus } from '@/generated/prisma/enums';
 import { Button } from '@/components/ui/button';
 import { tripText } from '@/lib/content/trip-text';
 import { transitionTripAction, type TripActionState } from './actions';
@@ -24,7 +24,12 @@ export function TripTransitionForm({
 	return (
 		<form action={formAction} className="flex flex-col items-stretch gap-2 sm:items-end">
 			<input type="hidden" name="idempotencyKey" value={idempotencyKey} />
-			<Button type="submit" disabled={isPending} aria-busy={isPending}>
+			<Button
+				type="submit"
+				disabled={isPending}
+				aria-busy={isPending}
+				variant={to === TripStatus.CANCELLED ? 'danger' : 'primary'}
+			>
 				{isPending ? tripText.pendingLabel : label}
 			</Button>
 			{state.message ? (

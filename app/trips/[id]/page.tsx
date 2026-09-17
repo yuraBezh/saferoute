@@ -11,6 +11,7 @@ import { TripTransitionForm } from '../trip-transition-form';
 
 const { statusLabels, actionLabels, caregiverView, currentStatus, route, availableActions } =
 	tripText;
+const { CANCELLED, CHILD_PICKED_UP, EN_ROUTE_HOME } = TripStatus;
 
 const getActionLabel = (status: TripStatus) => actionLabels[status as keyof typeof actionLabels];
 
@@ -23,11 +24,10 @@ export default async function TripPage({ params }: PageProps<'/trips/[id]'>) {
 	const { child, booking, status } = trip;
 	const { pickupLocation, activityLocation, dropoffLocation, activityLocationId } = booking;
 	const transitions = getAvailableTransitions(status, 'CAREGIVER').filter(
-		(to) =>
-			status !== TripStatus.CHILD_PICKED_UP ||
-			activityLocationId ||
-			to === TripStatus.EN_ROUTE_HOME,
+		(to) => status !== CHILD_PICKED_UP || activityLocationId || to === EN_ROUTE_HOME,
 	);
+	const hasPickupAction = transitions.includes(CHILD_PICKED_UP);
+	const hasCancelAction = transitions.includes(CANCELLED);
 
 	return (
 		<PageContainer>
@@ -48,17 +48,28 @@ export default async function TripPage({ params }: PageProps<'/trips/[id]'>) {
 						dropoff={dropoffLocation.name}
 					/>
 				</section>
-				<section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+				<section className="flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
 					<h2 className="text-sm font-semibold tracking-wide text-gray-950 uppercase">
 						{availableActions}
 					</h2>
-					<div className="mt-5 space-y-4">
-						{transitions.map((to) =>
-							to === TripStatus.CHILD_PICKED_UP ? (
-								<PickupForm key={to} tripId={id} />
-							) : (
+					<div className="mt-5 flex flex-1 flex-col">
+						{hasPickupAction ? (
+							<PickupForm
+								tripId={id}
+								cancelAction={
+									hasCancelAction ? (
+										<TripTransitionForm
+											tripId={id}
+											to={CANCELLED}
+											label={getActionLabel(CANCELLED)}
+										/>
+									) : null
+								}
+							/>
+						) : (
+							transitions.map((to) => (
 								<TripTransitionForm key={to} tripId={id} to={to} label={getActionLabel(to)} />
-							),
+							))
 						)}
 					</div>
 				</section>
