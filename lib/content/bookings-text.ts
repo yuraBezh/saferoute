@@ -22,6 +22,7 @@ export const bookingsText = {
 		pickup: 'Pickup',
 		activity: 'Activity stop',
 		dropoff: 'Drop-off',
+		route: 'Route',
 		duration: 'Estimated duration',
 		caregiver: 'Caregiver',
 		notes: 'Notes',

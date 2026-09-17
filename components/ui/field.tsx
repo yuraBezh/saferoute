@@ -1,9 +1,10 @@
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { Input } from '@/components/ui/input';
 
 type FieldProps = ComponentProps<typeof Input> & {
 	id: string;
-	label: string;
+	label: ReactNode;
+	labelAccessory?: ReactNode;
 	optionalLabel?: string;
 	error?: string;
 };
@@ -11,6 +12,7 @@ type FieldProps = ComponentProps<typeof Input> & {
 export function Field({
 	id,
 	label,
+	labelAccessory,
 	optionalLabel,
 	error,
 	...inputProps
@@ -19,17 +21,13 @@ export function Field({
 
 	return (
 		<div>
-			<label
-				className="mb-1.5 block text-sm font-medium text-gray-800"
-				htmlFor={id}
-			>
-				{label}
-				{optionalLabel && (
-					<span className="ml-1 font-normal text-gray-500">
-						{optionalLabel}
-					</span>
-				)}
-			</label>
+			<div className="mb-1.5 flex items-center gap-1.5">
+				<label className="text-sm font-medium text-gray-800" htmlFor={id}>
+					{label}
+					{optionalLabel && <span className="ml-1 font-normal text-gray-500">{optionalLabel}</span>}
+				</label>
+				{labelAccessory}
+			</div>
 			<Input
 				{...inputProps}
 				id={id}

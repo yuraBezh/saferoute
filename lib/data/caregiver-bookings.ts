@@ -105,6 +105,7 @@ export async function getAvailableBookingsForCurrentCaregiver() {
 }
 
 const ACCEPTED_INCLUDE = {
+	trip: { select: { id: true, status: true } },
 	child: { select: { id: true, firstName: true, lastName: true } },
 	requestedBy: { select: { fullName: true, phone: true } },
 	pickupLocation: true,
