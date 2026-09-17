@@ -16,7 +16,7 @@ const caregiverSessionToken = requireE2EEnvironmentVariable('E2E_DUAL_ROLE_SESSI
 const { acceptLabel } = assignmentsText;
 const { actionLabels, openTrip, pinLabel, statusLabels } = tripText;
 
-async function createPendingBooking() {
+async function createPendingBooking(scheduledPickupAt: string) {
 	const suffix = randomUUID().slice(0, 8);
 	const childId = await createOwnedChild(ownerEmail, {
 		firstName: `Trip-${suffix}`,
@@ -45,12 +45,12 @@ async function createPendingBooking() {
 		pickupLocationId,
 		dropoffLocationId,
 		status: BookingStatus.PENDING,
-		scheduledPickupAt: new Date('2090-09-05T20:30:00Z'),
+		scheduledPickupAt: new Date(scheduledPickupAt),
 		estimatedDurationMin: 45,
-		expiresAt: new Date('2090-09-05T18:30:00Z'),
+		expiresAt: new Date(new Date(scheduledPickupAt).getTime() - 2 * 60 * 60 * 1000),
 	});
 
-	return { bookingId, childName: `Trip-${suffix} Rider` };
+	return { bookingId, childName: `Trip-${suffix}` };
 }
 
 test('accepting a booking creates a trip visible to the caregiver and parent', async ({
@@ -60,7 +60,7 @@ test('accepting a booking creates a trip visible to the caregiver and parent', a
 	browser,
 }) => {
 	if (!baseURL) throw new Error('Playwright baseURL is required');
-	const booking = await createPendingBooking();
+	const booking = await createPendingBooking('2090-09-05T20:30:00Z');
 	await authenticate(context, baseURL, caregiverSessionToken);
 
 	await page.goto('/caregiver/assignments');
@@ -87,7 +87,7 @@ test('caregiver pickup PIN validation changes the trip status only for the corre
 	page,
 }) => {
 	if (!baseURL) throw new Error('Playwright baseURL is required');
-	const booking = await createPendingBooking();
+	const booking = await createPendingBooking('2090-09-06T20:30:00Z');
 	await authenticate(context, baseURL, caregiverSessionToken);
 
 	await page.goto('/caregiver/assignments');
