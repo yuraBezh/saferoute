@@ -85,8 +85,9 @@ describe('TripPage', () => {
 
 		await renderPage();
 
-		expect(screen.getByRole('button', { name: tripText.actionLabels.AT_ACTIVITY })).toBeDefined();
-		expect(screen.getByRole('button', { name: tripText.actionLabels.EN_ROUTE_HOME })).toBeDefined();
+		const actions = screen.getAllByRole('button');
+		expect(actions[0].textContent).toBe(tripText.skipActivityAction);
+		expect(actions[1].textContent).toBe(tripText.actionLabels.AT_ACTIVITY);
 		expect(screen.getByText('School → Ballet → Home')).toBeDefined();
 	});
 

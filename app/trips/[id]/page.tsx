@@ -9,8 +9,15 @@ import { tripText } from '@/lib/content/trip-text';
 import { PickupForm } from '../trip-pickup-form';
 import { TripTransitionForm } from '../trip-transition-form';
 
-const { statusLabels, actionLabels, caregiverView, currentStatus, route, availableActions } =
-	tripText;
+const {
+	statusLabels,
+	actionLabels,
+	skipActivityAction,
+	caregiverView,
+	currentStatus,
+	route,
+	availableActions,
+} = tripText;
 const { CANCELLED, CHILD_PICKED_UP, EN_ROUTE_HOME } = TripStatus;
 
 const getActionLabel = (status: TripStatus) => actionLabels[status as keyof typeof actionLabels];
@@ -28,6 +35,8 @@ export default async function TripPage({ params }: PageProps<'/trips/[id]'>) {
 	);
 	const hasPickupAction = transitions.includes(CHILD_PICKED_UP);
 	const hasCancelAction = transitions.includes(CANCELLED);
+	const orderedTransitions =
+		status === CHILD_PICKED_UP && activityLocationId ? [...transitions].reverse() : transitions;
 
 	return (
 		<PageContainer>
@@ -67,9 +76,22 @@ export default async function TripPage({ params }: PageProps<'/trips/[id]'>) {
 								}
 							/>
 						) : (
-							transitions.map((to) => (
-								<TripTransitionForm key={to} tripId={id} to={to} label={getActionLabel(to)} />
-							))
+							<div className="mt-auto flex flex-col items-stretch gap-3 pt-5">
+								{orderedTransitions.map((to) => (
+									<TripTransitionForm
+										key={to}
+										tripId={id}
+										to={to}
+										fullWidth
+										variant={to === EN_ROUTE_HOME && activityLocationId ? 'warning' : undefined}
+										label={
+											to === EN_ROUTE_HOME && activityLocationId
+												? skipActivityAction
+												: getActionLabel(to)
+										}
+									/>
+								))}
+							</div>
 						)}
 					</div>
 				</section>

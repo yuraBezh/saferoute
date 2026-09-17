@@ -25,4 +25,34 @@ describe('TripTransitionForm', () => {
 			screen.getByRole('button', { name: tripText.actionLabels.CANCELLED }).className,
 		).toContain('bg-red-600');
 	});
+
+	it('renders arrival at the activity as a success action', () => {
+		render(
+			<TripTransitionForm
+				tripId="trip-1"
+				to={TripStatus.AT_ACTIVITY}
+				label={tripText.actionLabels.AT_ACTIVITY}
+				fullWidth
+			/>,
+		);
+
+		const button = screen.getByRole('button', { name: tripText.actionLabels.AT_ACTIVITY });
+		expect(button.className).toContain('bg-green-600');
+		expect(button.className).toContain('w-full');
+	});
+
+	it('supports a warning style for a secondary trip action', () => {
+		render(
+			<TripTransitionForm
+				tripId="trip-1"
+				to={TripStatus.EN_ROUTE_HOME}
+				label={tripText.skipActivityAction}
+				variant="warning"
+			/>,
+		);
+
+		expect(screen.getByRole('button', { name: tripText.skipActivityAction }).className).toContain(
+			'bg-amber-100',
+		);
+	});
 });
