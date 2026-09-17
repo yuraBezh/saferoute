@@ -14,7 +14,7 @@ export const tripText = {
 		AT_ACTIVITY: 'Arrived at the activity',
 		EN_ROUTE_HOME: 'Head home',
 		COMPLETED: 'Complete the trip',
-		CANCELLED: 'Cancel',
+		CANCELLED: 'Cancel the trip',
 	},
 	pinLabel: 'Pickup code',
 	pinHint: 'Ask the parent for the six-digit code.',

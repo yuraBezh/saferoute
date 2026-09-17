@@ -27,12 +27,8 @@ export const PickupForm = ({
 				<input type="hidden" name="idempotencyKey" value={idempotencyKey} />
 				<Field
 					id="pin"
-					label={
-						<span className="inline-flex items-center gap-1.5">
-							{tripText.pinLabel}
-							<InfoTooltip label={tripText.pinHint}>{tripText.pinHint}</InfoTooltip>
-						</span>
-					}
+					label={tripText.pinLabel}
+					labelAccessory={<InfoTooltip label={tripText.pinHint}>{tripText.pinHint}</InfoTooltip>}
 					error={pinError}
 					name="pin"
 					inputMode="numeric"

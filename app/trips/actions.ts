@@ -88,6 +88,9 @@ export async function confirmPickupAction(
 	try {
 		await confirmPickupWithPin({ tripId, pin: parsed.data, idempotencyKey });
 	} catch (error) {
+		if (error instanceof Error && error.message === invalidPin) {
+			return { message: invalidPinError, errors: { pin: [invalidPinError] } };
+		}
 		return { message: getTripErrorMessage(error) };
 	}
 
