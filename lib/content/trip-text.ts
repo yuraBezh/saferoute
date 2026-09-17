@@ -17,6 +17,7 @@ export const tripText = {
 		CANCELLED: 'Cancel the trip',
 	},
 	skipActivityAction: 'Head home (skip activity)',
+	tripCompleteMessage: 'Trip completed',
 	pinLabel: 'Pickup code',
 	pinHint: 'Ask the parent for the six-digit code.',
 	pendingLabel: 'Saving…',

@@ -13,12 +13,13 @@ const {
 	statusLabels,
 	actionLabels,
 	skipActivityAction,
+	tripCompleteMessage,
 	caregiverView,
 	currentStatus,
 	route,
 	availableActions,
 } = tripText;
-const { CANCELLED, CHILD_PICKED_UP, EN_ROUTE_HOME } = TripStatus;
+const { CANCELLED, CHILD_PICKED_UP, COMPLETED, EN_ROUTE_HOME } = TripStatus;
 
 const getActionLabel = (status: TripStatus) => actionLabels[status as keyof typeof actionLabels];
 
@@ -76,21 +77,29 @@ export default async function TripPage({ params }: PageProps<'/trips/[id]'>) {
 								}
 							/>
 						) : (
-							<div className="mt-auto flex flex-col items-stretch gap-3 pt-5">
-								{orderedTransitions.map((to) => (
-									<TripTransitionForm
-										key={to}
-										tripId={id}
-										to={to}
-										fullWidth
-										variant={to === EN_ROUTE_HOME && activityLocationId ? 'warning' : undefined}
-										label={
-											to === EN_ROUTE_HOME && activityLocationId
-												? skipActivityAction
-												: getActionLabel(to)
-										}
-									/>
-								))}
+							<div className="mt-auto pt-5">
+								{status === COMPLETED ? (
+									<p className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-center font-semibold text-green-800">
+										{tripCompleteMessage}
+									</p>
+								) : (
+									<div className="flex flex-col items-stretch gap-3">
+										{orderedTransitions.map((to) => {
+											const isSkippingActivity = to === EN_ROUTE_HOME && activityLocationId;
+
+											return (
+												<TripTransitionForm
+													key={to}
+													tripId={id}
+													to={to}
+													fullWidth
+													variant={isSkippingActivity ? 'warning' : undefined}
+													label={isSkippingActivity ? skipActivityAction : getActionLabel(to)}
+												/>
+											);
+										})}
+									</div>
+								)}
 							</div>
 						)}
 					</div>
