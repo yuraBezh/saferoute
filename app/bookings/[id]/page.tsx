@@ -1,8 +1,11 @@
-import { BookingStatus } from '@/generated/prisma/enums';
+import { BookingStatus, TripStatus } from '@/generated/prisma/enums';
+import { tripText } from '@/lib/content/trip-text';
+import { TRIP_EVENT_TYPES } from '@/lib/trips/event-types';
 import { notFound } from 'next/navigation';
 import { cancelBookingAction } from '@/app/bookings/actions';
 import { BookingRoute } from '@/components/booking-route';
 import { BookingStatusBadge } from '@/components/booking-status';
+import { TripStatusBadge } from '@/components/trip-status';
 import { BackLink } from '@/components/ui/back-link';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { PageContainer } from '@/components/ui/page-container';
@@ -10,14 +13,37 @@ import { formatBookingPickup } from '@/lib/bookings/format';
 import { bookingsText } from '@/lib/content/bookings-text';
 import { getBookingForCurrentUser } from '@/lib/data/bookings';
 
+const { handoffConfirmed } = TRIP_EVENT_TYPES;
 const { title, cancel, details } = bookingsText;
+const {
+	statusLabels,
+	pinLabel,
+	pinShareHint,
+	tripStatus,
+	eventLog,
+	eventPickupConfirmed,
+	eventUpdated,
+	unknownActor,
+} = tripText;
+
+function formatTripEvent(event: {
+	type: string;
+	fromStatus: TripStatus | null;
+	toStatus: TripStatus | null;
+}) {
+	if (event.type === handoffConfirmed) return eventPickupConfirmed;
+	if (event.fromStatus && event.toStatus) {
+		return `${statusLabels[event.fromStatus]} → ${statusLabels[event.toStatus]}`;
+	}
+	return eventUpdated;
+}
 
 export default async function BookingDetailsPage({ params }: PageProps<'/bookings/[id]'>) {
 	const { id } = await params;
 	const booking = await getBookingForCurrentUser(id);
 	if (!booking) notFound();
 
-	const { child, pickupLocation, activityLocation, dropoffLocation, caregiver } = booking;
+	const { child, pickupLocation, activityLocation, dropoffLocation, caregiver, trip } = booking;
 
 	return (
 		<PageContainer>
@@ -25,27 +51,31 @@ export default async function BookingDetailsPage({ params }: PageProps<'/booking
 				{title}
 			</BackLink>
 			<section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-				<header className="flex flex-col gap-4 border-b border-gray-200 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
-					<div>
-						<div className="flex flex-wrap items-center gap-3">
-							<h1 className="text-2xl font-bold tracking-tight text-gray-950">
-								{child.firstName} {child.lastName}
-							</h1>
+				<header className="flex flex-col gap-4 border-b border-gray-200 bg-blue-50/60 px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+					<div className="flex flex-wrap items-center gap-3">
+						<h1 className="text-xl font-bold text-gray-950">
+							{child.firstName} {child.lastName}
+						</h1>
+						{trip ? (
+							<TripStatusBadge status={trip.status} />
+						) : (
 							<BookingStatusBadge status={booking.status} />
-						</div>
-						<p className="mt-2 text-sm font-medium text-gray-600">
+						)}
+					</div>
+					<div className="sm:text-right">
+						<p className="text-sm font-semibold text-gray-800">
 							{formatBookingPickup(booking.scheduledPickupAt, pickupLocation.timezone)}
 						</p>
+						{booking.status === BookingStatus.PENDING && (
+							<DeleteButton itemId={booking.id} deleteAction={cancelBookingAction} text={cancel} />
+						)}
 					</div>
-					{booking.status === BookingStatus.PENDING ? (
-						<DeleteButton itemId={booking.id} deleteAction={cancelBookingAction} text={cancel} />
-					) : null}
 				</header>
 
 				<div className="grid gap-8 px-5 py-6 sm:grid-cols-[minmax(0,1.25fr)_minmax(14rem,0.75fr)] sm:px-6">
 					<div>
 						<h2 className="mb-4 text-sm font-semibold tracking-wide text-gray-950 uppercase">
-							Route
+							{details.route}
 						</h2>
 						<BookingRoute
 							pickup={pickupLocation.name}
@@ -66,6 +96,17 @@ export default async function BookingDetailsPage({ params }: PageProps<'/booking
 								{caregiver?.fullName ?? details.unassigned}
 							</dd>
 						</div>
+						{trip ? (
+							<div>
+								<dt className="text-gray-500">{tripStatus}</dt>
+								<dd className="mt-1 font-semibold text-gray-900">{statusLabels[trip.status]}</dd>
+								<dt className="mt-4 text-gray-500">{pinLabel}</dt>
+								<dd className="mt-2 inline-flex rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-3 text-3xl font-black tracking-[0.15em] text-blue-700">
+									{trip.pickupPin}
+								</dd>
+								<dd className="mt-2 text-sm leading-6 text-gray-600">{pinShareHint}</dd>
+							</div>
+						) : null}
 						{booking.notes ? (
 							<div>
 								<dt className="text-gray-500">{details.notes}</dt>
@@ -74,6 +115,29 @@ export default async function BookingDetailsPage({ params }: PageProps<'/booking
 						) : null}
 					</dl>
 				</div>
+				{trip ? (
+					<section className="border-t border-gray-200 px-5 py-6 sm:px-6">
+						<h2 className="text-sm font-semibold tracking-wide text-gray-950 uppercase">
+							{eventLog}
+						</h2>
+						<div className="mt-4 divide-y divide-gray-100">
+							{trip.events.map((event) => (
+								<div
+									key={event.id}
+									className="grid gap-1 py-3 sm:grid-cols-[11rem_1fr_10rem] sm:gap-4"
+								>
+									<time className="text-sm text-gray-500">{event.occurredAt.toLocaleString()}</time>
+									<span className="text-sm font-medium text-gray-900">
+										{formatTripEvent(event)}
+									</span>
+									<span className="text-sm text-gray-500">
+										{event.actor?.fullName ?? unknownActor}
+									</span>
+								</div>
+							))}
+						</div>
+					</section>
+				) : null}
 			</section>
 		</PageContainer>
 	);

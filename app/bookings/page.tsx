@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AddLink } from '@/components/ui/add-link';
 import { BookingStatusBadge } from '@/components/booking-status';
+import { TripStatusBadge } from '@/components/trip-status';
 import { PageContainer } from '@/components/ui/page-container';
 import { PageDescription } from '@/components/ui/page-description';
 import { PageTitle } from '@/components/ui/page-title';
@@ -49,6 +50,7 @@ export default async function BookingsPage() {
 							id,
 							child: { firstName, lastName },
 							status,
+							trip,
 							expiresAt,
 							scheduledPickupAt,
 							pickupLocation: { name: pickupLocationName, timezone },
@@ -73,7 +75,11 @@ export default async function BookingsPage() {
 									</p>
 									<p className="truncate text-sm font-medium text-gray-800">{route}</p>
 									<div className="justify-self-start sm:justify-self-end">
-										<BookingStatusBadge status={displayStatus({ status, expiresAt })} />
+										{trip ? (
+											<TripStatusBadge status={trip.status} />
+										) : (
+											<BookingStatusBadge status={displayStatus({ status, expiresAt })} />
+										)}
 									</div>
 								</Link>
 							);

@@ -7,6 +7,17 @@ import { prisma } from '@/lib/prisma';
 import type { BookingInput } from '@/lib/validation/booking';
 
 const BOOKING_INCLUDE = {
+	trip: {
+		select: {
+			id: true,
+			status: true,
+			pickupPin: true,
+			events: {
+				orderBy: { occurredAt: 'asc' },
+				include: { actor: { select: { fullName: true } } },
+			},
+		},
+	},
 	child: { select: { id: true, firstName: true, lastName: true } },
 	caregiver: { select: { id: true, fullName: true, avatarUrl: true } },
 	pickupLocation: { select: { id: true, name: true, timezone: true } },

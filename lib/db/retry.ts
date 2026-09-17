@@ -1,5 +1,6 @@
 const SERIALIZATION_FAILURE = '40001';
 const PRISMA_TRANSACTION_CONFLICT = 'P2034';
+const UNIQUE_VIOLATION = 'P2002';
 
 export function hasDatabaseErrorCode(error: unknown, expectedCode: string): boolean {
 	if (!error || typeof error !== 'object') return false;
@@ -41,4 +42,15 @@ export async function withSerializableRetry<T>(
 	}
 
 	throw new Error('unreachable');
+}
+
+export function isUniqueViolationOn(error: unknown, field: string): boolean {
+	if (!error || typeof error !== 'object') return false;
+	if (!('code' in error) || error.code !== UNIQUE_VIOLATION) return false;
+	if (!('meta' in error) || !error.meta || typeof error.meta !== 'object') return false;
+
+	const { target } = error.meta as { target?: unknown };
+
+	if (Array.isArray(target)) return target.includes(field);
+	return typeof target === 'string' && target.includes(field);
 }
