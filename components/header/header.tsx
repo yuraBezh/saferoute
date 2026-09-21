@@ -63,7 +63,9 @@ export async function Header() {
 				{isCaregiver && (
 					<>
 						<HeaderLink href="/caregiver/assignments">{assignments}</HeaderLink>
-						<HeaderLink href="/caregiver">{profile}</HeaderLink>
+						<HeaderLink href="/caregiver" exact>
+							{profile}
+						</HeaderLink>
 					</>
 				)}
 				{!isCaregiver && <HeaderLink href="/caregiver/onboarding">{becomeCaregiver}</HeaderLink>}

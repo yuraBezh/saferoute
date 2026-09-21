@@ -14,6 +14,7 @@ const {
 const mocks = vi.hoisted(() => ({
 	getCurrentUser: vi.fn(),
 	signOut: vi.fn(),
+	usePathname: vi.fn(),
 }));
 
 vi.mock('@/auth', () => ({
@@ -21,6 +22,9 @@ vi.mock('@/auth', () => ({
 }));
 vi.mock('@/lib/auth/current-user', () => ({
 	getCurrentUser: mocks.getCurrentUser,
+}));
+vi.mock('next/navigation', () => ({
+	usePathname: mocks.usePathname,
 }));
 
 import { Header, signOutAction } from './header';
@@ -45,6 +49,7 @@ const routesFixture = {
 describe('Header', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mocks.usePathname.mockReturnValue(routesFixture.home);
 	});
 
 	it('shows the public header to an unauthenticated visitor', async () => {
@@ -86,6 +91,16 @@ describe('Header', () => {
 		expect(screen.getByRole('link', { name: becomeCaregiver }).getAttribute('href')).toBe(
 			routesFixture.caregiverOnboarding,
 		);
+	});
+
+	it('highlights the active navigation section on nested pages', async () => {
+		mocks.getCurrentUser.mockResolvedValue(userFixture);
+		mocks.usePathname.mockReturnValue(`${routesFixture.children}/${userFixture.id}`);
+
+		render(await Header());
+
+		expect(screen.getByRole('link', { name: children }).getAttribute('aria-current')).toBe('page');
+		expect(screen.getByRole('link', { name: bookings }).getAttribute('aria-current')).toBeNull();
 	});
 
 	it('uses the email for initials when the user has no name', async () => {
