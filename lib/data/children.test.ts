@@ -58,7 +58,7 @@ describe('children data access', () => {
 		mocks.getCurrentUserId.mockResolvedValue(currentUser.id);
 	});
 
-	it('lists only children guarded by the current user', async () => {
+	it('lists children guarded by the current user in first and last name order', async () => {
 		const children = [child];
 		mocks.findManyChildren.mockResolvedValue(children);
 
@@ -66,6 +66,7 @@ describe('children data access', () => {
 		expect(mocks.findManyChildren).toHaveBeenCalledWith({
 			where: { guardians: { some: { userId: currentUser.id } } },
 			include: { _count: { select: { guardians: true } } },
+			orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
 		});
 	});
 
@@ -112,9 +113,7 @@ describe('children data access', () => {
 		const updateResult = { count: 1 };
 		mocks.updateChildren.mockResolvedValue(updateResult);
 
-		await expect(updateChildForCurrentUser(child.id, childInput)).resolves.toBe(
-			updateResult,
-		);
+		await expect(updateChildForCurrentUser(child.id, childInput)).resolves.toBe(updateResult);
 
 		expect(mocks.updateChildren).toHaveBeenCalledWith({
 			where: {
@@ -133,9 +132,7 @@ describe('children data access', () => {
 		const deleteResult = { count: 1 };
 		mocks.deleteChildren.mockResolvedValue(deleteResult);
 
-		await expect(deleteChildForCurrentUser(child.id)).resolves.toBe(
-			deleteResult,
-		);
+		await expect(deleteChildForCurrentUser(child.id)).resolves.toBe(deleteResult);
 
 		expect(mocks.deleteChildren).toHaveBeenCalledWith({
 			where: {
