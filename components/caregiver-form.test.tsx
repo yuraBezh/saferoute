@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CaregiverForm } from './caregiver-form';
 import { caregiverText } from '@/lib/content/caregiver-text';
@@ -36,7 +36,7 @@ describe('CaregiverForm', () => {
 	});
 
 	it('prefills values for profile editing', () => {
-		render(<CaregiverForm {...propsFixture} defaultValues={valuesFixture} />);
+		render(<CaregiverForm {...propsFixture} preFillValue={valuesFixture} />);
 
 		for (const [field, value] of Object.entries(valuesFixture)) {
 			expect(
@@ -65,5 +65,11 @@ describe('CaregiverForm', () => {
 		await screen.findByText(caregiverText.fields.bio.invalid);
 		expect(bio.getAttribute('aria-invalid')).toBe('true');
 		expect(bio.getAttribute('aria-describedby')).toBe('bio-error');
+
+		fireEvent.change(bio, { target: { value: 'Updated bio' } });
+		await waitFor(() => {
+			expect(screen.queryByText(caregiverText.fields.bio.invalid)).toBeNull();
+			expect(screen.queryByText(caregiverText.validationError)).toBeNull();
+		});
 	});
 });
