@@ -80,9 +80,7 @@ describe('EditLocationPage', () => {
 		const missingLocation = { id: 'missing-location' };
 		mocks.getOwnedLocation.mockResolvedValue(null);
 
-		await expect(renderPage(missingLocation.id)).rejects.toThrow(
-			'NEXT_NOT_FOUND',
-		);
+		await expect(renderPage(missingLocation.id)).rejects.toThrow('NEXT_NOT_FOUND');
 		expect(mocks.notFound).toHaveBeenCalledOnce();
 	});
 
@@ -92,17 +90,13 @@ describe('EditLocationPage', () => {
 		render(await renderPage(location.id));
 		const formProps = mocks.locationForm.mock.calls[0][0];
 
-		expect(
-			screen
-				.getByRole('link', { name: locationsText.title })
-				.getAttribute('href'),
-		).toBe('/locations');
+		expect(screen.getByRole('link', { name: locationsText.title }).getAttribute('href')).toBe(
+			'/locations',
+		);
 		expect(screen.getByText(editLocationFormText.title)).toBeDefined();
-		expect(
-			screen.getByText(editLocationFormText.description(location.name)),
-		).toBeDefined();
+		expect(screen.getByText(editLocationFormText.description(location.name))).toBeDefined();
 		expect(formProps).toMatchObject({
-			defaultValues: {
+			preFillValue: {
 				type: location.type,
 				name: location.name,
 				addressLine1: location.addressLine1,
@@ -126,10 +120,6 @@ describe('EditLocationPage', () => {
 		const state: LocationFormState = { message: '', errors: {} };
 		const formData = new FormData();
 		await formProps.action(state, formData);
-		expect(mocks.editLocationAction).toHaveBeenCalledWith(
-			location.id,
-			state,
-			formData,
-		);
+		expect(mocks.editLocationAction).toHaveBeenCalledWith(location.id, state, formData);
 	});
 });
