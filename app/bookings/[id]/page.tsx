@@ -67,7 +67,13 @@ export default async function BookingDetailsPage({ params }: PageProps<'/booking
 							{formatBookingPickup(booking.scheduledPickupAt, pickupLocation.timezone)}
 						</p>
 						{booking.status === BookingStatus.PENDING && (
-							<DeleteButton itemId={booking.id} deleteAction={cancelBookingAction} text={cancel} />
+							<div className="mt-3">
+								<DeleteButton
+									itemId={booking.id}
+									deleteAction={cancelBookingAction}
+									text={cancel}
+								/>
+							</div>
 						)}
 					</div>
 				</header>
