@@ -29,12 +29,7 @@ export async function createChildAction(
 	_prevState: ChildFormState,
 	formData: FormData,
 ): Promise<ChildFormState> {
-	const parsed = createChildSchema.safeParse({
-		firstName: formData.get('firstName'),
-		lastName: formData.get('lastName'),
-		birthDate: formData.get('birthDate'),
-		relationship: formData.get('relationship'),
-	});
+	const parsed = createChildSchema.safeParse(Object.fromEntries(formData));
 
 	if (!parsed.success) {
 		return {
@@ -63,11 +58,7 @@ export async function editChildAction(
 	_prevState: ChildFormState,
 	formData: FormData,
 ): Promise<ChildFormState> {
-	const parsed = childSchema.safeParse({
-		firstName: formData.get('firstName'),
-		lastName: formData.get('lastName'),
-		birthDate: formData.get('birthDate'),
-	});
+	const parsed = childSchema.safeParse(Object.fromEntries(formData));
 
 	if (!parsed.success) {
 		return {
