@@ -14,7 +14,7 @@ export default function SignInPage() {
 					Sign in to SafeRoute
 				</h1>
 				<p className="mt-2 text-sm leading-6 text-gray-600">
-					Book a verified caregiver for your child and follow every trip live.
+					Book a verified caregiver for your child or manage your trips as a caregiver.
 				</p>
 
 				<form className="mt-6" action={signInAction}>
