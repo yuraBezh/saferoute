@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { headerText } from '@/lib/content/header-text';
 import { UserRole } from '@/generated/prisma/enums';
@@ -91,6 +91,20 @@ describe('Header', () => {
 		expect(screen.getByRole('link', { name: becomeCaregiver }).getAttribute('href')).toBe(
 			routesFixture.caregiverOnboarding,
 		);
+	});
+
+	it('shows parent navigation links in the expected order', async () => {
+		mocks.getCurrentUser.mockResolvedValue(userFixture);
+
+		render(await Header());
+
+		const navigationLinks = within(screen.getByRole('navigation')).getAllByRole('link');
+		expect(navigationLinks.map((link) => link.textContent)).toEqual([
+			children,
+			locations,
+			bookings,
+			becomeCaregiver,
+		]);
 	});
 
 	it('highlights the active navigation section on nested pages', async () => {
