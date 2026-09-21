@@ -19,7 +19,7 @@ export default async function EditChildrenPage({ params }: PageProps<'/children/
 	const action = editChildAction.bind(null, id);
 	const fullName = `${child.firstName} ${child.lastName}`;
 
-	const defaultValues = {
+	const preFillValue = {
 		firstName: child.firstName,
 		lastName: child.lastName,
 		birthDate: child.birthDate.toISOString().slice(0, 10),
@@ -38,7 +38,7 @@ export default async function EditChildrenPage({ params }: PageProps<'/children/
 
 			<ChildForm
 				formAction={action}
-				defaultValues={defaultValues}
+				preFillValue={preFillValue}
 				submitLabel={submit}
 				submittingLabel={submitting}
 				cancelHref={`/children/${id}`}

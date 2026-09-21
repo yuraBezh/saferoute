@@ -61,9 +61,19 @@ export async function createBookingAction(
 	_prevState: BookingFormState,
 	formData: FormData,
 ): Promise<BookingFormState> {
-	const pickupLocationValue = formData.get('pickupLocationId');
+	const rawValues = Object.fromEntries(formData);
+	const pickupLocationValue = rawValues.pickupLocationId;
+
 	if (typeof pickupLocationValue !== 'string' || !pickupLocationValue.trim()) {
-		return pickupLocationError(pickupLocationText.required);
+		const todayIsoDate = new Date().toISOString().slice(0, 10);
+		const parsed = createBookingSchema(todayIsoDate).safeParse(rawValues);
+
+		return parsed.success
+			? pickupLocationError(pickupLocationText.required)
+			: {
+					message: validationError,
+					errors: z.flattenError(parsed.error).fieldErrors,
+				};
 	}
 
 	const pickupLocationId = pickupLocationValue.trim();
@@ -80,14 +90,8 @@ export async function createBookingAction(
 
 	const todayAtPickupLocation = fromUtc(new Date(), pickupLocation.timezone).date;
 	const parsed = createBookingSchema(todayAtPickupLocation).safeParse({
-		childId: formData.get('childId'),
-		date: formData.get('date'),
-		time: formData.get('time'),
+		...rawValues,
 		pickupLocationId,
-		activityLocationId: formData.get('activityLocationId'),
-		dropoffLocationId: formData.get('dropoffLocationId'),
-		estimatedDurationMin: formData.get('estimatedDurationMin'),
-		notes: formData.get('notes'),
 	});
 
 	if (!parsed.success) {

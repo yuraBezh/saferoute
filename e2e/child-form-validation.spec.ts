@@ -1,8 +1,5 @@
 import { expect, test } from '@playwright/test';
-import {
-	childFormText,
-	createChildFormText,
-} from '@/lib/content/child-form-text';
+import { childFormText, createChildFormText } from '@/lib/content/child-form-text';
 import { GuardianRelationship } from '@/generated/prisma/enums';
 
 const {
@@ -37,5 +34,6 @@ test('rejects a birth date in the future', async ({ page }) => {
 	await page.getByRole('button', { name: submit }).click();
 
 	await expect(page.getByText(birthDate.future)).toBeVisible();
+	await expect(page.getByLabel(relationship.label)).toHaveValue(child.relationship);
 	await expect(page).toHaveURL('/children/new');
 });

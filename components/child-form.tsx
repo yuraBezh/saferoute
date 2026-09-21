@@ -1,28 +1,21 @@
 'use client';
 
-import { useActionState, useState } from 'react';
 import { type ChildFormState } from '@/app/children/actions';
 import { childFormText } from '@/lib/content/child-form-text';
 import { Field } from '@/components/ui/field';
 import { FormActions } from '@/components/ui/form-actions';
 import { FormError } from '@/components/ui/form-error';
 import { RelationshipField } from '@/components/relationship-field';
+import { useChildFormState } from '@/components/use-child-form-state';
 
 const {
 	cancel,
-	fields: {
-		firstName: firstNameText,
-		lastName: lastNameText,
-		birthDate: birthDateText,
-	},
+	fields: { firstName: firstNameText, lastName: lastNameText, birthDate: birthDateText },
 } = childFormText;
 
 export type ChildFormProps = {
-	formAction: (
-		state: ChildFormState,
-		formData: FormData,
-	) => Promise<ChildFormState>;
-	defaultValues?: { firstName: string; lastName: string; birthDate: string };
+	formAction: (state: ChildFormState, formData: FormData) => Promise<ChildFormState>;
+	preFillValue?: { firstName: string; lastName: string; birthDate: string };
 	submitLabel: string;
 	submittingLabel: string;
 	cancelHref?: string;
@@ -32,30 +25,21 @@ export type ChildFormProps = {
 export function ChildForm(props: ChildFormProps) {
 	const {
 		formAction,
-		defaultValues,
+		preFillValue,
 		submitLabel,
 		submittingLabel,
 		cancelHref,
 		showRelationship = false,
 	} = props;
 
-	const initialState: ChildFormState = { message: '', errors: {} };
-	const [formState, action, isPending] = useActionState(
-		formAction,
-		initialState,
-	);
-	const [values, setValues] = useState(
-		defaultValues ?? {
-			firstName: '',
-			lastName: '',
-			birthDate: '',
-		},
-	);
+	const { action, formMessage, getFieldError, isPending, submitForm, updateValue, values } =
+		useChildFormState({ formAction, preFillValue });
 
 	return (
 		<div className="w-full">
 			<form
 				action={action}
+				onSubmit={submitForm}
 				noValidate
 				className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6"
 			>
@@ -63,41 +47,39 @@ export function ChildForm(props: ChildFormProps) {
 					<Field
 						id="firstName"
 						label={firstNameText.label}
-						error={formState.errors?.firstName?.[0]}
+						error={getFieldError('firstName')}
 						name="firstName"
 						value={values.firstName}
-						onChange={(event) =>
-							setValues({ ...values, firstName: event.target.value })
-						}
+						onChange={(e) => updateValue('firstName', e.target.value)}
 						autoComplete="given-name"
 					/>
 					<Field
 						id="lastName"
 						label={lastNameText.label}
-						error={formState.errors?.lastName?.[0]}
+						error={getFieldError('lastName')}
 						name="lastName"
 						value={values.lastName}
-						onChange={(event) =>
-							setValues({ ...values, lastName: event.target.value })
-						}
+						onChange={(e) => updateValue('lastName', e.target.value)}
 						autoComplete="family-name"
 					/>
 					<Field
 						id="birthDate"
 						label={birthDateText.label}
-						error={formState.errors?.birthDate?.[0]}
+						error={getFieldError('birthDate')}
 						type="date"
 						name="birthDate"
 						value={values.birthDate}
-						onChange={(event) =>
-							setValues({ ...values, birthDate: event.target.value })
-						}
+						onChange={(e) => updateValue('birthDate', e.target.value)}
 						required
 					/>
-					{showRelationship ? (
-						<RelationshipField error={formState.errors?.relationship?.[0]} />
-					) : null}
-					<FormError message={formState.message} />
+					{showRelationship && (
+						<RelationshipField
+							error={getFieldError('relationship')}
+							value={values.relationship}
+							onChange={(e) => updateValue('relationship', e.target.value)}
+						/>
+					)}
+					<FormError message={formMessage} />
 					<FormActions
 						cancelHref={cancelHref}
 						cancelLabel={cancel}

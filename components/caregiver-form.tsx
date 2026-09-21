@@ -1,6 +1,5 @@
 'use client';
 
-import { useActionState } from 'react';
 import type { CaregiverFormState } from '@/app/caregiver/actions';
 import { Field } from '@/components/ui/field';
 import { FORM_CONTROL_CLASS_NAME } from '@/components/ui/form-control';
@@ -8,28 +7,32 @@ import { FormActions } from '@/components/ui/form-actions';
 import { FormError } from '@/components/ui/form-error';
 import { caregiverText } from '@/lib/content/caregiver-text';
 import type { CaregiverFormValues } from '@/lib/validation/caregiver';
+import { useCaregiverFormState } from '@/components/use-caregiver-form-state';
 
 const { fields, optional, cancel } = caregiverText;
 
 type CaregiverFormProps = {
 	action: (state: CaregiverFormState, formData: FormData) => Promise<CaregiverFormState>;
-	defaultValues?: CaregiverFormValues;
+	preFillValue?: CaregiverFormValues;
 	submitLabel: string;
 	cancelHref: string;
 };
 
 export function CaregiverForm({
 	action: formAction,
-	defaultValues,
+	preFillValue,
 	submitLabel,
 	cancelHref,
 }: CaregiverFormProps) {
-	const [state, action, isPending] = useActionState(formAction, { message: '', errors: {} });
-	const bioError = state.errors?.bio?.[0];
+	const { action, formMessage, getFieldError, isPending, submitForm, updateValue, values } =
+		useCaregiverFormState({ formAction, preFillValue });
+	const { bio, hourlyRate, vehicleMake, vehicleModel, vehicleYear, vehicleColor, licensePlate } =
+		values;
 
 	return (
 		<form
 			action={action}
+			onSubmit={submitForm}
 			noValidate
 			className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
 		>
@@ -42,14 +45,15 @@ export function CaregiverForm({
 						id="bio"
 						name="bio"
 						rows={5}
-						defaultValue={defaultValues?.bio}
-						aria-invalid={!!bioError}
-						aria-describedby={bioError ? 'bio-error' : undefined}
+						value={bio}
+						onChange={(e) => updateValue('bio', e.target.value)}
+						aria-invalid={Boolean(getFieldError('bio'))}
+						aria-describedby={getFieldError('bio') ? 'bio-error' : undefined}
 						className={FORM_CONTROL_CLASS_NAME}
 					/>
-					{bioError && (
+					{getFieldError('bio') && (
 						<p id="bio-error" className="mt-1.5 text-sm text-red-600">
-							{bioError}
+							{getFieldError('bio')}
 						</p>
 					)}
 				</div>
@@ -61,8 +65,9 @@ export function CaregiverForm({
 					max="500"
 					step="0.01"
 					label={fields.hourlyRate.label}
-					error={state.errors?.hourlyRate?.[0]}
-					defaultValue={defaultValues?.hourlyRate}
+					error={getFieldError('hourlyRate')}
+					value={hourlyRate}
+					onChange={(e) => updateValue('hourlyRate', e.target.value)}
 					required
 				/>
 				<div className="grid gap-5 sm:grid-cols-2">
@@ -71,16 +76,18 @@ export function CaregiverForm({
 						name="vehicleMake"
 						label={fields.vehicleMake.label}
 						optionalLabel={optional}
-						error={state.errors?.vehicleMake?.[0]}
-						defaultValue={defaultValues?.vehicleMake}
+						error={getFieldError('vehicleMake')}
+						value={vehicleMake}
+						onChange={(e) => updateValue('vehicleMake', e.target.value)}
 					/>
 					<Field
 						id="vehicleModel"
 						name="vehicleModel"
 						label={fields.vehicleModel.label}
 						optionalLabel={optional}
-						error={state.errors?.vehicleModel?.[0]}
-						defaultValue={defaultValues?.vehicleModel}
+						error={getFieldError('vehicleModel')}
+						value={vehicleModel}
+						onChange={(e) => updateValue('vehicleModel', e.target.value)}
 					/>
 					<Field
 						id="vehicleYear"
@@ -88,16 +95,18 @@ export function CaregiverForm({
 						type="number"
 						label={fields.vehicleYear.label}
 						optionalLabel={optional}
-						error={state.errors?.vehicleYear?.[0]}
-						defaultValue={defaultValues?.vehicleYear}
+						error={getFieldError('vehicleYear')}
+						value={vehicleYear}
+						onChange={(e) => updateValue('vehicleYear', e.target.value)}
 					/>
 					<Field
 						id="vehicleColor"
 						name="vehicleColor"
 						label={fields.vehicleColor.label}
 						optionalLabel={optional}
-						error={state.errors?.vehicleColor?.[0]}
-						defaultValue={defaultValues?.vehicleColor}
+						error={getFieldError('vehicleColor')}
+						value={vehicleColor}
+						onChange={(e) => updateValue('vehicleColor', e.target.value)}
 					/>
 				</div>
 				<Field
@@ -105,10 +114,11 @@ export function CaregiverForm({
 					name="licensePlate"
 					label={fields.licensePlate.label}
 					optionalLabel={optional}
-					error={state.errors?.licensePlate?.[0]}
-					defaultValue={defaultValues?.licensePlate}
+					error={getFieldError('licensePlate')}
+					value={licensePlate}
+					onChange={(e) => updateValue('licensePlate', e.target.value)}
 				/>
-				<FormError message={state.message} />
+				<FormError message={formMessage} />
 				<FormActions
 					cancelHref={cancelHref}
 					cancelLabel={cancel}

@@ -23,7 +23,7 @@ export default async function EditCaregiverPage() {
 				action={updateCaregiverProfileAction}
 				submitLabel={caregiverText.edit.submit}
 				cancelHref="/caregiver"
-				defaultValues={{
+				preFillValue={{
 					bio: profile.bio ?? '',
 					hourlyRate: fromCents(profile.hourlyRateCents),
 					vehicleMake: profile.vehicleMake ?? '',

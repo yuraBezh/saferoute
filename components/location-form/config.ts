@@ -14,11 +14,8 @@ export type LocationFormValues = {
 };
 
 export type LocationFormProps = {
-	action: (
-		state: LocationFormState,
-		formData: FormData,
-	) => Promise<LocationFormState>;
-	defaultValues?: LocationFormValues;
+	action: (state: LocationFormState, formData: FormData) => Promise<LocationFormState>;
+	preFillValue?: LocationFormValues;
 	submitLabel: string;
 	cancelHref?: string;
 	footerAction?: ReactNode;

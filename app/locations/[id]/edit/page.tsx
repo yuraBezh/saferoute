@@ -10,6 +10,8 @@ import { editLocationFormText } from '@/lib/content/location-form-text';
 import { locationsText } from '@/lib/content/locations-text';
 import { getOwnedLocation } from '@/lib/data/locations';
 
+const { title, description, submit, delete: deleteLabel } = editLocationFormText;
+
 export default async function EditLocationPage({ params }: PageProps<'/locations/[id]/edit'>) {
 	const { id } = await params;
 	const location = await getOwnedLocation(id);
@@ -17,7 +19,7 @@ export default async function EditLocationPage({ params }: PageProps<'/locations
 	if (!location) notFound();
 
 	const action = editLocationAction.bind(null, location.id);
-	const defaultValues = {
+	const preFillValue = {
 		type: location.type,
 		name: location.name,
 		addressLine1: location.addressLine1,
@@ -34,20 +36,20 @@ export default async function EditLocationPage({ params }: PageProps<'/locations
 			</BackLink>
 
 			<header className="mb-5">
-				<PageTitle>{editLocationFormText.title}</PageTitle>
-				<PageDescription>{editLocationFormText.description(location.name)}</PageDescription>
+				<PageTitle>{title}</PageTitle>
+				<PageDescription>{description(location.name)}</PageDescription>
 			</header>
 
 			<LocationForm
 				action={action}
-				defaultValues={defaultValues}
-				submitLabel={editLocationFormText.submit}
+				preFillValue={preFillValue}
+				submitLabel={submit}
 				cancelHref="/locations"
 				footerAction={
 					<DeleteButton
 						itemId={location.id}
 						deleteAction={deleteLocationAction}
-						text={editLocationFormText.delete}
+						text={deleteLabel}
 					/>
 				}
 			/>

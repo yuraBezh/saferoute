@@ -1,10 +1,7 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LocationType } from '@/generated/prisma/enums';
-import {
-	createLocationFormText,
-	locationFormText,
-} from '@/lib/content/location-form-text';
+import { createLocationFormText, locationFormText } from '@/lib/content/location-form-text';
 import { LocationForm } from '@/components/location-form';
 
 const {
@@ -62,29 +59,19 @@ describe('LocationForm', () => {
 		for (const { role, name } of locationControls) {
 			expect(screen.getByRole(role, { name })).toBeDefined();
 		}
-		expect(
-			screen.getByRole('button', { name: createLocationFormText.submit }),
-		).toBeDefined();
+		expect(screen.getByRole('button', { name: createLocationFormText.submit })).toBeDefined();
 	});
 
 	it('prefills editable values and links cancel to the provided page', () => {
 		const cancelHref = '/locations';
 
-		render(
-			<LocationForm
-				{...locationFormProps}
-				defaultValues={location}
-				cancelHref={cancelHref}
-			/>,
-		);
+		render(<LocationForm {...locationFormProps} preFillValue={location} cancelHref={cancelHref} />);
 
 		for (const { field, role, name } of locationControls) {
 			const control = screen.getByRole(role, { name }) as HTMLInputElement;
 			expect(control.value).toBe(location[field]);
 		}
-		expect(
-			screen.getByRole('link', { name: cancel }).getAttribute('href'),
-		).toBe(cancelHref);
+		expect(screen.getByRole('link', { name: cancel }).getAttribute('href')).toBe(cancelHref);
 	});
 
 	it('updates every controlled field', () => {
@@ -113,9 +100,7 @@ describe('LocationForm', () => {
 		const { container } = render(<LocationForm {...locationFormProps} />);
 		const name = screen.getByLabelText(nameText.label) as HTMLInputElement;
 		const state = screen.getByLabelText(stateText.label) as HTMLSelectElement;
-		const postalCode = screen.getByLabelText(
-			postalCodeText.label,
-		) as HTMLInputElement;
+		const postalCode = screen.getByLabelText(postalCodeText.label) as HTMLInputElement;
 
 		fireEvent.change(name, { target: { value: location.name } });
 		fireEvent.change(state, { target: { value: location.state } });
@@ -127,9 +112,12 @@ describe('LocationForm', () => {
 		expect(state.value).toBe(location.state);
 		expect(postalCode.value).toBe(location.postalCode);
 		expect(postalCode.getAttribute('aria-invalid')).toBe('true');
-		expect(postalCode.getAttribute('aria-describedby')).toBe(
-			'postalCode-error',
-		);
+		expect(postalCode.getAttribute('aria-describedby')).toBe('postalCode-error');
+
+		fireEvent.change(postalCode, { target: { value: '60602' } });
+		await waitFor(() => {
+			expect(screen.queryByText(postalCodeText.invalid)).toBeNull();
+		});
 	});
 
 	it('announces a general save error', async () => {

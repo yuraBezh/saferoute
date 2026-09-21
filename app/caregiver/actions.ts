@@ -18,15 +18,7 @@ export type CaregiverFormState = {
 };
 
 const parseCaregiverForm = (formData: FormData) =>
-	caregiverProfileSchema.safeParse({
-		bio: formData.get('bio'),
-		hourlyRate: formData.get('hourlyRate'),
-		vehicleMake: formData.get('vehicleMake'),
-		vehicleModel: formData.get('vehicleModel'),
-		vehicleYear: formData.get('vehicleYear'),
-		vehicleColor: formData.get('vehicleColor'),
-		licensePlate: formData.get('licensePlate'),
-	});
+	caregiverProfileSchema.safeParse(Object.fromEntries(formData));
 
 export async function createCaregiverProfileAction(
 	_prevState: CaregiverFormState,

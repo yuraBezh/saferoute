@@ -17,21 +17,11 @@ import {
 
 export type LocationFormState = {
 	message: string;
-	errors?: Partial<
-		Record<keyof z.infer<typeof locationSchema>, string[] | undefined>
-	>;
+	errors?: Partial<Record<keyof z.infer<typeof locationSchema>, string[] | undefined>>;
 };
 
 function parseLocationForm(formData: FormData) {
-	return locationSchema.safeParse({
-		type: formData.get('type'),
-		name: formData.get('name'),
-		addressLine1: formData.get('addressLine1'),
-		addressLine2: formData.get('addressLine2'),
-		city: formData.get('city'),
-		state: formData.get('state'),
-		postalCode: formData.get('postalCode'),
-	});
+	return locationSchema.safeParse(Object.fromEntries(formData));
 }
 
 export async function createLocationAction(

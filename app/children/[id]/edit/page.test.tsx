@@ -79,15 +79,13 @@ describe('EditChildrenPage', () => {
 		const fullName = `${childFixture.firstName} ${childFixture.lastName}`;
 		const formProps = mocks.childForm.mock.calls[0][0];
 
-		expect(
-			screen.getByRole('link', { name: fullName }).getAttribute('href'),
-		).toBe(`/children/${childFixture.id}`);
+		expect(screen.getByRole('link', { name: fullName }).getAttribute('href')).toBe(
+			`/children/${childFixture.id}`,
+		);
 		expect(screen.getByText(editChildFormText.title)).toBeDefined();
-		expect(
-			screen.getByText(editChildFormText.description(fullName)),
-		).toBeDefined();
+		expect(screen.getByText(editChildFormText.description(fullName))).toBeDefined();
 		expect(formProps).toMatchObject({
-			defaultValues: {
+			preFillValue: {
 				firstName: childFixture.firstName,
 				lastName: childFixture.lastName,
 				birthDate: childFixture.birthDate.toISOString().slice(0, 10),
@@ -100,10 +98,6 @@ describe('EditChildrenPage', () => {
 		const state: ChildFormState = { message: '', errors: {} };
 		const formData = new FormData();
 		await formProps.formAction(state, formData);
-		expect(mocks.editChildAction).toHaveBeenCalledWith(
-			childFixture.id,
-			state,
-			formData,
-		);
+		expect(mocks.editChildAction).toHaveBeenCalledWith(childFixture.id, state, formData);
 	});
 });
