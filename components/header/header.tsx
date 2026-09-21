@@ -55,15 +55,17 @@ export async function Header() {
 			<nav className="flex items-center gap-4 text-sm">
 				{isParent && (
 					<>
-						<HeaderLink href="/bookings">{bookings}</HeaderLink>
 						<HeaderLink href="/children">{children}</HeaderLink>
 						<HeaderLink href="/locations">{locations}</HeaderLink>
+						<HeaderLink href="/bookings">{bookings}</HeaderLink>
 					</>
 				)}
 				{isCaregiver && (
 					<>
 						<HeaderLink href="/caregiver/assignments">{assignments}</HeaderLink>
-						<HeaderLink href="/caregiver">{profile}</HeaderLink>
+						<HeaderLink href="/caregiver" exact>
+							{profile}
+						</HeaderLink>
 					</>
 				)}
 				{!isCaregiver && <HeaderLink href="/caregiver/onboarding">{becomeCaregiver}</HeaderLink>}

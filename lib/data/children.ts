@@ -12,6 +12,7 @@ export async function getChildrenForCurrentUser() {
 		include: {
 			_count: { select: { guardians: true } },
 		},
+		orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
 	});
 }
 

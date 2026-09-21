@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { headerText } from '@/lib/content/header-text';
 import { UserRole } from '@/generated/prisma/enums';
@@ -14,6 +14,7 @@ const {
 const mocks = vi.hoisted(() => ({
 	getCurrentUser: vi.fn(),
 	signOut: vi.fn(),
+	usePathname: vi.fn(),
 }));
 
 vi.mock('@/auth', () => ({
@@ -21,6 +22,9 @@ vi.mock('@/auth', () => ({
 }));
 vi.mock('@/lib/auth/current-user', () => ({
 	getCurrentUser: mocks.getCurrentUser,
+}));
+vi.mock('next/navigation', () => ({
+	usePathname: mocks.usePathname,
 }));
 
 import { Header, signOutAction } from './header';
@@ -45,6 +49,7 @@ const routesFixture = {
 describe('Header', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mocks.usePathname.mockReturnValue(routesFixture.home);
 	});
 
 	it('shows the public header to an unauthenticated visitor', async () => {
@@ -86,6 +91,30 @@ describe('Header', () => {
 		expect(screen.getByRole('link', { name: becomeCaregiver }).getAttribute('href')).toBe(
 			routesFixture.caregiverOnboarding,
 		);
+	});
+
+	it('shows parent navigation links in the expected order', async () => {
+		mocks.getCurrentUser.mockResolvedValue(userFixture);
+
+		render(await Header());
+
+		const navigationLinks = within(screen.getByRole('navigation')).getAllByRole('link');
+		expect(navigationLinks.map((link) => link.textContent)).toEqual([
+			children,
+			locations,
+			bookings,
+			becomeCaregiver,
+		]);
+	});
+
+	it('highlights the active navigation section on nested pages', async () => {
+		mocks.getCurrentUser.mockResolvedValue(userFixture);
+		mocks.usePathname.mockReturnValue(`${routesFixture.children}/${userFixture.id}`);
+
+		render(await Header());
+
+		expect(screen.getByRole('link', { name: children }).getAttribute('aria-current')).toBe('page');
+		expect(screen.getByRole('link', { name: bookings }).getAttribute('aria-current')).toBeNull();
 	});
 
 	it('uses the email for initials when the user has no name', async () => {
