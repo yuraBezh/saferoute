@@ -8,7 +8,7 @@ import { childrenText } from '@/lib/content/children-text';
 import { BackLink } from '@/components/ui/back-link';
 
 export default function AddNewChildrenPage() {
-	const defaultValues = { firstName: '', lastName: '', birthDate: '' };
+	const preFillValue = { firstName: '', lastName: '', birthDate: '' };
 	const { title, description, submit, submitting } = createChildFormText;
 
 	return (
@@ -26,7 +26,7 @@ export default function AddNewChildrenPage() {
 				formAction={createChildAction}
 				submitLabel={submit}
 				submittingLabel={submitting}
-				defaultValues={defaultValues}
+				preFillValue={preFillValue}
 				cancelHref="/children"
 				showRelationship
 			/>

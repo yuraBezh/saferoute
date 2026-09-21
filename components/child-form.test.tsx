@@ -73,7 +73,7 @@ describe('ChildForm', () => {
 		};
 		const cancelHref = '/children/child-1';
 
-		render(<ChildForm {...childFormProps} defaultValues={child} cancelHref={cancelHref} />);
+		render(<ChildForm {...childFormProps} preFillValue={child} cancelHref={cancelHref} />);
 
 		expect((screen.getByLabelText(firstNameText.label) as HTMLInputElement).value).toBe(
 			child.firstName,
@@ -121,6 +121,11 @@ describe('ChildForm', () => {
 		expect(lastName.value).toBe('Davis');
 		expect(relationship.value).toBe(GuardianRelationship.GUARDIAN);
 		expect(birthDate.getAttribute('aria-invalid')).toBe('true');
+
+		fireEvent.change(birthDate, { target: { value: '2010-01-01' } });
+		await waitFor(() => {
+			expect(screen.queryByText(birthDateText.future)).toBeNull();
+		});
 	});
 
 	it('shows a general save error', async () => {
