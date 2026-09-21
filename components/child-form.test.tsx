@@ -1,10 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { dateFromToday } from '@/test/date';
-import {
-	childFormText,
-	createChildFormText,
-} from '@/lib/content/child-form-text';
+import { childFormText, createChildFormText } from '@/lib/content/child-form-text';
 import { ChildForm } from '@/components/child-form';
 import { GuardianRelationship } from '@/generated/prisma/enums';
 import { guardianRelationshipLabels } from '@/lib/content/child-form-text';
@@ -37,17 +34,11 @@ describe('ChildForm', () => {
 	it('renders all form controls', () => {
 		render(<ChildForm {...childFormProps} />);
 
-		expect(
-			screen.getByRole('textbox', { name: firstNameText.label }),
-		).toBeDefined();
-		expect(
-			screen.getByRole('textbox', { name: lastNameText.label }),
-		).toBeDefined();
+		expect(screen.getByRole('textbox', { name: firstNameText.label })).toBeDefined();
+		expect(screen.getByRole('textbox', { name: lastNameText.label })).toBeDefined();
 		expect(screen.getByLabelText(birthDateText.label)).toBeDefined();
 		expect(screen.getByRole('button', { name: submit })).toBeDefined();
-		expect(
-			screen.queryByRole('combobox', { name: relationshipText.label }),
-		).toBeNull();
+		expect(screen.queryByRole('combobox', { name: relationshipText.label })).toBeNull();
 	});
 
 	it('shows relationship options and its validation error when requested', async () => {
@@ -55,9 +46,7 @@ describe('ChildForm', () => {
 			message: childFormText.validationError,
 			errors: { relationship: [relationshipText.invalid] },
 		});
-		const { container } = render(
-			<ChildForm {...childFormProps} showRelationship />,
-		);
+		const { container } = render(<ChildForm {...childFormProps} showRelationship />);
 		const relationship = screen.getByRole('combobox', {
 			name: relationshipText.label,
 		});
@@ -84,56 +73,53 @@ describe('ChildForm', () => {
 		};
 		const cancelHref = '/children/child-1';
 
-		render(
-			<ChildForm
-				{...childFormProps}
-				defaultValues={child}
-				cancelHref={cancelHref}
-			/>,
-		);
+		render(<ChildForm {...childFormProps} defaultValues={child} cancelHref={cancelHref} />);
 
-		expect(
-			(screen.getByLabelText(firstNameText.label) as HTMLInputElement).value,
-		).toBe(child.firstName);
-		expect(
-			(screen.getByLabelText(lastNameText.label) as HTMLInputElement).value,
-		).toBe(child.lastName);
-		expect(
-			(screen.getByLabelText(birthDateText.label) as HTMLInputElement).value,
-		).toBe(child.birthDate);
-		expect(
-			screen
-				.getByRole('link', { name: childFormText.cancel })
-				.getAttribute('href'),
-		).toBe(cancelHref);
+		expect((screen.getByLabelText(firstNameText.label) as HTMLInputElement).value).toBe(
+			child.firstName,
+		);
+		expect((screen.getByLabelText(lastNameText.label) as HTMLInputElement).value).toBe(
+			child.lastName,
+		);
+		expect((screen.getByLabelText(birthDateText.label) as HTMLInputElement).value).toBe(
+			child.birthDate,
+		);
+		expect(screen.getByRole('link', { name: childFormText.cancel }).getAttribute('href')).toBe(
+			cancelHref,
+		);
 	});
 
-	it('keeps names when the birth date is invalid', async () => {
+	it('keeps entered values when the birth date is invalid', async () => {
 		mocks.childFormAction.mockResolvedValue({
 			message: '',
 			errors: { birthDate: [birthDateText.future] },
 		});
-		const { container } = render(<ChildForm {...childFormProps} />);
+		const { container } = render(<ChildForm {...childFormProps} showRelationship />);
 		const firstName = screen.getByRole('textbox', {
 			name: firstNameText.label,
 		}) as HTMLInputElement;
 		const lastName = screen.getByRole('textbox', {
 			name: lastNameText.label,
 		}) as HTMLInputElement;
-		const birthDate = screen.getByLabelText(
-			birthDateText.label,
-		) as HTMLInputElement;
+		const birthDate = screen.getByLabelText(birthDateText.label) as HTMLInputElement;
+		const relationship = screen.getByRole('combobox', {
+			name: relationshipText.label,
+		}) as HTMLSelectElement;
 
 		fireEvent.change(firstName, { target: { value: 'Miles' } });
 		fireEvent.change(lastName, { target: { value: 'Davis' } });
 		fireEvent.change(birthDate, {
 			target: { value: dateFromToday({ days: 1 }) },
 		});
+		fireEvent.change(relationship, {
+			target: { value: GuardianRelationship.GUARDIAN },
+		});
 		fireEvent.submit(container.querySelector('form')!);
 
 		await screen.findByText(birthDateText.future);
 		expect(firstName.value).toBe('Miles');
 		expect(lastName.value).toBe('Davis');
+		expect(relationship.value).toBe(GuardianRelationship.GUARDIAN);
 		expect(birthDate.getAttribute('aria-invalid')).toBe('true');
 	});
 
