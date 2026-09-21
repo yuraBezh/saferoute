@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import type { ChangeEventHandler } from 'react';
 import { SelectField } from '@/components/ui/select-field';
 import { bookingFormText } from '@/lib/content/booking-form-text';
 
@@ -12,13 +12,21 @@ type LocationSelectProps = {
 	locations: { id: string; name: string }[];
 	error?: string;
 	required: boolean;
+	value: string;
+	onChangeAction: ChangeEventHandler<HTMLSelectElement>;
 };
 
 const { fields, optional } = bookingFormText;
 
-export function LocationSelect({ name, label, locations, error, required }: LocationSelectProps) {
-	const [value, setValue] = useState('');
-
+export function LocationSelect({
+	name,
+	label,
+	locations,
+	error,
+	required,
+	value,
+	onChangeAction,
+}: LocationSelectProps) {
 	return (
 		<SelectField
 			id={name}
@@ -28,7 +36,7 @@ export function LocationSelect({ name, label, locations, error, required }: Loca
 			name={name}
 			required={required}
 			value={value}
-			onChange={(event) => setValue(event.target.value)}
+			onChange={onChangeAction}
 		>
 			<option value="">{fields[name].placeholder}</option>
 			{locations.map(({ id, name: locationName }) => (

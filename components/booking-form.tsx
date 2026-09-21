@@ -1,6 +1,5 @@
 'use client';
 
-import { useActionState, useState, type ChangeEvent } from 'react';
 import type { BookingFormState } from '@/app/bookings/actions';
 import { LocationSelect } from '@/components/location-select';
 import { Field } from '@/components/ui/field';
@@ -8,26 +7,11 @@ import { FORM_CONTROL_CLASS_NAME } from '@/components/ui/form-control';
 import { FormActions } from '@/components/ui/form-actions';
 import { FormError } from '@/components/ui/form-error';
 import { SelectField } from '@/components/ui/select-field';
+import { useBookingFormState } from '@/components/use-booking-form-state';
 import { bookingFormText } from '@/lib/content/booking-form-text';
 
 type Option = { id: string; name: string };
 type ChildOption = { id: string; firstName: string; lastName: string };
-type BookingFormValues = {
-	childId: string;
-	date: string;
-	time: string;
-	estimatedDurationMin: string;
-	notes: string;
-};
-
-const EMPTY_VALUES: BookingFormValues = {
-	childId: '',
-	date: '',
-	time: '',
-	estimatedDurationMin: '45',
-	notes: '',
-};
-
 const { fields, optional, cancel, submit, submitting } = bookingFormText;
 
 type BookingFormProps = {
@@ -37,18 +21,14 @@ type BookingFormProps = {
 };
 
 export function BookingForm({ action: formAction, childOptions, locations }: BookingFormProps) {
-	const initialState: BookingFormState = { message: '', errors: {} };
-	const [formState, action, isPending] = useActionState(formAction, initialState);
-	const [values, setValues] = useState(EMPTY_VALUES);
+	const { action, formMessage, getFieldError, isPending, submitForm, updateValue, values } =
+		useBookingFormState({ formAction });
 	const { childId, date, time, estimatedDurationMin, notes } = values;
-	const updateValue =
-		(field: keyof BookingFormValues) =>
-		(event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-			setValues((current) => ({ ...current, [field]: event.target.value }));
 
 	return (
 		<form
 			action={action}
+			onSubmit={submitForm}
 			noValidate
 			className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
 		>
@@ -56,11 +36,11 @@ export function BookingForm({ action: formAction, childOptions, locations }: Boo
 				<SelectField
 					id="childId"
 					label={fields.childId.label}
-					error={formState.errors?.childId?.[0]}
+					error={getFieldError('childId')}
 					name="childId"
 					required
 					value={childId}
-					onChange={updateValue('childId')}
+					onChange={(e) => updateValue('childId', e.target.value)}
 				>
 					<option value="">{fields.childId.placeholder}</option>
 					{childOptions.map(({ id, firstName, lastName }) => (
@@ -74,55 +54,59 @@ export function BookingForm({ action: formAction, childOptions, locations }: Boo
 					<Field
 						id="date"
 						label={fields.date.label}
-						error={formState.errors?.date?.[0]}
+						error={getFieldError('date')}
 						name="date"
 						type="date"
 						required
 						value={date}
-						onChange={updateValue('date')}
+						onChange={(e) => updateValue('date', e.target.value)}
 					/>
 					<Field
 						id="time"
 						label={fields.time.label}
-						error={formState.errors?.time?.[0]}
+						error={getFieldError('time')}
 						name="time"
 						type="time"
 						required
 						value={time}
-						onChange={updateValue('time')}
+						onChange={(e) => updateValue('time', e.target.value)}
 					/>
 				</div>
-
 				<LocationSelect
 					name="pickupLocationId"
 					label={fields.pickupLocationId.label}
 					locations={locations}
-					error={formState.errors?.pickupLocationId?.[0]}
+					error={getFieldError('pickupLocationId')}
 					required
+					value={values.pickupLocationId}
+					onChangeAction={(e) => updateValue('pickupLocationId', e.target.value)}
 				/>
 				<LocationSelect
 					name="activityLocationId"
 					label={fields.activityLocationId.label}
 					locations={locations}
-					error={formState.errors?.activityLocationId?.[0]}
+					error={getFieldError('activityLocationId')}
 					required={false}
+					value={values.activityLocationId}
+					onChangeAction={(e) => updateValue('activityLocationId', e.target.value)}
 				/>
 				<LocationSelect
 					name="dropoffLocationId"
 					label={fields.dropoffLocationId.label}
 					locations={locations}
-					error={formState.errors?.dropoffLocationId?.[0]}
+					error={getFieldError('dropoffLocationId')}
 					required
+					value={values.dropoffLocationId}
+					onChangeAction={(e) => updateValue('dropoffLocationId', e.target.value)}
 				/>
-
 				<SelectField
 					id="estimatedDurationMin"
 					label={fields.estimatedDurationMin.label}
-					error={formState.errors?.estimatedDurationMin?.[0]}
+					error={getFieldError('estimatedDurationMin')}
 					name="estimatedDurationMin"
 					required
 					value={estimatedDurationMin}
-					onChange={updateValue('estimatedDurationMin')}
+					onChange={(e) => updateValue('estimatedDurationMin', e.target.value)}
 				>
 					{fields.estimatedDurationMin.options.map(({ value, label }) => (
 						<option key={value} value={value}>
@@ -141,18 +125,18 @@ export function BookingForm({ action: formAction, childOptions, locations }: Boo
 						maxLength={500}
 						placeholder={fields.notes.placeholder}
 						value={notes}
-						onChange={updateValue('notes')}
-						aria-invalid={Boolean(formState.errors?.notes?.[0])}
-						aria-describedby={formState.errors?.notes?.[0] ? 'notes-error' : undefined}
+						onChange={(e) => updateValue('notes', e.target.value)}
+						aria-invalid={Boolean(getFieldError('notes'))}
+						aria-describedby={getFieldError('notes') ? 'notes-error' : undefined}
 						className={`${FORM_CONTROL_CLASS_NAME} resize-y placeholder:text-gray-400`}
 					/>
-					{formState.errors?.notes?.[0] ? (
+					{getFieldError('notes') ? (
 						<p id="notes-error" className="mt-1.5 text-sm text-red-600">
-							{formState.errors.notes[0]}
+							{getFieldError('notes')}
 						</p>
 					) : null}
 				</div>
-				<FormError message={formState.message} />
+				<FormError message={formMessage} />
 				<FormActions
 					cancelHref="/bookings"
 					cancelLabel={cancel}

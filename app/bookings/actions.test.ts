@@ -73,6 +73,20 @@ describe('createBookingAction', () => {
 		expect(mocks.getAccessibleLocation).not.toHaveBeenCalled();
 	});
 
+	it('returns validation errors for every empty required field', async () => {
+		const result = await createBookingAction(initialState, createFormData({}));
+
+		expect(result.message).toBe(validationError);
+		expect(result.errors).toMatchObject({
+			childId: [fields.childId.required],
+			date: [fields.date.invalid],
+			time: [fields.time.invalid],
+			pickupLocationId: [fields.pickupLocationId.required],
+			dropoffLocationId: [fields.dropoffLocationId.required],
+		});
+		expect(mocks.getAccessibleLocation).not.toHaveBeenCalled();
+	});
+
 	it('returns the invalid pickup error for an inaccessible location', async () => {
 		mocks.getAccessibleLocation.mockResolvedValue(null);
 		const result = await createBookingAction(initialState, createFormData(validValues));
