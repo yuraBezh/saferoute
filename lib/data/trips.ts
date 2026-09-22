@@ -68,14 +68,6 @@ export async function transitionTrip(params: {
 					id: true,
 					status: true,
 					version: true,
-					booking: {
-						select: {
-							activityLocationId: true,
-							pickupLocation: true,
-							activityLocation: true,
-							dropoffLocation: true,
-						},
-					},
 				},
 			});
 

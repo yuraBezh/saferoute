@@ -34,8 +34,8 @@ update’s `where` clause. If no rows are updated, another request changed the t
 same pattern used for booking acceptance.
 
 Each event has a unique idempotency key. The client creates it once per form instance, so retries from that form reuse it.
-If a duplicate reaches event creation, the `TripEvent` unique index rolls back the transaction and the operation returns
-success.
+For ordinary transitions, a duplicate that reaches event creation violates the `TripEvent` unique index, rolls back the
+transaction, and returns success. Pickup handoff does not catch this unique-key violation and returns an error instead.
 
 The interface handles pickup handoff through a separate operation. It requires the parent’s six-digit code and writes a
 distinct event type. The event log therefore distinguishes a normal status change from pickup confirmed with the code.
