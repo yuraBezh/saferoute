@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fromUtc, shiftDateByDays, toUtc } from '@/lib/date';
+import { fromDbDate, fromUtc, shiftDateByDays, toDbDate, toUtc } from '@/lib/date';
 
 const timeZoneFixture = 'America/Chicago';
 
@@ -26,5 +26,15 @@ describe('zoned date and time conversion', () => {
 describe('calendar date arithmetic', () => {
 	it('shifts a date across the end of the year', () => {
 		expect(shiftDateByDays('2026-12-31', 30)).toBe('2027-01-30');
+	});
+});
+
+describe('calendar date <-> db round trip', () => {
+	it('parses a calendar date as UTC midnight', () => {
+		expect(toDbDate('2026-12-31').toISOString()).toBe('2026-12-31T00:00:00.000Z');
+	});
+
+	it('reads a stored date back as the same calendar date', () => {
+		expect(fromDbDate(toDbDate('2026-12-31'))).toBe('2026-12-31');
 	});
 });

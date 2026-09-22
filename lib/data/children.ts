@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/auth/current-user';
+import { toDbDate } from '@/lib/date';
 import { type ChildInput, type CreateChildInput } from '@/lib/validation/child';
 
 export const CHILD_NOT_ARCHIVED = { deletedAt: null } as const;
@@ -28,7 +29,7 @@ function toChildData(data: ChildInput) {
 	return {
 		firstName: data.firstName,
 		lastName: data.lastName,
-		birthDate: new Date(`${data.birthDate}T00:00:00.000Z`),
+		birthDate: toDbDate(data.birthDate),
 	};
 }
 

@@ -7,6 +7,7 @@ import { editChildAction } from '@/app/children/actions';
 import { editChildFormText } from '@/lib/content/child-form-text';
 import { BackLink } from '@/components/ui/back-link';
 import { getChildForCurrentUser } from '@/lib/data/children';
+import { fromDbDate } from '@/lib/date';
 
 const { title, description, submit, submitting } = editChildFormText;
 
@@ -22,7 +23,7 @@ export default async function EditChildrenPage({ params }: PageProps<'/children/
 	const preFillValue = {
 		firstName: child.firstName,
 		lastName: child.lastName,
-		birthDate: child.birthDate.toISOString().slice(0, 10),
+		birthDate: fromDbDate(child.birthDate),
 	};
 
 	return (
