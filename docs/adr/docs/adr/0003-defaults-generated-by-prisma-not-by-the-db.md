@@ -5,11 +5,15 @@
 
 ## Context
 
-Every model has three automatically populated fields:
+Most models have three automatically populated fields:
 
 * `id`
 * `createdAt`
 * `updatedAt`
+
+Some models drop one or more of these on purpose — `TripEvent` has no
+`updatedAt` because it is never updated, and uses `recordedAt` instead of
+`createdAt`.
 
 Prisma can populate them in two ways:
 
@@ -49,7 +53,9 @@ Writes that bypass Prisma Client may fail or create invalid data. This includes:
 
 The DB itself doesn't enforce these defaults. The application layer does.
 
-This doesn't apply to data where correctness must be guaranteed regardless of the 
-write path. Audit and handoff tables will use database-side defaults and constraints when added.
+`TripEvent`, the audit/handoff table, has since been added. It uses the same
+Prisma-side `cuid()`/`now()` defaults as every other table — consistency
+won out over giving it a stronger, database-side guarantee. If that
+guarantee turns out to matter, it still needs to be designed and added.
 
 If another write path is introduced, this decision must be reviewed first.
