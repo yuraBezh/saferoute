@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
 	queryRaw: vi.fn(),
 	createBooking: vi.fn(),
 	updateBookings: vi.fn(),
+	findBooking: vi.fn(),
+	findGuardian: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/current-user', () => ({ getCurrentUserId: mocks.getCurrentUserId }));
@@ -17,12 +19,21 @@ vi.mock('@/lib/prisma', () => ({
 	prisma: {
 		child: { findFirst: mocks.findChild },
 		location: { findMany: mocks.findLocations },
-		booking: { create: mocks.createBooking, updateMany: mocks.updateBookings },
+		booking: {
+			create: mocks.createBooking,
+			updateMany: mocks.updateBookings,
+			findFirst: mocks.findBooking,
+		},
+		childGuardian: { findUnique: mocks.findGuardian },
 		$queryRaw: mocks.queryRaw,
 	},
 }));
 
-import { cancelBookingForCurrentUser, createBookingForCurrentUser } from './bookings';
+import {
+	cancelBookingForCurrentUser,
+	createBookingForCurrentUser,
+	getBookingForCurrentUser,
+} from './bookings';
 
 const user = { id: 'parent-1' };
 const pickup = { id: 'pickup-1', timezone: 'America/Chicago' };
@@ -160,5 +171,58 @@ describe('booking mutations', () => {
 	it('completes cancellation when the atomic update succeeds', async () => {
 		mocks.updateBookings.mockResolvedValue({ count: 1 });
 		await expect(cancelBookingForCurrentUser(booking.id)).resolves.toBeUndefined();
+	});
+});
+
+describe('getBookingForCurrentUser', () => {
+	const foundBooking = {
+		id: booking.id,
+		childId: input.childId,
+		requestedByUserId: 'requester-1',
+		trip: { id: 'trip-1', pickupPin: '123456' },
+	};
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+		mocks.getCurrentUserId.mockResolvedValue(user.id);
+		mocks.findBooking.mockResolvedValue(foundBooking);
+	});
+
+	it('returns null when the current user has no guardian link to the child', async () => {
+		mocks.findBooking.mockResolvedValue(null);
+		await expect(getBookingForCurrentUser(booking.id)).resolves.toBeNull();
+		expect(mocks.findGuardian).not.toHaveBeenCalled();
+	});
+
+	it('hides the pickup pin from a guardian who cannot approve handoff', async () => {
+		mocks.findGuardian.mockResolvedValue({ canApproveHandoff: false });
+		const result = await getBookingForCurrentUser(booking.id);
+		expect(result?.trip?.pickupPin).toBeNull();
+	});
+
+	it('hides the pickup pin when the user has no guardian record at all', async () => {
+		mocks.findGuardian.mockResolvedValue(null);
+		const result = await getBookingForCurrentUser(booking.id);
+		expect(result?.trip?.pickupPin).toBeNull();
+	});
+
+	it('shows the pickup pin to a guardian who can approve handoff', async () => {
+		mocks.findGuardian.mockResolvedValue({ canApproveHandoff: true });
+		const result = await getBookingForCurrentUser(booking.id);
+		expect(result?.trip?.pickupPin).toBe(foundBooking.trip.pickupPin);
+	});
+
+	it('marks the booking requester so only they can cancel it', async () => {
+		mocks.findGuardian.mockResolvedValue({ canApproveHandoff: true });
+		mocks.getCurrentUserId.mockResolvedValue(foundBooking.requestedByUserId);
+		const result = await getBookingForCurrentUser(booking.id);
+		expect(result?.isRequester).toBe(true);
+	});
+
+	it('marks a non-requesting guardian as not the requester', async () => {
+		mocks.findGuardian.mockResolvedValue({ canApproveHandoff: true });
+		mocks.getCurrentUserId.mockResolvedValue('other-guardian');
+		const result = await getBookingForCurrentUser(booking.id);
+		expect(result?.isRequester).toBe(false);
 	});
 });

@@ -34,6 +34,7 @@ export const tripText = {
 	eventPickupConfirmed: 'Pickup confirmed',
 	eventUpdated: 'Trip updated',
 	pinShareHint: 'Share this code with your caregiver at pickup.',
+	pinHiddenHint: 'Only guardians who can approve handoff see the pickup code.',
 	caregiverView: 'Update the trip as each handoff and stop happens.',
 	unknownActor: 'System',
 	notFoundError: 'This trip is not available.',

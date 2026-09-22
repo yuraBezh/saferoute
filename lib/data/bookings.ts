@@ -46,10 +46,25 @@ export async function getBookingsForCurrentUser() {
 export async function getBookingForCurrentUser(id: string) {
 	const userId = await getCurrentUserId();
 
-	return prisma.booking.findFirst({
-		where: { id, requestedByUserId: userId },
+	const booking = await prisma.booking.findFirst({
+		where: { id, child: { guardians: { some: { userId } } } },
 		include: BOOKING_INCLUDE,
 	});
+	if (!booking) return null;
+
+	const guardian = await prisma.childGuardian.findUnique({
+		where: { childId_userId: { childId: booking.childId, userId } },
+		select: { canApproveHandoff: true },
+	});
+
+	return {
+		...booking,
+		isRequester: booking.requestedByUserId === userId,
+		trip:
+			booking.trip && !guardian?.canApproveHandoff
+				? { ...booking.trip, pickupPin: null }
+				: booking.trip,
+	};
 }
 
 export async function getBookableChildrenForCurrentUser() {

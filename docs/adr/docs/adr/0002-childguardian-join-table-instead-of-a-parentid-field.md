@@ -56,13 +56,21 @@ If relationship and permissions were stored as one value, these cases would be d
 Fetching a child together with their guardians is slightly more expensive.
 Prisma will usually fetch the children, then the `ChildGuardian` records, then the related users, and combine the results in memory.
 This means roughly three queries instead of one. However, the number of queries does not increase for every child, so this is acceptable.
-All child-related permission checks will now use the `ChildGuardian` table.
+Child-related permission checks use the `ChildGuardian` table.
 
 For example:
 
-- Can this user see the child?
-- Can this user book a trip for the child?
-- Can this user confirm a handoff?
+- Can this user see the child, or the bookings made for them? (any linked guardian)
+- Can this user book a trip for the child? (`canBook`)
+- Can this user see the trip's pickup PIN? (`canApproveHandoff`)
+
+`canApproveHandoff` does not gate the moment the PIN is entered. No
+caregiver ever sees the PIN, not even the one assigned to the trip — the
+caregiver-facing query does not select `pickupPin`, and the pickup form is
+a blank field the caregiver fills in from what the guardian tells them out
+loud. The check happens earlier, at the moment the PIN is issued to a
+guardian: a guardian without `canApproveHandoff` can open a booking but
+never sees the PIN to read out, so they cannot authorize a handoff.
 
 Having these rules in one place makes authorization easier to understand and maintain. 
 However, it also means that mistakes in this model or its permission checks can affect access across the application.
