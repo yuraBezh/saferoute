@@ -1,4 +1,4 @@
-import { deleteChildAction } from '@/app/children/actions';
+import { archiveChildAction } from '@/app/children/actions';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { EditLink } from '@/components/ui/edit-link';
 import { InitialsAvatar } from '@/components/ui/initials-avatar';
@@ -39,7 +39,7 @@ export function ChildHeader({
 				<EditLink href={`/children/${id}/edit`} label={actions.edit} />
 				<DeleteButton
 					itemId={id}
-					deleteAction={deleteChildAction}
+					deleteAction={archiveChildAction}
 					text={{ trigger: actions.delete, ...deleteModal }}
 				/>
 			</div>

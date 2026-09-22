@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
 	findFirstChild: vi.fn(),
 	createChild: vi.fn(),
 	updateChildren: vi.fn(),
-	deleteChildren: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/current-user', () => ({
@@ -22,16 +21,16 @@ vi.mock('@/lib/prisma', () => ({
 			findFirst: mocks.findFirstChild,
 			create: mocks.createChild,
 			updateMany: mocks.updateChildren,
-			deleteMany: mocks.deleteChildren,
 		},
 	},
 }));
 
 import {
 	createChildForCurrentUser,
-	deleteChildForCurrentUser,
+	archiveChildForCurrentUser,
 	getChildForCurrentUser,
 	getChildrenForCurrentUser,
+	ownedChildWhere,
 	updateChildForCurrentUser,
 } from '@/lib/data/children';
 
@@ -64,7 +63,7 @@ describe('children data access', () => {
 
 		await expect(getChildrenForCurrentUser()).resolves.toBe(children);
 		expect(mocks.findManyChildren).toHaveBeenCalledWith({
-			where: { guardians: { some: { userId: currentUser.id } } },
+			where: ownedChildWhere(currentUser.id),
 			include: { _count: { select: { guardians: true } } },
 			orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
 		});
@@ -96,10 +95,7 @@ describe('children data access', () => {
 
 		await expect(getChildForCurrentUser(child.id)).resolves.toBe(child);
 		expect(mocks.findFirstChild).toHaveBeenCalledWith({
-			where: {
-				id: child.id,
-				guardians: { some: { userId: currentUser.id } },
-			},
+			where: ownedChildWhere(currentUser.id, { id: child.id }),
 			include: {
 				guardians: {
 					include: { user: true },
@@ -116,10 +112,7 @@ describe('children data access', () => {
 		await expect(updateChildForCurrentUser(child.id, childInput)).resolves.toBe(updateResult);
 
 		expect(mocks.updateChildren).toHaveBeenCalledWith({
-			where: {
-				id: child.id,
-				guardians: { some: { userId: currentUser.id } },
-			},
+			where: ownedChildWhere(currentUser.id, { id: child.id }),
 			data: {
 				firstName: childInput.firstName,
 				lastName: childInput.lastName,
@@ -128,17 +121,19 @@ describe('children data access', () => {
 		});
 	});
 
-	it('deletes a child through an atomic guardian filter', async () => {
-		const deleteResult = { count: 1 };
-		mocks.deleteChildren.mockResolvedValue(deleteResult);
+	it('archives a child through an atomic guardian filter instead of deleting the row', async () => {
+		const archiveResult = { count: 1 };
+		mocks.updateChildren.mockResolvedValue(archiveResult);
+		const now = new Date('2026-09-05T14:00:00Z');
+		vi.useFakeTimers();
+		vi.setSystemTime(now);
 
-		await expect(deleteChildForCurrentUser(child.id)).resolves.toBe(deleteResult);
+		await expect(archiveChildForCurrentUser(child.id)).resolves.toBe(archiveResult);
 
-		expect(mocks.deleteChildren).toHaveBeenCalledWith({
-			where: {
-				id: child.id,
-				guardians: { some: { userId: currentUser.id } },
-			},
+		expect(mocks.updateChildren).toHaveBeenCalledWith({
+			where: ownedChildWhere(currentUser.id, { id: child.id }),
+			data: { deletedAt: now },
 		});
+		vi.useRealTimers();
 	});
 });

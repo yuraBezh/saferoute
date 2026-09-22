@@ -2,13 +2,21 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/auth/current-user';
 import { type ChildInput, type CreateChildInput } from '@/lib/validation/child';
 
+export const CHILD_NOT_ARCHIVED = { deletedAt: null } as const;
+
+export function ownedChildWhere(userId: string, options?: { id?: string; canBook?: true }) {
+	return {
+		...(options?.id ? { id: options.id } : {}),
+		...CHILD_NOT_ARCHIVED,
+		guardians: { some: options?.canBook ? { userId, canBook: true as const } : { userId } },
+	};
+}
+
 export async function getChildrenForCurrentUser() {
 	const userId = await getCurrentUserId();
 
 	return await prisma.child.findMany({
-		where: {
-			guardians: { some: { userId } },
-		},
+		where: ownedChildWhere(userId),
 		include: {
 			_count: { select: { guardians: true } },
 		},
@@ -46,10 +54,7 @@ export async function getChildForCurrentUser(id: string) {
 	const userId = await getCurrentUserId();
 
 	return prisma.child.findFirst({
-		where: {
-			id,
-			guardians: { some: { userId } },
-		},
+		where: ownedChildWhere(userId, { id }),
 		include: {
 			guardians: {
 				include: { user: true },
@@ -63,15 +68,16 @@ export async function updateChildForCurrentUser(id: string, data: ChildInput) {
 	const userId = await getCurrentUserId();
 
 	return prisma.child.updateMany({
-		where: { id, guardians: { some: { userId } } },
+		where: ownedChildWhere(userId, { id }),
 		data: toChildData(data),
 	});
 }
 
-export async function deleteChildForCurrentUser(id: string) {
+export async function archiveChildForCurrentUser(id: string) {
 	const userId = await getCurrentUserId();
 
-	return prisma.child.deleteMany({
-		where: { id, guardians: { some: { userId } } },
+	return prisma.child.updateMany({
+		where: ownedChildWhere(userId, { id }),
+		data: { deletedAt: new Date() },
 	});
 }

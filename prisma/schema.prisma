@@ -19,6 +19,7 @@ model Child {
   birthDate DateTime        @db.Date
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
+  deletedAt DateTime?
   guardians ChildGuardian[]
   bookings  Booking[]
   trips     Trip[]

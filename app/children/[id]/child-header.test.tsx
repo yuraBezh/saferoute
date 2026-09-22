@@ -5,13 +5,13 @@ import { childrenText } from '@/lib/content/children-text';
 
 const mocks = vi.hoisted(() => ({
 	getAge: vi.fn(),
-	deleteChildAction: vi.fn(),
+	archiveChildAction: vi.fn(),
 }));
 
 vi.mock('@/lib/children/get-age', () => ({ getAge: mocks.getAge }));
 
 vi.mock('@/app/children/actions', () => ({
-	deleteChildAction: mocks.deleteChildAction,
+	archiveChildAction: mocks.archiveChildAction,
 }));
 
 import { ChildHeader } from './child-header';
@@ -36,21 +36,15 @@ describe('ChildHeader', () => {
 
 		expect(screen.getByRole('heading', { name: fullName })).toBeDefined();
 		expect(screen.getByText(initials)).toBeDefined();
-		expect(
-			screen.getByText(`${ageFixture} ${childrenText.yearsOld}`),
-		).toBeDefined();
+		expect(screen.getByText(`${ageFixture} ${childrenText.yearsOld}`)).toBeDefined();
 	});
 
 	it('renders the child actions', () => {
 		render(<ChildHeader {...childFixture} />);
 
 		expect(
-			screen
-				.getByRole('link', { name: childDetailsText.actions.edit })
-				.getAttribute('href'),
+			screen.getByRole('link', { name: childDetailsText.actions.edit }).getAttribute('href'),
 		).toBe(`/children/${childFixture.id}/edit`);
-		expect(
-			screen.getByRole('button', { name: childDetailsText.actions.delete }),
-		).toBeDefined();
+		expect(screen.getByRole('button', { name: childDetailsText.actions.delete })).toBeDefined();
 	});
 });

@@ -3,7 +3,7 @@ import { guardianRelationshipLabels } from '@/lib/content/child-form-text';
 const childDetailsText = {
 	actions: {
 		edit: 'Edit',
-		delete: 'Delete',
+		delete: 'Remove',
 	},
 	details: {
 		dateOfBirth: 'Date of birth',
@@ -16,10 +16,10 @@ const childDetailsText = {
 	deleteModal: {
 		confirm: 'Are you sure?',
 		cancel: 'Cancel',
-		delete: 'Delete',
+		delete: 'Remove',
 		description:
-			'This action cannot be undone. This will permanently delete this child and remove its data from our servers.',
-		deleting: 'Deleting…',
+			'This will remove this child from your account and hide their profile from guardians. Trip history is kept for safety records.',
+		deleting: 'Removing…',
 	},
 	guardians: {
 		title: 'Guardians',
@@ -27,8 +27,7 @@ const childDetailsText = {
 		primary: 'Primary',
 		canBook: 'Can book',
 		viewOnly: 'View only',
-		details: (relationship: string, email: string) =>
-			`${relationship} · ${email}`,
+		details: (relationship: string, email: string) => `${relationship} · ${email}`,
 		relationships: guardianRelationshipLabels,
 	},
 } as const;

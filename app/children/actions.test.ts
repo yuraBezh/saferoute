@@ -15,7 +15,7 @@ const { saveError } = createChildFormText;
 const mocks = vi.hoisted(() => ({
 	createChildForCurrentUser: vi.fn(),
 	updateChildForCurrentUser: vi.fn(),
-	deleteChildForCurrentUser: vi.fn(),
+	archiveChildForCurrentUser: vi.fn(),
 	revalidatePath: vi.fn(),
 	redirect: vi.fn(),
 }));
@@ -23,7 +23,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/data/children', () => ({
 	createChildForCurrentUser: mocks.createChildForCurrentUser,
 	updateChildForCurrentUser: mocks.updateChildForCurrentUser,
-	deleteChildForCurrentUser: mocks.deleteChildForCurrentUser,
+	archiveChildForCurrentUser: mocks.archiveChildForCurrentUser,
 }));
 
 vi.mock('next/cache', () => ({
@@ -36,7 +36,7 @@ vi.mock('next/navigation', () => ({
 
 import {
 	createChildAction,
-	deleteChildAction,
+	archiveChildAction,
 	editChildAction,
 	type ChildFormState,
 } from '@/app/children/actions';
@@ -113,12 +113,8 @@ describe('createChildAction', () => {
 	});
 
 	it('returns a general message when saving fails', async () => {
-		const consoleError = vi
-			.spyOn(console, 'error')
-			.mockImplementation(() => undefined);
-		mocks.createChildForCurrentUser.mockRejectedValue(
-			new Error('Database unavailable'),
-		);
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		mocks.createChildForCurrentUser.mockRejectedValue(new Error('Database unavailable'));
 		const birthDate = dateFromToday({ years: -6 });
 
 		const result = await createChildAction(
@@ -153,16 +149,10 @@ describe('editChildAction', () => {
 			birthDate: '',
 		};
 
-		const result = await editChildAction(
-			child.id,
-			initialState,
-			createFormData(child),
-		);
+		const result = await editChildAction(child.id, initialState, createFormData(child));
 
 		expect(result.message).toBe(childFormText.validationError);
-		expect(result.errors?.birthDate?.[0]).toBe(
-			childFormText.fields.birthDate.required,
-		);
+		expect(result.errors?.birthDate?.[0]).toBe(childFormText.fields.birthDate.required);
 		expect(mocks.updateChildForCurrentUser).not.toHaveBeenCalled();
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
@@ -192,10 +182,7 @@ describe('editChildAction', () => {
 			birthDate: child.birthDate,
 		});
 		expect(mocks.revalidatePath).toHaveBeenNthCalledWith(1, '/children');
-		expect(mocks.revalidatePath).toHaveBeenNthCalledWith(
-			2,
-			`/children/${child.id}`,
-		);
+		expect(mocks.revalidatePath).toHaveBeenNthCalledWith(2, `/children/${child.id}`);
 		expect(mocks.redirect).toHaveBeenCalledWith(`/children/${child.id}`);
 	});
 
@@ -208,11 +195,7 @@ describe('editChildAction', () => {
 		};
 		mocks.updateChildForCurrentUser.mockResolvedValue({ count: 0 });
 
-		const result = await editChildAction(
-			child.id,
-			initialState,
-			createFormData(child),
-		);
+		const result = await editChildAction(child.id, initialState, createFormData(child));
 
 		expect(result.message).toBe(editChildFormText.notFoundError);
 		expect(mocks.revalidatePath).not.toHaveBeenCalled();
@@ -227,16 +210,10 @@ describe('editChildAction', () => {
 			birthDate: dateFromToday({ years: -6 }),
 		};
 		const error = new Error('Database unavailable');
-		const consoleError = vi
-			.spyOn(console, 'error')
-			.mockImplementation(() => undefined);
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 		mocks.updateChildForCurrentUser.mockRejectedValue(error);
 
-		const result = await editChildAction(
-			child.id,
-			initialState,
-			createFormData(child),
-		);
+		const result = await editChildAction(child.id, initialState, createFormData(child));
 
 		expect(result.message).toBe(editChildFormText.saveError);
 		expect(consoleError).toHaveBeenCalledWith('Failed to update child', error);
@@ -246,37 +223,37 @@ describe('editChildAction', () => {
 	});
 });
 
-describe('deleteChildAction', () => {
+describe('archiveChildAction', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it('deletes the child and check children page revalidation', async () => {
+	it('archives the child and check children page revalidation', async () => {
 		const child = { id: 'child-1' };
-		mocks.deleteChildForCurrentUser.mockResolvedValue({ count: 1 });
+		mocks.archiveChildForCurrentUser.mockResolvedValue({ count: 1 });
 
-		await deleteChildAction(child.id);
+		await archiveChildAction(child.id);
 
-		expect(mocks.deleteChildForCurrentUser).toHaveBeenCalledWith(child.id);
+		expect(mocks.archiveChildForCurrentUser).toHaveBeenCalledWith(child.id);
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
 		expect(mocks.redirect).toHaveBeenCalledWith('/children');
 	});
 
-	it('does not reveal why no child was deleted', async () => {
+	it('does not reveal why no child was archived', async () => {
 		const child = { id: 'missing-child' };
-		mocks.deleteChildForCurrentUser.mockResolvedValue({ count: 0 });
+		mocks.archiveChildForCurrentUser.mockResolvedValue({ count: 0 });
 
-		await expect(deleteChildAction(child.id)).resolves.toBeUndefined();
+		await expect(archiveChildAction(child.id)).resolves.toBeUndefined();
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/children');
 		expect(mocks.redirect).toHaveBeenCalledWith('/children');
 	});
 
-	it('throws DB deletion errors', async () => {
+	it('throws DB archive errors', async () => {
 		const child = { id: 'child-1' };
 		const error = new Error('Database unavailable');
-		mocks.deleteChildForCurrentUser.mockRejectedValue(error);
+		mocks.archiveChildForCurrentUser.mockRejectedValue(error);
 
-		await expect(deleteChildAction(child.id)).rejects.toBe(error);
+		await expect(archiveChildAction(child.id)).rejects.toBe(error);
 		expect(mocks.revalidatePath).not.toHaveBeenCalled();
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
