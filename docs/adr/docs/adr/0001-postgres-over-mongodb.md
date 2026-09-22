@@ -13,8 +13,7 @@ Two requirements drive the choice:
 1. Broken references must be impossible. The database has to enforce this,
    not the application code. A trip pointing at a child who no longer
    exists is a safety problem.
-   2Handoff and audit rows must be impossible to change afterwards. That
-   includes changes made by the application itself.
+2. Handoff and audit rows must not be changed after they are written.
 
 ## Decision
 
@@ -24,28 +23,17 @@ MongoDB was considered. It fits this domain better than it first looks.
 It has compound unique indexes, partial unique indexes, and multi
 document transactions. None of those were the deciding factor.
 
-Two things decided it.
-
-1. Foreign keys with delete policies. MongoDB has no equivalent. Every
-   reference check would live in application code. That is the easiest
-   place to forget one.
-2. Table level privileges. A database role can be denied UPDATE and DELETE
-   on audit tables while still being allowed to insert. MongoDB has no
-   comparable way to make a collection append only for the application.
+What decided it: foreign keys with delete policies. MongoDB has no
+equivalent. Every reference check would live in the application code. That
+is the easiest place to forget one.
 
 ## Consequences
 
-Schema changes need migrations. Slower now, reviewable later.
+Schema changes need migrations.
 
-Delete behaviour has to be chosen for every relation. The default is
-not safe here. To be decided separately.
+Delete behavior has to be chosen for every relation. The default is
+not safe here. See ADR 0004.
 
-A GRANT alone will not make audit tables immutable, because the schema
-owner bypasses table privileges. A stronger mechanism is needed. To be
-decided separately.
-
-Immutable audit records conflict with the right to erase a child's
-data. To be decided separately.
-
-Prisma hides SQL. Raw SQL will be used on purpose for map queries and
-reports.
+Handoff and audit rows (`TripEvent`) are only ever inserted by the data
+access layer, never updated or deleted. This is enforced by convention
+in application code, not by the database.
