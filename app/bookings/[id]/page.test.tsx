@@ -19,6 +19,7 @@ import BookingDetailsPage from './page';
 const bookingFixture = {
 	id: 'booking-1',
 	status: BookingStatus.PENDING,
+	isRequester: true,
 	child: { id: 'child-1', firstName: 'John', lastName: 'Krasinski' },
 	caregiver: null,
 	scheduledPickupAt: new Date('2026-09-05T20:30:00Z'),
@@ -27,6 +28,7 @@ const bookingFixture = {
 	pickupLocation: { id: 'pickup-1', name: 'School', timezone: 'America/Chicago' },
 	activityLocation: null,
 	dropoffLocation: { id: 'dropoff-1', name: 'Home' },
+	trip: null,
 };
 
 const renderPage = (id: string) =>
@@ -56,5 +58,29 @@ describe('BookingDetailsPage', () => {
 		mocks.getBooking.mockResolvedValue({ ...bookingFixture, status: BookingStatus.ACCEPTED });
 		await renderPage(bookingFixture.id);
 		expect(mocks.deleteButton).not.toHaveBeenCalled();
+	});
+
+	it('hides cancellation from a guardian who did not request the booking', async () => {
+		mocks.getBooking.mockResolvedValue({ ...bookingFixture, isRequester: false });
+		await renderPage(bookingFixture.id);
+		expect(mocks.deleteButton).not.toHaveBeenCalled();
+	});
+
+	it('shows the pickup pin when the trip includes one', async () => {
+		mocks.getBooking.mockResolvedValue({
+			...bookingFixture,
+			trip: { id: 'trip-1', status: 'EN_ROUTE_TO_SCHOOL', pickupPin: '123456', events: [] },
+		});
+		render(await renderPage(bookingFixture.id));
+		expect(screen.getByText('123456')).toBeDefined();
+	});
+
+	it('shows the hidden-pin hint when the guardian cannot approve handoff', async () => {
+		mocks.getBooking.mockResolvedValue({
+			...bookingFixture,
+			trip: { id: 'trip-1', status: 'EN_ROUTE_TO_SCHOOL', pickupPin: null, events: [] },
+		});
+		render(await renderPage(bookingFixture.id));
+		expect(screen.getByText(/only guardians who can approve handoff/i)).toBeDefined();
 	});
 });

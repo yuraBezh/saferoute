@@ -24,6 +24,7 @@ const {
 	eventPickupConfirmed,
 	eventUpdated,
 	unknownActor,
+	pinHiddenHint,
 } = tripText;
 
 function formatTripEvent(event: {
@@ -66,7 +67,7 @@ export default async function BookingDetailsPage({ params }: PageProps<'/booking
 						<p className="text-sm font-semibold text-gray-800">
 							{formatBookingPickup(booking.scheduledPickupAt, pickupLocation.timezone)}
 						</p>
-						{booking.status === BookingStatus.PENDING && (
+						{booking.status === BookingStatus.PENDING && booking.isRequester && (
 							<div className="mt-3">
 								<DeleteButton
 									itemId={booking.id}
@@ -107,10 +108,16 @@ export default async function BookingDetailsPage({ params }: PageProps<'/booking
 								<dt className="text-gray-500">{tripStatus}</dt>
 								<dd className="mt-1 font-semibold text-gray-900">{statusLabels[trip.status]}</dd>
 								<dt className="mt-4 text-gray-500">{pinLabel}</dt>
-								<dd className="mt-2 inline-flex rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-3 text-3xl font-black tracking-[0.15em] text-blue-700">
-									{trip.pickupPin}
-								</dd>
-								<dd className="mt-2 text-sm leading-6 text-gray-600">{pinShareHint}</dd>
+								{trip.pickupPin ? (
+									<>
+										<dd className="mt-2 inline-flex rounded-xl border-2 border-blue-200 bg-blue-50 px-4 py-3 text-3xl font-black tracking-[0.15em] text-blue-700">
+											{trip.pickupPin}
+										</dd>
+										<dd className="mt-2 text-sm leading-6 text-gray-600">{pinShareHint}</dd>
+									</>
+								) : (
+									<dd className="mt-2 text-sm leading-6 text-gray-600">{pinHiddenHint}</dd>
+								)}
 							</div>
 						) : null}
 						{booking.notes ? (
