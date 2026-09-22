@@ -11,7 +11,7 @@ import {
 import { z } from 'zod';
 import {
 	createChildForCurrentUser,
-	deleteChildForCurrentUser,
+	archiveChildForCurrentUser,
 	updateChildForCurrentUser,
 } from '@/lib/data/children';
 
@@ -83,8 +83,8 @@ export async function editChildAction(
 	redirect(`/children/${id}`);
 }
 
-export async function deleteChildAction(id: string): Promise<void> {
-	await deleteChildForCurrentUser(id);
+export async function archiveChildAction(id: string): Promise<void> {
+	await archiveChildForCurrentUser(id);
 
 	revalidatePath('/children');
 	redirect('/children');

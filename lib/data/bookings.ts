@@ -3,6 +3,7 @@ import { getBookingExpiresAt } from '@/lib/bookings/time';
 import { BOOKING_DATA_ERRORS } from '@/lib/bookings/errors';
 import { hasOverlappingChildBooking } from '@/lib/bookings/overlap';
 import { toUtc } from '@/lib/date';
+import { ownedChildWhere } from '@/lib/data/children';
 import { prisma } from '@/lib/prisma';
 import type { BookingInput } from '@/lib/validation/booking';
 
@@ -71,7 +72,7 @@ export async function getBookableChildrenForCurrentUser() {
 	const userId = await getCurrentUserId();
 
 	return prisma.child.findMany({
-		where: { guardians: { some: { userId, canBook: true } } },
+		where: ownedChildWhere(userId, { canBook: true }),
 		select: { id: true, firstName: true, lastName: true },
 		orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
 	});
@@ -91,7 +92,7 @@ export async function createBookingForCurrentUser(data: BookingInput) {
 	} = data;
 
 	const child = await prisma.child.findFirst({
-		where: { id: childId, guardians: { some: { userId, canBook: true } } },
+		where: ownedChildWhere(userId, { id: childId, canBook: true }),
 		select: { id: true },
 	});
 	if (!child) throw new Error(BOOKING_DATA_ERRORS.childNotBookable);
