@@ -10,7 +10,7 @@ Work in progress.
 
 ## Requirements
 
-- Node.js 22
+- Node.js 24 LTS
 - Docker Desktop
 - npm 10+
 
@@ -26,6 +26,14 @@ npm run dev
 ```
 
 The app runs at http://localhost:3000.
+
+### Deployment
+
+`package.json` pins the Vercel build and Node.js runtime to `24.x`.
+Keep **Settings → Build and Deployment → Node.js Version** set to **24.x**
+as well. Deploy a new commit containing this configuration to apply it;
+existing deployments keep their original runtime. Vercel manages minor
+and patch updates within the selected major version.
 
 ### Useful commands
 

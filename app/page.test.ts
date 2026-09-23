@@ -9,7 +9,8 @@ vi.mock('next/navigation', () => ({ redirect: mocks.redirect }));
 vi.mock('@/lib/auth/current-user', () => ({ getCurrentUser: mocks.getCurrentUser }));
 vi.mock('@/auth', () => ({ signIn: mocks.signIn }));
 
-import Home, { becomeCaregiverAction, findCaregiverAction } from './page';
+import { becomeCaregiverAction, findCaregiverAction } from './actions';
+import Home from './page';
 
 const userFixture = {
 	id: 'user-1',
