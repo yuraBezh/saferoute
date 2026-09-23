@@ -81,6 +81,7 @@ export async function getAvailableBookingsForCurrentCaregiver() {
 				caregiverUserId: null,
 				requestedByUserId: { not: userId },
 				expiresAt: { gt: new Date() },
+				child: { guardians: { none: { userId } } },
 			},
 			include: AVAILABLE_INCLUDE,
 			orderBy: { scheduledPickupAt: 'asc' },
@@ -188,6 +189,11 @@ async function acceptBookingInTransaction(
 				SELECT 1 FROM "User"
 				WHERE "id" = ${caregiverUserId}
 					AND 'CAREGIVER' = ANY("roles")
+			)
+			AND NOT EXISTS (
+				SELECT 1 FROM "ChildGuardian"
+				WHERE "childId" = "Booking"."childId"
+					AND "userId" = ${caregiverUserId}
 			)
 	`;
 

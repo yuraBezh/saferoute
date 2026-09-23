@@ -124,6 +124,18 @@ describe('caregiver booking data access', () => {
 		);
 	});
 
+	it('excludes bookings for a child the current caregiver guards', async () => {
+		await getAvailableBookingsForCurrentCaregiver();
+
+		expect(mocks.findBookings).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: expect.objectContaining({
+					child: { guardians: { none: { userId: caregiver.userId } } },
+				}),
+			}),
+		);
+	});
+
 	it('marks a booking that conflicts with the caregiver schedule', async () => {
 		mocks.bookingIntervalsOverlap.mockReturnValue(true);
 
@@ -141,7 +153,7 @@ describe('caregiver booking data access', () => {
 		expect(mocks.requireRole).toHaveBeenCalledWith(UserRole.CAREGIVER);
 	});
 
-	it('checks caregiver role and verification in the statement that accepts a booking', async () => {
+	it('checks caregiver role, verification, and guardianship in the acceptance statement', async () => {
 		await acceptBookingForCurrentCaregiver(booking.id);
 
 		const [
@@ -151,12 +163,14 @@ describe('caregiver booking data access', () => {
 			requesterExclusionUserId,
 			verifiedCaregiverId,
 			caregiverRoleUserId,
+			guardianExclusionUserId,
 		] = mocks.executeRaw.mock.calls[0];
 		expect(assignedCaregiverId).toBe(caregiver.userId);
 		expect(bookingId).toBe(booking.id);
 		expect(requesterExclusionUserId).toBe(caregiver.userId);
 		expect(verifiedCaregiverId).toBe(caregiver.userId);
 		expect(caregiverRoleUserId).toBe(caregiver.userId);
+		expect(guardianExclusionUserId).toBe(caregiver.userId);
 	});
 
 	it('creates a trip and its initial event in the acceptance transaction', async () => {
