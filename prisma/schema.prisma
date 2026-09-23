@@ -144,6 +144,7 @@ model Booking {
 
   @@index([status, scheduledPickupAt])
   @@index([requestedByUserId, createdAt])
+  @@index([caregiverUserId, status])
   @@index([childId, scheduledPickupAt])
   @@index([pickupLocationId])
   @@index([activityLocationId])
