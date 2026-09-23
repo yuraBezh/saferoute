@@ -148,6 +148,13 @@ async function main() {
 	});
 	await createE2ESession(dualRoleUser.id, 'E2E_DUAL_ROLE_SESSION_TOKEN');
 
+	const dualRoleCoParent = await prisma.user.create({
+		data: {
+			email: 'co-parent@example.com',
+			fullName: 'Casey Lee',
+		},
+	});
+
 	const [school, motherHome, , activity] = await prisma.$transaction([
 		prisma.location.create({
 			data: {
@@ -221,6 +228,15 @@ async function main() {
 		},
 	});
 
+	// Emma has two guardians: Casey (who books) and Jordan, who is also a verified caregiver.
+	const emma = await prisma.child.create({
+		data: {
+			firstName: 'Emma',
+			lastName: 'Lee',
+			birthDate: toDbDate('2015-06-10'),
+		},
+	});
+
 	await prisma.childGuardian.createMany({
 		data: [
 			// John has two parents
@@ -258,6 +274,23 @@ async function main() {
 				canBook: true,
 				canApproveHandoff: true,
 			},
+			// Emma has two guardians, one of whom (Jordan) is also a verified caregiver
+			{
+				childId: emma.id,
+				userId: dualRoleCoParent.id,
+				relationship: GuardianRelationship.MOTHER,
+				isPrimary: true,
+				canBook: true,
+				canApproveHandoff: true,
+			},
+			{
+				childId: emma.id,
+				userId: dualRoleUser.id,
+				relationship: GuardianRelationship.FATHER,
+				isPrimary: false,
+				canBook: false,
+				canApproveHandoff: true,
+			},
 		],
 	});
 
@@ -266,8 +299,9 @@ async function main() {
 		toUtc(shiftDateByDays(todayAtPickupLocation, 1), '15:30', school.timezone),
 		toUtc(shiftDateByDays(todayAtPickupLocation, 2), '14:30', school.timezone),
 		toUtc(shiftDateByDays(todayAtPickupLocation, 3), '16:00', school.timezone),
+		toUtc(shiftDateByDays(todayAtPickupLocation, 1), '09:00', school.timezone),
 	];
-	const [pendingPickupAt, acceptedPickupAt, declinedPickupAt] = bookingTimes;
+	const [pendingPickupAt, acceptedPickupAt, declinedPickupAt, guardedChildPickupAt] = bookingTimes;
 
 	await prisma.booking.createMany({
 		data: [
@@ -305,6 +339,18 @@ async function main() {
 				dropoffLocationId: motherHome.id,
 				estimatedDurationMin: 75,
 				expiresAt: getBookingExpiresAt(declinedPickupAt),
+			},
+			{
+				// Requested by Emma's other guardian. Jordan, also Emma's guardian, must never see
+				// or be able to accept this booking as a caregiver.
+				childId: emma.id,
+				requestedByUserId: dualRoleCoParent.id,
+				status: BookingStatus.PENDING,
+				scheduledPickupAt: guardedChildPickupAt,
+				pickupLocationId: school.id,
+				dropoffLocationId: school.id,
+				estimatedDurationMin: 60,
+				expiresAt: getBookingExpiresAt(guardedChildPickupAt),
 			},
 		],
 	});

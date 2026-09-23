@@ -1,31 +1,38 @@
 # 0011. Booking lifecycle, time, and integrity
 
 **Date:** 2026-09-04
+
 **Status:** Accepted
 
 ## Context
 
-A `Booking` is a request for future care, not a `Trip`. It may be declined, expire, or later create one or more trips.
+A `Booking` is a request for future care, not a `Trip`. It may be declined, expire, or later create
+one or more trips.
 
-A booking belongs to one child and one parent, may have a caregiver, and can reference pickup, activity, and drop-off locations.
+A booking belongs to one child and one parent, may have a caregiver, and can reference pickup,
+activity, and drop-off locations.
 
 Pickup time is entered in the pickup location's timezone but stored as an exact UTC instant.
 
 A child may have multiple overlapping `PENDING` bookings, but `ACCEPTED` bookings must not overlap.
 
-Prisma cannot express the PostgreSQL exclusion constraints needed to enforce this rule directly in the schema.
+Prisma cannot express the PostgreSQL exclusion constraints needed to enforce this rule directly in
+the schema.
 
 ## Decision
 
 Use named Prisma relations for users and locations.
 
-All `Booking` foreign keys use `onDelete: Restrict` so booking history keeps its related child, users, and route.
+All `Booking` foreign keys use `onDelete: Restrict` so booking history keeps its related child,
+users, and route.
 
-Store `scheduledPickupAt` and `expiresAt` as `timestamptz`. Convert input and output using the pickup location's timezone in `lib/date.ts` with `date-fns-tz`.
+Store `scheduledPickupAt` and `expiresAt` as `timestamptz`. Convert input and output using the
+pickup location's timezone, via `date-fns-tz`.
 
-Form validation rejects calendar dates before the pickup location's current date, but it does not decide whether a time
-earlier on that same date has already passed. After the data layer loads the pickup location and combines the submitted
-date, time, and timezone into a UTC instant, it must reject `scheduledPickupAt <= now` before creating the booking.
+Form validation rejects calendar dates before the pickup location's current date, but it does not
+decide whether a time earlier on that same date has already passed. After the data layer loads the
+pickup location and combines the submitted date, time, and timezone into a UTC instant, it must
+reject `scheduledPickupAt <= now` before creating the booking.
 
 A booking expires two hours before pickup:
 
@@ -33,16 +40,19 @@ A booking expires two hours before pickup:
 
 Available bookings must have `expiresAt > now`.
 
-For now, expired bookings may still be stored as `PENDING`; the UI derives `EXPIRED` from `expiresAt`.
+For now, expired bookings may still be stored as `PENDING`; the UI derives `EXPIRED` from
+`expiresAt`.
 
-Overlap is not enforced yet because acceptance is not implemented.
+Overlap is enforced only at acceptance. Multiple `PENDING` bookings for the same child or caregiver
+are allowed to coexist; accepting one is what has to enforce the rule.
 
-When a booking changes from `PENDING` to `ACCEPTED`, the overlap check and update must run in one Prisma `$transaction` 
-with PostgreSQL `Serializable` isolation and limited retries.
+When a booking changes from `PENDING` to `ACCEPTED`, the overlap check and update must run in one
+Prisma `$transaction` with PostgreSQL `Serializable` isolation and limited retries.
 
-A manual SQL migration adds partial PostgreSQL exclusion constraints for accepted bookings. 
-One prevents overlapping bookings for the same child and the other prevents overlapping bookings for the same caregiver. 
-Prisma does not model these constraints, so `schema.prisma` documents that they are maintained by SQL migrations.
+A manual SQL migration adds partial PostgreSQL exclusion constraints for accepted bookings. One
+prevents overlapping bookings for the same child and the other prevents overlapping bookings for the
+same caregiver. Prisma does not model these constraints, so `schema.prisma` documents that they are
+maintained by SQL migrations.
 
 Two bookings overlap if:
 
@@ -52,20 +62,21 @@ where:
 
 `end = scheduledPickupAt + estimatedDurationMin`
 
-A creation-time overlap check may be added for UX, but it must not block overlapping `PENDING` bookings.
+A creation-time overlap check may be added for UX, but it must not block overlapping `PENDING`
+bookings.
 
 ## Consequences
 
 Referenced children, users, and locations cannot be deleted accidentally.
 
-Serializable transactions protect concurrent acceptance, but PostgreSQL may abort one transaction when two conflicting 
-bookings are accepted at the same time. 
-The exclusion constraints remain the final database-level guarantee if an acceptance path omits the friendly pre-check.
+Serializable transactions protect concurrent acceptance, but PostgreSQL may abort one transaction
+when two conflicting bookings are accepted at the same time. The exclusion constraints remain the
+final database-level guarantee if an acceptance path omits the friendly pre-check.
 
-An exclusion violation uses PostgreSQL code `23P01`. The data layer converts it to the corresponding child or caregiver conflict error.
+An exclusion violation uses PostgreSQL code `23P01`. The data layer converts it to the corresponding
+child or caregiver conflict error.
 
 ## Open questions
 
 - When should a job persist `EXPIRED` and send notifications?
-- When should overlap enforcement move to a PostgreSQL exclusion constraint?
 - How should recurring bookings create bookings and trips without duplicating scheduling logic?

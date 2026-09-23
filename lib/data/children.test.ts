@@ -98,7 +98,7 @@ describe('children data access', () => {
 			where: ownedChildWhere(currentUser.id, { id: child.id }),
 			include: {
 				guardians: {
-					include: { user: true },
+					include: { user: { select: { fullName: true, email: true } } },
 					orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }],
 				},
 			},

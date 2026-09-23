@@ -41,6 +41,21 @@ test('a caregiver edits their profile and opens assignments', async ({
 	await expect(page.getByText(assignmentsText.description)).toBeVisible();
 });
 
+test('a caregiver cannot see or accept a booking for a child they guard', async ({
+	baseURL,
+	context,
+	page,
+}) => {
+	if (!baseURL) throw new Error('Playwright baseURL is required');
+	await authenticate(context, baseURL, dualRoleSessionToken);
+
+	await page.goto('/caregiver/assignments');
+
+	await expect(page.getByRole('heading', { name: assignmentsText.availableTitle })).toBeVisible();
+	await expect(page.getByText('John')).toBeVisible();
+	await expect(page.getByText('Emma')).toHaveCount(0);
+});
+
 test('a suspended caregiver cannot access caregiver pages', async ({ baseURL, context, page }) => {
 	const { accessRevoked, profile } = caregiverText;
 	if (!baseURL) throw new Error('Playwright baseURL is required');

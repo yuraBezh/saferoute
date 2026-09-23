@@ -65,6 +65,9 @@
     "*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write"
+    ],
+    "docs/adr/**/*.md": [
+      "prettier --write"
     ]
   }
 }
