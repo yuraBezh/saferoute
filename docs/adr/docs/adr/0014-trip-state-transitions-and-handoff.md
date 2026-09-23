@@ -79,5 +79,3 @@ additionally require pushing state changes and are out of scope.
 
 - May a caregiver withdraw after accepting? What happens to a trip already in progress? Both cases
   require notifying the parent.
-- Must the guardian confirming handoff at the door be the person who booked the trip? The
-  `canApproveHandoff` flag exists on the guardianship record, but nothing uses it yet.
