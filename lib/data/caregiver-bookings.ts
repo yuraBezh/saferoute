@@ -234,7 +234,11 @@ export async function acceptBookingForCurrentCaregiver(bookingId: string) {
 		);
 	} catch (error) {
 		if (error instanceof AcceptancePreconditionFailed) {
-			const status = await getCaregiverStatus();
+			const profile = await prisma.caregiverProfile.findUnique({
+				where: { userId },
+				select: { status: true },
+			});
+			const status = profile?.status ?? null;
 			throw new Error(status === CaregiverStatus.VERIFIED ? notAvailable : notVerified);
 		}
 
