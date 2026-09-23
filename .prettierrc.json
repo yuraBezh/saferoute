@@ -10,6 +10,12 @@
       "options": {
         "useTabs": false
       }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "proseWrap": "always"
+      }
     }
   ]
 }
