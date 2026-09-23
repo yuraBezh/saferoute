@@ -30,7 +30,7 @@ export const getCaregiverProfileForCurrentUser = cache(async () => {
 	});
 });
 
-export const getCaregiverStatus = async () => {
+export const getCaregiverStatus = cache(async () => {
 	const userId = await getCurrentUserId();
 	const profile = await prisma.caregiverProfile.findUnique({
 		where: { userId },
@@ -38,7 +38,7 @@ export const getCaregiverStatus = async () => {
 	});
 
 	return profile?.status ?? null;
-};
+});
 
 export async function createCaregiverProfileForCurrentUser(data: CaregiverProfileInput) {
 	const userId = await getCurrentUserId();

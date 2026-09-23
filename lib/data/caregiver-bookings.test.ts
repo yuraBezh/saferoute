@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 	getCaregiverStatus: vi.fn(),
 	findBookings: vi.fn(),
 	findBooking: vi.fn(),
+	findCaregiverProfile: vi.fn(),
 	hasChildOverlap: vi.fn(),
 	hasCaregiverOverlap: vi.fn(),
 	bookingIntervalsOverlap: vi.fn(),
@@ -37,6 +38,9 @@ vi.mock('@/lib/prisma', () => ({
 		booking: {
 			findMany: mocks.findBookings,
 			findFirst: mocks.findBooking,
+		},
+		caregiverProfile: {
+			findUnique: mocks.findCaregiverProfile,
 		},
 		$executeRaw: mocks.executeRaw,
 		$transaction: mocks.transaction,
@@ -72,6 +76,7 @@ describe('caregiver booking data access', () => {
 		mocks.hasRole.mockResolvedValue(true);
 		mocks.requireRole.mockResolvedValue(undefined);
 		mocks.getCaregiverStatus.mockResolvedValue(CaregiverStatus.VERIFIED);
+		mocks.findCaregiverProfile.mockResolvedValue({ status: CaregiverStatus.VERIFIED });
 		mocks.findBookings.mockResolvedValue([booking]);
 		mocks.findBooking.mockResolvedValue(booking);
 		mocks.hasChildOverlap.mockResolvedValue(false);
@@ -197,14 +202,19 @@ describe('caregiver booking data access', () => {
 	});
 
 	it('diagnoses a verification change after an atomic update matches nothing', async () => {
-		mocks.getCaregiverStatus
-			.mockResolvedValueOnce(CaregiverStatus.VERIFIED)
-			.mockResolvedValueOnce(CaregiverStatus.PENDING_VERIFICATION);
+		mocks.getCaregiverStatus.mockResolvedValueOnce(CaregiverStatus.VERIFIED);
+		mocks.findCaregiverProfile.mockResolvedValueOnce({
+			status: CaregiverStatus.PENDING_VERIFICATION,
+		});
 		mocks.executeRaw.mockResolvedValue(0);
 
 		await expect(acceptBookingForCurrentCaregiver(booking.id)).rejects.toThrow(
 			CAREGIVER_ERRORS.notVerified,
 		);
+		expect(mocks.findCaregiverProfile).toHaveBeenCalledWith({
+			where: { userId: caregiver.userId },
+			select: { status: true },
+		});
 	});
 
 	it('maps a child exclusion violation to a child conflict', async () => {
