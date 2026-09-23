@@ -251,6 +251,7 @@ test('full booking path: a parent books, a caregiver completes the trip, the par
 
 	await expect(page).toHaveURL('/bookings');
 	await page.getByRole('link', { name: new RegExp(fullName) }).click();
+	await expect(page).toHaveURL(/\/bookings\/[^/]+$/);
 	const bookingId = page.url().split('/').pop();
 	if (!bookingId) throw new Error('Booking id was not found in the URL');
 
@@ -261,7 +262,7 @@ test('full booking path: a parent books, a caregiver completes the trip, the par
 	await expect(page.getByText(tripCompleteMessage)).toBeVisible();
 
 	await withParentBooking(browser, baseURL, bookingId, async (parentPage) => {
-		await expect(parentPage.getByText(completedStatus, { exact: true })).toBeVisible();
+		await expect(parentPage.locator('dd').filter({ hasText: completedStatus })).toBeVisible();
 	});
 });
 
