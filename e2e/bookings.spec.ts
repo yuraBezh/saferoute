@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import { BookingStatus, LocationType } from '@/generated/prisma/enums';
 import { authenticate } from '@/e2e/helpers/auth';
+import { submitBookingForm } from '@/e2e/helpers/booking-form';
 import {
 	createOwnedBooking,
 	createOwnedChild,
@@ -9,25 +10,11 @@ import {
 	requireE2EEnvironmentVariable,
 } from '@/e2e/helpers/database';
 import { MS_PER_HOUR, MS_PER_MINUTE, shiftDateByDays } from '@/lib/date';
-import { bookingFormText } from '@/lib/content/booking-form-text';
 import { bookingsText } from '@/lib/content/bookings-text';
 import { headerText } from '@/lib/content/header-text';
 
 const ownerEmail = requireE2EEnvironmentVariable('SEED_OWNER_EMAIL');
 const secondSessionToken = requireE2EEnvironmentVariable('E2E_SECOND_SESSION_TOKEN');
-const {
-	fields: {
-		childId: childField,
-		date: dateField,
-		time: timeField,
-		pickupLocationId: pickupField,
-		activityLocationId: activityField,
-		dropoffLocationId: dropoffField,
-		estimatedDurationMin: durationField,
-		notes: notesField,
-	},
-	submit,
-} = bookingFormText;
 const { cancel, status: statusLabels } = bookingsText;
 
 const routes = {
@@ -133,18 +120,16 @@ test('creates a booking through the form', async ({ page }) => {
 	await createOwnedChild(ownerEmail, child);
 	const tomorrow = shiftDateByDays(new Date().toISOString().slice(0, 10), 1);
 
-	await page.goto(routes.newBooking);
-	await page.getByLabel(childField.label).selectOption({ label: fullName });
-	await page.getByLabel(dateField.label).fill(tomorrow);
-	await page.getByLabel(timeField.label).fill('10:30');
-	await page.getByLabel(pickupField.label).selectOption({ label: 'Lamar High School' });
-	await page.getByLabel(activityField.label, { exact: false }).selectOption({
-		label: 'Houston Ballet Academy',
+	await submitBookingForm(page, {
+		childFullName: fullName,
+		date: tomorrow,
+		time: '10:30',
+		pickupLocationName: 'Lamar High School',
+		activityLocationName: 'Houston Ballet Academy',
+		dropoffLocationName: "Anna's Home",
+		durationMin: '60',
+		notes,
 	});
-	await page.getByLabel(dropoffField.label).selectOption({ label: "Anna's Home" });
-	await page.getByLabel(durationField.label).selectOption('60');
-	await page.getByLabel(notesField.label, { exact: false }).fill(notes);
-	await page.getByRole('button', { name: submit }).click();
 
 	await expect(page).toHaveURL(routes.bookings);
 	const row = page.getByRole('link', { name: new RegExp(fullName) });

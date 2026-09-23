@@ -2,12 +2,14 @@ import { randomUUID } from 'node:crypto';
 import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { BookingStatus, LocationType, TripStatus } from '@/generated/prisma/enums';
 import { authenticate } from '@/e2e/helpers/auth';
+import { submitBookingForm } from '@/e2e/helpers/booking-form';
 import {
 	createOwnedBooking,
 	createOwnedChild,
 	createOwnedLocation,
 	requireE2EEnvironmentVariable,
 } from '@/e2e/helpers/database';
+import { shiftDateByDays } from '@/lib/date';
 import { assignmentsText } from '@/lib/content/assignments-text';
 import { tripText } from '@/lib/content/trip-text';
 
@@ -224,6 +226,44 @@ async function expectParentEventHistory(
 
 const makeDifferentPin = (pickupPin: string) =>
 	`${pickupPin[0] === '0' ? '1' : '0'}${pickupPin.slice(1)}`;
+
+test('full booking path: a parent books, a caregiver completes the trip, the parent sees it finished', async ({
+	baseURL,
+	context,
+	page,
+	browser,
+}) => {
+	baseURL = requireBaseURL(baseURL);
+	const suffix = randomUUID().slice(0, 8);
+	const child = { firstName: `Golden-${suffix}`, lastName: 'Rider', birthDate: '2015-04-10' };
+	const fullName = `${child.firstName} ${child.lastName}`;
+	await createOwnedChild(ownerEmail, child);
+	const tomorrow = shiftDateByDays(new Date().toISOString().slice(0, 10), 1);
+
+	await submitBookingForm(page, {
+		childFullName: fullName,
+		date: tomorrow,
+		time: '09:15',
+		pickupLocationName: 'Lamar High School',
+		dropoffLocationName: "Anna's Home",
+		durationMin: '60',
+	});
+
+	await expect(page).toHaveURL('/bookings');
+	await page.getByRole('link', { name: new RegExp(fullName) }).click();
+	const bookingId = page.url().split('/').pop();
+	if (!bookingId) throw new Error('Booking id was not found in the URL');
+
+	await openAcceptedTrip(context, page, baseURL, { bookingId, childName: child.firstName });
+	await startTrip(page);
+	await confirmPickup(page, await readPickupPin(browser, baseURL, bookingId));
+	await goHomeAndFinishTrip(page);
+	await expect(page.getByText(tripCompleteMessage)).toBeVisible();
+
+	await withParentBooking(browser, baseURL, bookingId, async (parentPage) => {
+		await expect(parentPage.getByText(completedStatus, { exact: true })).toBeVisible();
+	});
+});
 
 test('accepting a booking creates a trip visible to the caregiver and parent', async ({
 	baseURL,
