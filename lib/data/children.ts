@@ -58,7 +58,7 @@ export async function getChildForCurrentUser(id: string) {
 		where: ownedChildWhere(userId, { id }),
 		include: {
 			guardians: {
-				include: { user: true },
+				include: { user: { select: { fullName: true, email: true } } },
 				orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }],
 			},
 		},
