@@ -1,6 +1,4 @@
-function Skeleton({ className }: { className: string }) {
-	return <div className={`animate-pulse rounded bg-gray-200 ${className}`} />;
-}
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
 	return (
@@ -42,10 +40,7 @@ export default function Loading() {
 					<Skeleton className="mb-3 h-6 w-24" />
 					<div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 						{[0, 1].map((item) => (
-							<div
-								key={item}
-								className="flex items-center justify-between gap-4 px-4 py-4"
-							>
+							<div key={item} className="flex items-center justify-between gap-4 px-4 py-4">
 								<div className="space-y-2">
 									<Skeleton className="h-5 w-36" />
 									<Skeleton className="h-4 w-52" />

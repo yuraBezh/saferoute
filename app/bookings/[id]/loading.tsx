@@ -1,6 +1,4 @@
-const Skeleton = ({ className }: { className: string }) => (
-	<div className={`animate-pulse rounded bg-gray-200 ${className}`} />
-);
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BookingDetailsLoading() {
 	return (
