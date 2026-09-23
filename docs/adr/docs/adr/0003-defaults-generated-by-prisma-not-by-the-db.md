@@ -11,9 +11,8 @@ Most models have three automatically populated fields:
 * `createdAt`
 * `updatedAt`
 
-Some models drop one or more of these on purpose — `TripEvent` has no
-`updatedAt` because it is never updated, and uses `recordedAt` instead of
-`createdAt`.
+Some models drop one or more of these on purpose — `TripEvent` has no `updatedAt` because it is
+never updated, and uses `recordedAt` instead of `createdAt`.
 
 Prisma can populate them in two ways:
 
@@ -22,12 +21,12 @@ Prisma can populate them in two ways:
 
 The difference matters when data is inserted without Prisma Client.
 
-I hit this during development: rows created outside the normal application path 
-received an empty `id` and `1970-01-01` for `updatedAt`. A second insert then failed 
-because the empty `id` was already used.
+I hit this during development: rows created outside the normal application path received an empty
+`id` and `1970-01-01` for `updatedAt`. A second insert then failed because the empty `id` was
+already used.
 
-The migration shows why: `id` is `TEXT NOT NULL`, but has no database `DEFAULT`. 
-The DB does not know about `cuid()`.
+The migration shows why: `id` is `TEXT NOT NULL`, but has no database `DEFAULT`. The DB does not
+know about `cuid()`.
 
 ## Decision
 
@@ -37,11 +36,11 @@ Keep defaults on the Prisma side:
 * `now()` for `createdAt`
 * `@updatedAt` for `updatedAt`
 
-For now, Prisma Client is the only supported write path, so database-side defaults 
-would add complexity without solving a current application need.
+For now, Prisma Client is the only supported write path, so database-side defaults would add
+complexity without solving a current application need.
 
-`cuid()` also fits the domain: identifiers are opaque, do not expose record counts, 
-and are generated before the DB insert.
+`cuid()` also fits the domain: identifiers are opaque, do not expose record counts, and are
+generated before the DB insert.
 
 ## Consequences
 
@@ -53,9 +52,9 @@ Writes that bypass Prisma Client may fail or create invalid data. This includes:
 
 The DB itself doesn't enforce these defaults. The application layer does.
 
-`TripEvent`, the audit/handoff table, has since been added. It uses the same
-Prisma-side `cuid()`/`now()` defaults as every other table — consistency
-won out over giving it a stronger, database-side guarantee. If that
-guarantee turns out to matter, it still needs to be designed and added.
+`TripEvent`, the audit/handoff table, has since been added. It uses the same Prisma-side
+`cuid()`/`now()` defaults as every other table — consistency won out over giving it a stronger,
+database-side guarantee. If that guarantee turns out to matter, it still needs to be designed and
+added.
 
 If another write path is introduced, this decision must be reviewed first.

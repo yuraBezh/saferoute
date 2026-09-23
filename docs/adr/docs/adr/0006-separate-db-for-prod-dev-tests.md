@@ -10,7 +10,8 @@ The project originally used one Neon database for both development and productio
 This caused two problems:
 
 * Running `prisma migrate dev` locally changed the same DB used by the deployed app.
-* End-to-end tests could not safely reset the DB because it contained real development or production data.
+* End-to-end tests could not safely reset the DB because it contained real development or
+  production data.
 
 ## Decision
 
@@ -24,26 +25,31 @@ Use three separate databases:
 
 The development and test databases run locally in Docker and can be recreated from scratch.
 
-The production connection string exists only in Vercel environment variables and is not stored locally. 
-This means commands run on a developer machine, including Prisma CLI commands, use the local Docker database by default.
+The production connection string exists only in Vercel environment variables and is not stored
+locally. This means commands run on a developer machine, including Prisma CLI commands, use the
+local Docker database by default.
 
-Test-specific variables are stored in `.env.e2e`, including a flag that allows the test DB to be reset. 
-This flag is not available in the development environment.
+Test-specific variables are stored in `.env.e2e`, including a flag that allows the test DB to be
+reset. This flag is not available in the development environment.
 
 ## Consequences
 
 Local development no longer requires a network connection.
 
-Migrations are tested against an empty DB after every reset, which helps detect migrations that only work with existing data.
+Migrations are tested against an empty DB after every reset, which helps detect migrations that only
+work with existing data.
 
-Accessing production from a local machine now requires explicitly providing the production connection string. 
-This extra step is intentional to reduce accidental changes.
+Accessing production from a local machine now requires explicitly providing the production
+connection string. This extra step is intentional to reduce accidental changes.
 
-There is still a risk of running destructive commands against the wrong DB. 
-The reset flag helps, but the reset logic should also verify that the connection string points to a test DB.
+The reset logic does not just trust the flag. It also parses `DATABASE_URL` itself and refuses to
+run unless the host is `localhost`/`127.0.0.1`, the port is `5433`, and the database name is
+`saferoute_e2e` — `ALLOW_DATABASE_RESET=true` alone is not enough.
 
 ## Open question
 
-Vercel preview deployments still use the production DB, so code from an open pull request can modify live data.
+Vercel preview deployments still use the production DB, so code from an open pull request can modify
+live data.
 
-Neon database branching could give each preview deployment its own DB, but this has not been set up yet.
+Neon database branching could give each preview deployment its own DB, but this has not been set up
+yet.
