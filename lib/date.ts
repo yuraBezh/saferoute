@@ -5,11 +5,13 @@ export const MS_PER_HOUR = 60 * MS_PER_MINUTE;
 
 export const toDbDate = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 
+export const fromDbDate = (date: Date) => date.toISOString().slice(0, 10);
+
 export const shiftDateByDays = (iso: string, days: number) => {
 	const date = toDbDate(iso);
 	date.setUTCDate(date.getUTCDate() + days);
 
-	return date.toISOString().slice(0, 10);
+	return fromDbDate(date);
 };
 
 export const toUtc = (date: string, time: string, timeZone: string) =>
