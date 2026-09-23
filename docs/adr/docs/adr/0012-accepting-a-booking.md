@@ -1,6 +1,7 @@
 # 0012. Accepting a booking
 
 Date: 2026-09-10
+
 Status: accepted
 
 ## Context
@@ -10,9 +11,9 @@ child at one time.
 
 Acceptance must prevent three races:
 
-* Two caregivers accepting the same booking.
-* A child having overlapping accepted bookings.
-* A caregiver accepting overlapping bookings.
+- Two caregivers accepting the same booking.
+- A child having overlapping accepted bookings.
+- A caregiver accepting overlapping bookings.
 
 ADR 0011 identified the first two as future requirements because acceptance had not yet been
 implemented.

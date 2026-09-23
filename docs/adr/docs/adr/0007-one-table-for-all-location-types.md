@@ -1,6 +1,7 @@
 # 0007. One table for all location types
 
 Date: 2026-08-25
+
 Status: accepted
 
 ## Context
@@ -12,8 +13,8 @@ name, address, coordinates, and timezone.
 
 The main difference is ownership:
 
-* A Home is private and belongs to one parent.
-* A School or Activity venue can be shared by multiple families.
+- A Home is private and belongs to one parent.
+- A School or Activity venue can be shared by multiple families.
 
 ## Decision
 

@@ -1,6 +1,7 @@
 # 0010. User roles and caregiver profiles
 
 Date: 2026-09-02
+
 Status: accepted
 
 ## Context

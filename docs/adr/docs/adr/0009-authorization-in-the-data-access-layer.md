@@ -1,6 +1,7 @@
 # 0009. Authorization lives in the data access layer
 
 Date: 2026-09-01
+
 Status: accepted
 
 ## Context
@@ -11,10 +12,10 @@ and the edit page loaded children by ID without checking ownership.
 
 There were three possible places for permission checks:
 
-* **Proxy**: only runs during page navigation. Server Actions can be called directly, so it cannot
+- **Proxy**: only runs during page navigation. Server Actions can be called directly, so it cannot
   protect them.
-* **Components**: can hide UI but cannot secure the actual operation.
-* **Data access layer**: every DB read and write already goes through it, so it is the safest place.
+- **Components**: can hide UI but cannot secure the actual operation.
+- **Data access layer**: every DB read and write already goes through it, so it is the safest place.
 
 As the app grows, duplicated checks become easy to miss. For sensitive data such as `Children’s`
 records, one missed check is a security issue.

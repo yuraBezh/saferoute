@@ -1,6 +1,7 @@
 # 0013. Trip lifecycle and integrity
 
 Date: 2026-09-15
+
 Status: accepted
 
 ## Context

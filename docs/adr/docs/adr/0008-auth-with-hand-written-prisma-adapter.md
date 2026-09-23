@@ -1,6 +1,7 @@
 # 0008. Auth.js with a custom Prisma adapter
 
 Date: 2026-08-28
+
 Status: accepted
 
 ## Context
@@ -9,11 +10,11 @@ The application needs real authentication.
 
 I considered 3 alternatives:
 
-* **Neon Auth** was rejected because it would manage the `User` table already used by
+- **Neon Auth** was rejected because it would manage the `User` table already used by
   `ChildGuardian` and `Location`, and would couple authentication to the database provider.
-* **Better Auth** has good typing and schema generation, but Auth.js is more widely adopted in
+- **Better Auth** has good typing and schema generation, but Auth.js is more widely adopted in
   real-world projects.
-* **Custom authentication from scratch** was rejected because OAuth is easy to implement incorrectly
+- **Custom authentication from scratch** was rejected because OAuth is easy to implement incorrectly
   and would take extra time. For the MVP, Auth.js provides everything the app needs at this stage.
 
 ## Decision
@@ -25,9 +26,9 @@ to keep its own naming instead of following Auth.js conventions.
 
 Auth.js fields are mapped to domain fields in one place:
 
-* `name` → `fullName`
-* `emailVerified` → `emailVerifiedAt`
-* `image` → `avatarUrl`
+- `name` → `fullName`
+- `emailVerified` → `emailVerifiedAt`
+- `image` → `avatarUrl`
 
 OAuth fields in `Account`, such as `access_token`, `expires_at`, and `id_token`, stay in snake_case
 because Auth.js expects these names.

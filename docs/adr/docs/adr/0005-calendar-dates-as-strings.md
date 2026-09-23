@@ -1,6 +1,7 @@
 # 0005. Calendar dates as strings (not timestamps)
 
 **Date:** 2026-08-17
+
 **Status:** Accepted
 
 ## Context
@@ -13,7 +14,7 @@ by one day depending on the timezone.
 I hit this during development. For example:
 
 ```ts
-new Date("2010-01-01")
+new Date('2010-01-01');
 ```
 
 is parsed as midnight UTC. In Houston, that is still the previous day locally, which caused
@@ -30,9 +31,9 @@ Calendar dates are represented as `YYYY-MM-DD` strings throughout the applicatio
 
 This includes:
 
-* form values
-* validation
-* API data
+- form values
+- validation
+- API data
 
 Strings in this format can be compared directly because their order matches calendar order.
 
@@ -52,10 +53,10 @@ Application code should work with `YYYY-MM-DD` strings, not `Date` objects, for 
 
 ## Consequences
 
-The conversion to and from Prisma is kept in one shared pair of helpers (`toDbDate` /
-`fromDbDate`). Every call site uses them instead of repeating the pattern. This wasn't true from
-the start — the data layer and the child-edit form originally re-inlined the same two expressions
-by hand — but both now call the shared helpers, and the round trip is covered by tests.
+The conversion to and from Prisma is kept in one shared pair of helpers (`toDbDate` / `fromDbDate`).
+Every call site uses them instead of repeating the pattern. This wasn't true from the start — the
+data layer and the child-edit form originally re-inlined the same two expressions by hand — but both
+now call the shared helpers, and the round trip is covered by tests.
 
 Calendar dates and timestamps are different concepts and must be handled differently.
 

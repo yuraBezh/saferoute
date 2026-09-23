@@ -1,6 +1,7 @@
 # 0006. Separate databases for production, development, and tests
 
 Date: 2026-08-25
+
 Status: accepted
 
 ## Context
@@ -9,9 +10,9 @@ The project originally used one Neon database for both development and productio
 
 This caused two problems:
 
-* Running `prisma migrate dev` locally changed the same DB used by the deployed app.
-* End-to-end tests could not safely reset the DB because it contained real development or
-  production data.
+- Running `prisma migrate dev` locally changed the same DB used by the deployed app.
+- End-to-end tests could not safely reset the DB because it contained real development or production
+  data.
 
 ## Decision
 

@@ -1,6 +1,7 @@
 # 0002. `ChildGuardian` join table instead of a `parentId` field
 
 Date: 2026-08-10
+
 Status: accepted
 
 ## Context

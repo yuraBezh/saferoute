@@ -1,6 +1,7 @@
 # 0004. Delete policies per relation
 
 **Date:** 2026-08-17
+
 **Status:** Accepted
 
 ## Context
@@ -20,14 +21,14 @@ not erase what happened during previous trips.
 
 Delete policies are chosen per relation.
 
-| Relation                    | Policy     | Reason                                                       |
-| ---------------------------- | ---------- | ------------------------------------------------------------- |
-| `ChildGuardian -> Child`     | `Cascade`  | The link has no meaning without the child                     |
-| `ChildGuardian -> User`      | `Restrict` | A guardian cannot be deleted while linked to a child           |
-| `Trip -> Child`              | `Restrict` | Trip history must be saved                                    |
-| `Trip -> User` (caregiver)   | `Restrict` | We must keep a record of who the caregiver was                |
-| `TripEvent -> Trip`          | `Restrict` | Event history is part of the trip record                      |
-| `TripEvent -> User` (actor)  | `SetNull`  | An event survives the actor being removed; who did it can go blank |
+| Relation                    | Policy     | Reason                                                             |
+| --------------------------- | ---------- | ------------------------------------------------------------------ |
+| `ChildGuardian -> Child`    | `Cascade`  | The link has no meaning without the child                          |
+| `ChildGuardian -> User`     | `Restrict` | A guardian cannot be deleted while linked to a child               |
+| `Trip -> Child`             | `Restrict` | Trip history must be saved                                         |
+| `Trip -> User` (caregiver)  | `Restrict` | We must keep a record of who the caregiver was                     |
+| `TripEvent -> Trip`         | `Restrict` | Event history is part of the trip record                           |
+| `TripEvent -> User` (actor) | `SetNull`  | An event survives the actor being removed; who did it can go blank |
 
 There is no separate audit-log table. `TripEvent` is the only history table SafeRoute has, and
 unlike a generic audit log it uses real foreign keys — trip history is guaranteed to point at a real

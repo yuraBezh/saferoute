@@ -1,6 +1,7 @@
 # 0011. Booking lifecycle, time, and integrity
 
 **Date:** 2026-09-04
+
 **Status:** Accepted
 
 ## Context
