@@ -50,7 +50,7 @@ export default async function CaregiverPage() {
 				</div>
 				<Link
 					href="/caregiver/edit"
-					className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+					className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50"
 				>
 					{edit}
 				</Link>

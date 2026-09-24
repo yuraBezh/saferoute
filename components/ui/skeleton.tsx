@@ -1,7 +1,30 @@
+import type { ReactNode } from 'react';
 import { PageContainer } from '@/components/ui/page-container';
 
 export function Skeleton({ className }: { className: string }) {
 	return <div className={`animate-pulse rounded bg-gray-200 ${className}`} />;
+}
+
+export function PageHeaderSkeleton({
+	className = 'mb-8',
+	titleWidth,
+	descriptionWidth,
+	action,
+}: {
+	className?: string;
+	titleWidth: string;
+	descriptionWidth: string;
+	action?: ReactNode;
+}) {
+	return (
+		<div className={`${className} flex items-start justify-between gap-4`}>
+			<div className="space-y-1">
+				<Skeleton className={`h-9 ${titleWidth}`} />
+				<Skeleton className={`h-6 ${descriptionWidth}`} />
+			</div>
+			{action}
+		</div>
+	);
 }
 
 export function FormFieldSkeleton() {

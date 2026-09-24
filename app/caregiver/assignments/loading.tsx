@@ -1,5 +1,5 @@
 import { PageContainer } from '@/components/ui/page-container';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeaderSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 function SectionSkeleton() {
 	return (
@@ -17,7 +17,7 @@ function SectionSkeleton() {
 							<Skeleton className="h-3 w-20" />
 						</div>
 						<Skeleton className="h-12 w-full" />
-						<Skeleton className="h-9 w-24" />
+						<Skeleton className="h-10 w-24" />
 					</div>
 				))}
 			</div>
@@ -28,10 +28,7 @@ function SectionSkeleton() {
 export default function Loading() {
 	return (
 		<PageContainer>
-			<header className="mb-8 space-y-2">
-				<Skeleton className="h-7 w-36" />
-				<Skeleton className="h-4 w-72" />
-			</header>
+			<PageHeaderSkeleton titleWidth="w-44" descriptionWidth="w-96" />
 			<div className="space-y-10">
 				<SectionSkeleton />
 				<SectionSkeleton />

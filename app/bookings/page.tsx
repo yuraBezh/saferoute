@@ -14,7 +14,6 @@ const {
 	title,
 	description,
 	newBooking,
-	bookingCount,
 	empty: { title: emptyTitle, description: emptyDescription, cta: emptyCta },
 } = bookingsText;
 
@@ -27,11 +26,9 @@ export default async function BookingsPage() {
 				<div>
 					<PageTitle>{title}</PageTitle>
 					<PageDescription>{description}</PageDescription>
-					<p className="mt-1 text-xs font-medium text-gray-500">{bookingCount(bookings.length)}</p>
 				</div>
 				<AddLink href="/bookings/new">{newBooking}</AddLink>
 			</div>
-
 			{bookings.length === 0 ? (
 				<section className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-6 py-12 text-center">
 					<h2 className="font-semibold text-gray-950">{emptyTitle}</h2>

@@ -4,7 +4,6 @@ export const bookingsText = {
 	title: 'Bookings',
 	description: 'Plan rides and keep track of every pickup.',
 	newBooking: 'New booking',
-	bookingCount: (count: number) => `${count} ${count === 1 ? 'booking' : 'bookings'}`,
 	empty: {
 		title: 'No bookings yet',
 		description: 'Schedule the first ride for your family.',

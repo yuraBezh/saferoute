@@ -10,7 +10,7 @@ export default function BookingDetailsLoading() {
 						<Skeleton className="h-7 w-48" />
 						<Skeleton className="h-4 w-64" />
 					</div>
-					<Skeleton className="h-9 w-32" />
+					<Skeleton className="h-10 w-32" />
 				</div>
 				<div className="grid gap-8 p-6 sm:grid-cols-2">
 					<div className="space-y-5">
