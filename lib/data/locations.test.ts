@@ -8,7 +8,6 @@ const mocks = vi.hoisted(() => ({
 	findFirstLocation: vi.fn(),
 	createLocation: vi.fn(),
 	updateLocations: vi.fn(),
-	deleteLocations: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/current-user', () => ({
@@ -22,16 +21,17 @@ vi.mock('@/lib/prisma', () => ({
 			findFirst: mocks.findFirstLocation,
 			create: mocks.createLocation,
 			updateMany: mocks.updateLocations,
-			deleteMany: mocks.deleteLocations,
 		},
 	},
 }));
 
 import {
+	accessibleLocationWhere,
+	archiveLocationForCurrentUser,
 	createLocationForCurrentUser,
-	deleteLocationForCurrentUser,
 	getLocationsForCurrentUser,
 	getOwnedLocation,
+	ownedLocationWhere,
 	updateLocationForCurrentUser,
 } from '@/lib/data/locations';
 
@@ -63,9 +63,7 @@ describe('locations data access', () => {
 
 		await expect(getLocationsForCurrentUser()).resolves.toBe(locations);
 		expect(mocks.findManyLocations).toHaveBeenCalledWith({
-			where: {
-				OR: [{ ownerUserId: currentUser.id }, { ownerUserId: null }],
-			},
+			where: accessibleLocationWhere(currentUser.id),
 			orderBy: [{ type: 'asc' }, { name: 'asc' }],
 		});
 	});
@@ -75,7 +73,7 @@ describe('locations data access', () => {
 
 		await expect(getOwnedLocation(location.id)).resolves.toBe(location);
 		expect(mocks.findFirstLocation).toHaveBeenCalledWith({
-			where: { id: location.id, ownerUserId: currentUser.id },
+			where: ownedLocationWhere(currentUser.id, { id: location.id }),
 		});
 	});
 
@@ -93,24 +91,28 @@ describe('locations data access', () => {
 		const updateResult = { count: 1 };
 		mocks.updateLocations.mockResolvedValue(updateResult);
 
-		await expect(
-			updateLocationForCurrentUser(location.id, locationInput),
-		).resolves.toBe(updateResult);
+		await expect(updateLocationForCurrentUser(location.id, locationInput)).resolves.toBe(
+			updateResult,
+		);
 		expect(mocks.updateLocations).toHaveBeenCalledWith({
-			where: { id: location.id, ownerUserId: currentUser.id },
+			where: ownedLocationWhere(currentUser.id, { id: location.id }),
 			data: locationInput,
 		});
 	});
 
-	it('deletes only a location owned by the current user', async () => {
-		const deleteResult = { count: 1 };
-		mocks.deleteLocations.mockResolvedValue(deleteResult);
+	it('archives a location owned by the current user instead of deleting the row', async () => {
+		const archiveResult = { count: 1 };
+		mocks.updateLocations.mockResolvedValue(archiveResult);
+		const now = new Date('2026-09-05T14:00:00Z');
+		vi.useFakeTimers();
+		vi.setSystemTime(now);
 
-		await expect(deleteLocationForCurrentUser(location.id)).resolves.toBe(
-			deleteResult,
-		);
-		expect(mocks.deleteLocations).toHaveBeenCalledWith({
-			where: { id: location.id, ownerUserId: currentUser.id },
+		await expect(archiveLocationForCurrentUser(location.id)).resolves.toBe(archiveResult);
+
+		expect(mocks.updateLocations).toHaveBeenCalledWith({
+			where: ownedLocationWhere(currentUser.id, { id: location.id }),
+			data: { deletedAt: now },
 		});
+		vi.useRealTimers();
 	});
 });

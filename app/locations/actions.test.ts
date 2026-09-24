@@ -9,7 +9,7 @@ import {
 const mocks = vi.hoisted(() => ({
 	createLocationForCurrentUser: vi.fn(),
 	updateLocationForCurrentUser: vi.fn(),
-	deleteLocationForCurrentUser: vi.fn(),
+	archiveLocationForCurrentUser: vi.fn(),
 	revalidatePath: vi.fn(),
 	redirect: vi.fn(),
 }));
@@ -17,7 +17,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/data/locations', () => ({
 	createLocationForCurrentUser: mocks.createLocationForCurrentUser,
 	updateLocationForCurrentUser: mocks.updateLocationForCurrentUser,
-	deleteLocationForCurrentUser: mocks.deleteLocationForCurrentUser,
+	archiveLocationForCurrentUser: mocks.archiveLocationForCurrentUser,
 }));
 
 vi.mock('next/cache', () => ({
@@ -30,7 +30,7 @@ vi.mock('next/navigation', () => ({
 
 import {
 	createLocationAction,
-	deleteLocationAction,
+	archiveLocationAction,
 	editLocationAction,
 	type LocationFormState,
 } from '@/app/locations/actions';
@@ -153,25 +153,25 @@ describe('editLocationAction', () => {
 	});
 });
 
-describe('deleteLocationAction', () => {
+describe('archiveLocationAction', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it('deletes the location and redirects', async () => {
-		mocks.deleteLocationForCurrentUser.mockResolvedValue({ count: 1 });
+	it('archives the location and redirects', async () => {
+		mocks.archiveLocationForCurrentUser.mockResolvedValue({ count: 1 });
 
-		await deleteLocationAction(location.id);
+		await archiveLocationAction(location.id);
 
-		expect(mocks.deleteLocationForCurrentUser).toHaveBeenCalledWith(location.id);
+		expect(mocks.archiveLocationForCurrentUser).toHaveBeenCalledWith(location.id);
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/locations');
 		expect(mocks.redirect).toHaveBeenCalledWith('/locations');
 	});
 
-	it('does not redirect when no owned location was deleted', async () => {
-		mocks.deleteLocationForCurrentUser.mockResolvedValue({ count: 0 });
+	it('does not redirect when no owned location was archived', async () => {
+		mocks.archiveLocationForCurrentUser.mockResolvedValue({ count: 0 });
 
-		await expect(deleteLocationAction(location.id)).rejects.toThrow();
+		await expect(archiveLocationAction(location.id)).rejects.toThrow();
 		expect(mocks.revalidatePath).not.toHaveBeenCalled();
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});

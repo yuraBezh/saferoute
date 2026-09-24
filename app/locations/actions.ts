@@ -11,7 +11,7 @@ import {
 import { locationSchema } from '@/lib/validation/location';
 import {
 	createLocationForCurrentUser,
-	deleteLocationForCurrentUser,
+	archiveLocationForCurrentUser,
 	updateLocationForCurrentUser,
 } from '@/lib/data/locations';
 
@@ -77,8 +77,8 @@ export async function editLocationAction(
 	redirect('/locations');
 }
 
-export async function deleteLocationAction(id: string): Promise<void> {
-	const result = await deleteLocationForCurrentUser(id);
+export async function archiveLocationAction(id: string): Promise<void> {
+	const result = await archiveLocationForCurrentUser(id);
 
 	if (result.count === 0) {
 		throw new Error('Location not found or access denied');

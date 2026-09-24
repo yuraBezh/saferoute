@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { deleteLocationAction, editLocationAction } from '@/app/locations/actions';
+import { archiveLocationAction, editLocationAction } from '@/app/locations/actions';
 import { LocationForm } from '@/components/location-form';
 import { BackLink } from '@/components/ui/back-link';
 import { DeleteButton } from '@/components/ui/delete-button';
@@ -48,7 +48,7 @@ export default async function EditLocationPage({ params }: PageProps<'/locations
 				footerAction={
 					<DeleteButton
 						itemId={location.id}
-						deleteAction={deleteLocationAction}
+						deleteAction={archiveLocationAction}
 						text={deleteLabel}
 					/>
 				}

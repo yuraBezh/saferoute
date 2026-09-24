@@ -58,12 +58,12 @@ export const editLocationFormText = {
 	notFoundError: 'This location no longer exists or cannot be edited.',
 	saveError: 'Unable to update the location. Please try again.',
 	delete: {
-		trigger: 'Delete',
-		confirm: 'Delete this location?',
+		trigger: 'Remove',
+		confirm: 'Are you sure?',
 		description:
-			'This action cannot be undone. This location will be permanently deleted.',
+			'This will remove this location from your account and hide it from future bookings. Booking history is kept for records.',
 		cancel: 'Cancel',
-		delete: 'Delete',
-		deleting: 'Deleting…',
+		delete: 'Remove',
+		deleting: 'Removing…',
 	},
 } as const;
