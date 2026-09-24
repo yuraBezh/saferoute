@@ -18,10 +18,7 @@ type Guardian = {
 export function GuardiansList({ guardians }: { guardians: Guardian[] }) {
 	return (
 		<section className="mt-4" aria-labelledby="guardians-heading">
-			<h2
-				id="guardians-heading"
-				className="mb-3 text-lg font-bold tracking-tight"
-			>
+			<h2 id="guardians-heading" className="mb-3 text-lg font-bold tracking-tight">
 				{title}
 			</h2>
 			<div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -32,14 +29,9 @@ export function GuardiansList({ guardians }: { guardians: Guardian[] }) {
 							className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
 						>
 							<div className="min-w-0">
-								<h3 className="font-semibold text-gray-950">
-									{guardian.user.fullName}
-								</h3>
+								<h3 className="font-semibold text-gray-950">{guardian.user.fullName}</h3>
 								<p className="mt-0.5 truncate text-sm text-gray-500">
-									{details(
-										relationships[guardian.relationship],
-										guardian.user.email,
-									)}
+									{details(relationships[guardian.relationship], guardian.user.email)}
 								</p>
 							</div>
 							<div className="flex flex-wrap gap-2 sm:justify-end">
