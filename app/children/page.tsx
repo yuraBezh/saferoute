@@ -2,6 +2,7 @@ import { AddLink } from '@/components/ui/add-link';
 import { ChevronRightIcon } from '@/components/ui/icons';
 import { InitialsAvatar } from '@/components/ui/initials-avatar';
 import { PageTitle } from '@/components/ui/page-title';
+import { PageDescription } from '@/components/ui/page-description';
 import { PageContainer } from '@/components/ui/page-container';
 import Link from 'next/link';
 import { getAge } from '@/lib/children/get-age';
@@ -11,14 +12,14 @@ import { getPersonInitials } from '@/lib/person';
 
 export default async function Children() {
 	const children = await getChildrenForCurrentUser();
-	const { title, childCount, addChild, yearsOld, guardianCount } = childrenText;
+	const { title, description, addChild, yearsOld, guardianCount } = childrenText;
 
 	return (
 		<PageContainer>
-			<div className="mb-5 flex items-center justify-between gap-4">
+			<div className="mb-5 flex items-start justify-between gap-4">
 				<div>
 					<PageTitle>{title}</PageTitle>
-					<p className="mt-1 text-sm text-gray-500">{childCount(children.length)}</p>
+					<PageDescription>{description}</PageDescription>
 				</div>
 				<AddLink href="/children/new">{addChild}</AddLink>
 			</div>

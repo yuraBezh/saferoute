@@ -25,9 +25,11 @@ const {
 } = caregiverText;
 
 const assignmentsHeader = (
-	<header className="mb-8">
-		<PageTitle>{title}</PageTitle>
-		<PageDescription>{description}</PageDescription>
+	<header className="mb-8 flex items-start justify-between gap-4">
+		<div>
+			<PageTitle>{title}</PageTitle>
+			<PageDescription>{description}</PageDescription>
+		</div>
 	</header>
 );
 

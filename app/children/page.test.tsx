@@ -49,16 +49,12 @@ describe('Children', () => {
 
 		expect(screen.getByText(fullName)).toBeDefined();
 		expect(
-			screen.getByText(
-				`${ageFixture} ${childrenText.yearsOld} · ${childrenText.guardianCount(1)}`,
-			),
+			screen.getByText(`${ageFixture} ${childrenText.yearsOld} · ${childrenText.guardianCount(1)}`),
 		).toBeDefined();
 		expect(screen.getByText(initials)).toBeDefined();
-		expect(
-			screen
-				.getByRole('link', { name: new RegExp(fullName) })
-				.getAttribute('href'),
-		).toBe(`/children/${childFixture.id}`);
+		expect(screen.getByRole('link', { name: new RegExp(fullName) }).getAttribute('href')).toBe(
+			`/children/${childFixture.id}`,
+		);
 	});
 
 	it('uses plural labels for multiple children and guardians', async () => {
@@ -69,11 +65,8 @@ describe('Children', () => {
 
 		render(await Children());
 
-		expect(screen.getByText(childrenText.childCount(2))).toBeDefined();
 		expect(
-			screen.getByText(
-				`${ageFixture} ${childrenText.yearsOld} · ${childrenText.guardianCount(2)}`,
-			),
+			screen.getByText(`${ageFixture} ${childrenText.yearsOld} · ${childrenText.guardianCount(2)}`),
 		).toBeDefined();
 	});
 });

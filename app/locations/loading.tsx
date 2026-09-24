@@ -1,17 +1,14 @@
 import { PageContainer } from '@/components/ui/page-container';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeaderSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
 	return (
 		<PageContainer>
-			<div className="mb-8 flex items-start justify-between gap-4">
-				<div className="space-y-2">
-					<Skeleton className="h-7 w-32" />
-					<Skeleton className="h-4 w-64" />
-				</div>
-				<Skeleton className="h-9 w-32" />
-			</div>
-
+			<PageHeaderSkeleton
+				titleWidth="w-32"
+				descriptionWidth="w-96"
+				action={<Skeleton className="h-10 w-36" />}
+			/>
 			<div className="space-y-8">
 				{[0, 1].map((section) => (
 					<section key={section}>
