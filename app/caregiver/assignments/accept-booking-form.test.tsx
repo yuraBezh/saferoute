@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { assignmentsText } from '@/lib/content/assignments-text';
+import { genericPageError } from '@/lib/content/error-text';
 
 const mocks = vi.hoisted(() => ({ acceptBookingAction: vi.fn() }));
 
@@ -9,7 +10,7 @@ vi.mock('./actions', () => ({ acceptBookingAction: mocks.acceptBookingAction }))
 import { AcceptBookingForm } from './accept-booking-form';
 
 const booking = { id: 'booking-1' };
-const { acceptLabel, caregiverConflictError, scheduleConflict, error: errorText } = assignmentsText;
+const { acceptLabel, caregiverConflictError, scheduleConflict } = assignmentsText;
 
 describe('AcceptBookingForm', () => {
 	beforeEach(() => vi.clearAllMocks());
@@ -24,7 +25,7 @@ describe('AcceptBookingForm', () => {
 		await waitFor(() => {
 			expect(screen.getByRole('button', { name: acceptLabel })).toHaveProperty('disabled', true);
 		});
-		expect(screen.queryByText(errorText.description)).toBeNull();
+		expect(screen.queryByText(genericPageError.description)).toBeNull();
 	});
 
 	it('disables acceptance when the booking already conflicts with the schedule', () => {

@@ -9,10 +9,6 @@ const childDetailsText = {
 		dateOfBirth: 'Date of birth',
 		added: 'Added',
 	},
-	error: {
-		title: 'Something went wrong',
-		retry: 'Try again',
-	},
 	deleteModal: {
 		confirm: 'Are you sure?',
 		cancel: 'Cancel',

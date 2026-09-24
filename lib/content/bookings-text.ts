@@ -36,9 +36,4 @@ export const bookingsText = {
 		delete: 'Cancel booking',
 		deleting: 'Cancelling…',
 	},
-	error: {
-		title: 'Booking could not be loaded',
-		description: 'The problem may be temporary. Try loading the booking again.',
-		retry: 'Try again',
-	},
 } as const;

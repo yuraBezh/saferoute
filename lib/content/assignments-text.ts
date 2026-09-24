@@ -19,9 +19,4 @@ export const assignmentsText = {
 	childConflictError: 'This child already has a booking at that time.',
 	caregiverConflictError: 'You already have a booking at that time.',
 	saveError: 'Something went wrong. Please try again.',
-	error: {
-		title: 'Assignments could not be loaded',
-		description: 'The problem may be temporary. Try loading your assignments again.',
-		retry: 'Try again',
-	},
 } as const;

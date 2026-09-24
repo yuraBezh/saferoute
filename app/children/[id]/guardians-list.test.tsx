@@ -4,8 +4,7 @@ import { GuardianRelationship } from '@/generated/prisma/enums';
 import childDetailsText from '@/lib/content/child-details-text';
 import { GuardiansList } from './guardians-list';
 
-const { empty, primary, canBook, viewOnly, details, relationships } =
-	childDetailsText.guardians;
+const { empty, primary, canBook, viewOnly, details, relationships } = childDetailsText.guardians;
 
 const motherFixture = {
 	id: 'guardian-1',
@@ -50,9 +49,7 @@ describe('GuardiansList', () => {
 		render(<GuardiansList guardians={[motherFixture]} />);
 
 		expect(screen.getByText(motherFixture.user.fullName)).toBeDefined();
-		expect(
-			screen.getByText(details(relationships.MOTHER, motherFixture.user.email)),
-		).toBeDefined();
+		expect(screen.getByText(details(relationships.MOTHER, motherFixture.user.email))).toBeDefined();
 	});
 
 	it('shows Primary for the primary guardian', () => {
@@ -62,9 +59,7 @@ describe('GuardiansList', () => {
 	});
 
 	it('hides Primary for a secondary guardian', () => {
-		render(
-			<GuardiansList guardians={[{ ...motherFixture, isPrimary: false }]} />,
-		);
+		render(<GuardiansList guardians={[{ ...motherFixture, isPrimary: false }]} />);
 
 		expect(screen.queryByText(primary)).toBeNull();
 	});
@@ -76,9 +71,7 @@ describe('GuardiansList', () => {
 	});
 
 	it('shows View only when booking is not allowed', () => {
-		render(
-			<GuardiansList guardians={[{ ...motherFixture, canBook: false }]} />,
-		);
+		render(<GuardiansList guardians={[{ ...motherFixture, canBook: false }]} />);
 
 		expect(screen.getByText(viewOnly)).toBeDefined();
 		expect(screen.queryByText(canBook)).toBeNull();
@@ -86,29 +79,14 @@ describe('GuardiansList', () => {
 
 	it('shows every supported relationship label', () => {
 		render(
-			<GuardiansList
-				guardians={[
-					motherFixture,
-					fatherFixture,
-					guardianFixture,
-					otherFixture,
-				]}
-			/>,
+			<GuardiansList guardians={[motherFixture, fatherFixture, guardianFixture, otherFixture]} />,
 		);
 
+		expect(screen.getByText(details(relationships.MOTHER, motherFixture.user.email))).toBeDefined();
+		expect(screen.getByText(details(relationships.FATHER, fatherFixture.user.email))).toBeDefined();
 		expect(
-			screen.getByText(details(relationships.MOTHER, motherFixture.user.email)),
+			screen.getByText(details(relationships.GUARDIAN, guardianFixture.user.email)),
 		).toBeDefined();
-		expect(
-			screen.getByText(details(relationships.FATHER, fatherFixture.user.email)),
-		).toBeDefined();
-		expect(
-			screen.getByText(
-				details(relationships.GUARDIAN, guardianFixture.user.email),
-			),
-		).toBeDefined();
-		expect(
-			screen.getByText(details(relationships.OTHER, otherFixture.user.email)),
-		).toBeDefined();
+		expect(screen.getByText(details(relationships.OTHER, otherFixture.user.email))).toBeDefined();
 	});
 });

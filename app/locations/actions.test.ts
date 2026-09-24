@@ -69,9 +69,7 @@ describe('createLocationAction', () => {
 		);
 
 		expect(result.message).toBe(locationFormText.validationError);
-		expect(result.errors?.state?.[0]).toBe(
-			locationFormText.fields.state.invalid,
-		);
+		expect(result.errors?.state?.[0]).toBe(locationFormText.fields.state.invalid);
 		expect(mocks.createLocationForCurrentUser).not.toHaveBeenCalled();
 		expect(mocks.redirect).not.toHaveBeenCalled();
 	});
@@ -103,24 +101,16 @@ describe('createLocationAction', () => {
 
 	it('returns a general message when saving fails', async () => {
 		const error = new Error('Database unavailable');
-		const consoleError = vi
-			.spyOn(console, 'error')
-			.mockImplementation(() => undefined);
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 		mocks.createLocationForCurrentUser.mockRejectedValue(error);
 
-		const result = await createLocationAction(
-			initialState,
-			createFormData(location),
-		);
+		const result = await createLocationAction(initialState, createFormData(location));
 
 		expect(result).toEqual({
 			message: createLocationFormText.saveError,
 			errors: {},
 		});
-		expect(consoleError).toHaveBeenCalledWith(
-			'Failed to create location',
-			error,
-		);
+		expect(consoleError).toHaveBeenCalledWith('Failed to create location', error);
 		expect(mocks.redirect).not.toHaveBeenCalled();
 		consoleError.mockRestore();
 	});
@@ -134,24 +124,17 @@ describe('editLocationAction', () => {
 	it('updates validated location data and redirects', async () => {
 		mocks.updateLocationForCurrentUser.mockResolvedValue({ count: 1 });
 
-		await editLocationAction(
-			location.id,
-			initialState,
-			createFormData(location),
-		);
+		await editLocationAction(location.id, initialState, createFormData(location));
 
-		expect(mocks.updateLocationForCurrentUser).toHaveBeenCalledWith(
-			location.id,
-			{
-				type: location.type,
-				name: location.name,
-				addressLine1: location.addressLine1,
-				addressLine2: undefined,
-				city: location.city,
-				state: location.state.toUpperCase(),
-				postalCode: location.postalCode,
-			},
-		);
+		expect(mocks.updateLocationForCurrentUser).toHaveBeenCalledWith(location.id, {
+			type: location.type,
+			name: location.name,
+			addressLine1: location.addressLine1,
+			addressLine2: undefined,
+			city: location.city,
+			state: location.state.toUpperCase(),
+			postalCode: location.postalCode,
+		});
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/locations');
 		expect(mocks.redirect).toHaveBeenCalledWith('/locations');
 	});
@@ -159,11 +142,7 @@ describe('editLocationAction', () => {
 	it('returns a not-found message when no owned location is updated', async () => {
 		mocks.updateLocationForCurrentUser.mockResolvedValue({ count: 0 });
 
-		const result = await editLocationAction(
-			location.id,
-			initialState,
-			createFormData(location),
-		);
+		const result = await editLocationAction(location.id, initialState, createFormData(location));
 
 		expect(result).toEqual({
 			message: editLocationFormText.notFoundError,
@@ -184,9 +163,7 @@ describe('deleteLocationAction', () => {
 
 		await deleteLocationAction(location.id);
 
-		expect(mocks.deleteLocationForCurrentUser).toHaveBeenCalledWith(
-			location.id,
-		);
+		expect(mocks.deleteLocationForCurrentUser).toHaveBeenCalledWith(location.id);
 		expect(mocks.revalidatePath).toHaveBeenCalledWith('/locations');
 		expect(mocks.redirect).toHaveBeenCalledWith('/locations');
 	});

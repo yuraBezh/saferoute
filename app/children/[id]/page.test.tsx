@@ -77,16 +77,10 @@ describe('ChildDetailsPage', () => {
 			timeZone: 'UTC',
 		});
 
-		expect(
-			screen.getByText(childDetailsText.details.dateOfBirth),
-		).toBeDefined();
-		expect(
-			screen.getByText(dateFormatter.format(childFixture.birthDate)),
-		).toBeDefined();
+		expect(screen.getByText(childDetailsText.details.dateOfBirth)).toBeDefined();
+		expect(screen.getByText(dateFormatter.format(childFixture.birthDate))).toBeDefined();
 		expect(screen.getByText(childDetailsText.details.added)).toBeDefined();
-		expect(
-			screen.getByText(dateFormatter.format(childFixture.createdAt)),
-		).toBeDefined();
+		expect(screen.getByText(dateFormatter.format(childFixture.createdAt))).toBeDefined();
 		expect(mocks.childHeader.mock.calls[0][0]).toEqual({
 			id: childFixture.id,
 			firstName: childFixture.firstName,
