@@ -11,7 +11,7 @@ type LocationFormProps = ComponentProps<typeof LocationForm>;
 const mocks = vi.hoisted(() => ({
 	getOwnedLocation: vi.fn(),
 	editLocationAction: vi.fn(),
-	deleteLocationAction: vi.fn(),
+	archiveLocationAction: vi.fn(),
 	locationForm: vi.fn((props: LocationFormProps) => props.footerAction),
 	deleteButton: vi.fn(() => null),
 	notFound: vi.fn(() => {
@@ -29,7 +29,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/app/locations/actions', () => ({
 	editLocationAction: mocks.editLocationAction,
-	deleteLocationAction: mocks.deleteLocationAction,
+	archiveLocationAction: mocks.archiveLocationAction,
 }));
 
 vi.mock('@/components/location-form', () => ({
@@ -111,7 +111,7 @@ describe('EditLocationPage', () => {
 		expect(mocks.deleteButton).toHaveBeenCalledWith(
 			{
 				itemId: location.id,
-				deleteAction: mocks.deleteLocationAction,
+				deleteAction: mocks.archiveLocationAction,
 				text: editLocationFormText.delete,
 			},
 			undefined,

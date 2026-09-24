@@ -4,6 +4,7 @@ import { BOOKING_DATA_ERRORS } from '@/lib/bookings/errors';
 import { hasOverlappingChildBooking } from '@/lib/bookings/overlap';
 import { toUtc } from '@/lib/date';
 import { ownedChildWhere } from '@/lib/data/children';
+import { accessibleLocationWhere } from '@/lib/data/locations';
 import { prisma } from '@/lib/prisma';
 import type { BookingInput } from '@/lib/validation/booking';
 
@@ -30,7 +31,7 @@ export async function getAccessibleLocation(id: string) {
 	const userId = await getCurrentUserId();
 
 	return prisma.location.findFirst({
-		where: { id, OR: [{ ownerUserId: userId }, { ownerUserId: null }] },
+		where: { id, ...accessibleLocationWhere(userId) },
 	});
 }
 
@@ -101,10 +102,7 @@ export async function createBookingForCurrentUser(data: BookingInput) {
 		(id): id is string => Boolean(id),
 	);
 	const locations = await prisma.location.findMany({
-		where: {
-			id: { in: locationIds },
-			OR: [{ ownerUserId: userId }, { ownerUserId: null }],
-		},
+		where: { id: { in: locationIds }, ...accessibleLocationWhere(userId) },
 		select: { id: true, timezone: true },
 	});
 
