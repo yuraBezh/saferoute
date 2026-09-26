@@ -33,15 +33,15 @@ transitions are allowed, and what happens when requests race or are retried.
 [Architecture decision records](docs/adr) explain the data model, integrity guarantees, and
 trade-offs. Start with:
 
-- [Accepting a booking](docs/adr/docs/adr/0012-accepting-a-booking.md): Serializable transactions,
+- [Accepting a booking](docs/adr/0012-accepting-a-booking.md): Serializable transactions,
   conditional updates, and bounded retries.
-- [Trip lifecycle and integrity](docs/adr/docs/adr/0013-trip-lifecycle-and-integrity.md): enforcing
-  one in-progress trip per child in PostgreSQL.
-- [Trip transitions and handoff](docs/adr/docs/adr/0014-trip-state-transitions-and-handoff.md): the
-  state machine, optimistic locking, and current idempotency limits.
-- [Calendar dates](docs/adr/docs/adr/0005-calendar-dates-as-strings.md) and
-  [booking time](docs/adr/docs/adr/0011-booking-lifecycle-time-and-integrity.md): separating
-  birthdays from pickup instants.
+- [Trip lifecycle and integrity](docs/adr/0013-trip-lifecycle-and-integrity.md): enforcing one
+  in-progress trip per child in PostgreSQL.
+- [Trip transitions and handoff](docs/adr/0014-trip-state-transitions-and-handoff.md): the state
+  machine, optimistic locking, and current idempotency limits.
+- [Calendar dates](docs/adr/0005-calendar-dates-as-strings.md) and
+  [booking time](docs/adr/0011-booking-lifecycle-time-and-integrity.md): separating birthdays from
+  pickup instants.
 
 ## Interesting problems
 
